@@ -1,0 +1,81 @@
+'use client';
+
+import {
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
+import { monthlyRevenue, weeklyOrders, categorySales } from '@/lib/analytics';
+
+const COLORS = ['#b8893a', '#7a5a1f', '#d4a857', '#3d6b5a', '#7a2e2e', '#1a1410'];
+
+export function RevenueChart() {
+  return (
+    <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
+      <div className="mb-4">
+        <h3 className="display text-sm tracking-[2px] uppercase text-[#1a1410]">Revenue Overview</h3>
+        <p className="text-[10px] text-[#9a8c75] mt-1">Monthly performance</p>
+      </div>
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={monthlyRevenue}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(184,137,58,0.15)" />
+          <XAxis dataKey="month" stroke="#6b5d4c" style={{ fontSize: 11 }} />
+          <YAxis stroke="#6b5d4c" style={{ fontSize: 11 }} />
+          <Tooltip contentStyle={{ background: '#1a1410', border: '1px solid #b8893a', color: '#e8d49b', fontSize: 12 }} />
+          <Line type="monotone" dataKey="revenue" stroke="#b8893a" strokeWidth={2.5} dot={{ fill: '#b8893a', r: 4 }} activeDot={{ r: 6 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function OrdersChart() {
+  return (
+    <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
+      <div className="mb-4">
+        <h3 className="display text-sm tracking-[2px] uppercase text-[#1a1410]">Weekly Orders</h3>
+        <p className="text-[10px] text-[#9a8c75] mt-1">This week</p>
+      </div>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart data={weeklyOrders}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(184,137,58,0.15)" />
+          <XAxis dataKey="label" stroke="#6b5d4c" style={{ fontSize: 11 }} />
+          <YAxis stroke="#6b5d4c" style={{ fontSize: 11 }} />
+          <Tooltip contentStyle={{ background: '#1a1410', border: '1px solid #b8893a', color: '#e8d49b', fontSize: 12 }} />
+          <Bar dataKey="value" fill="#b8893a" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function CategoryChart() {
+  return (
+    <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
+      <div className="mb-4">
+        <h3 className="display text-sm tracking-[2px] uppercase text-[#1a1410]">Sales by Category</h3>
+        <p className="text-[10px] text-[#9a8c75] mt-1">Last 30 days</p>
+      </div>
+      <ResponsiveContainer width="100%" height={280}>
+        <PieChart>
+          <Pie
+            data={categorySales}
+            cx="50%"
+            cy="50%"
+            innerRadius={50}
+            outerRadius={90}
+            paddingAngle={2}
+            dataKey="value"
+            label={({ label, value }: { label?: string; value?: number }) => `${label} ${value}%`}
+            labelLine={false}
+            style={{ fontSize: 10 }}
+          >
+            {categorySales.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip contentStyle={{ background: '#1a1410', border: '1px solid #b8893a', color: '#e8d49b', fontSize: 12 }} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}

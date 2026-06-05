@@ -1,0 +1,112 @@
+/* Luxury reusable styles */
+
+.luxury-card {
+  background: #ffffff;
+  border: 1px solid rgba(184, 137, 58, 0.18);
+  transition: all 0.3s ease;
+}
+
+.luxury-card:hover {
+  box-shadow: 0 12px 40px rgba(122, 90, 31, 0.12);
+  transform: translateY(-3px);
+  border-color: rgba(184, 137, 58, 0.32);
+}
+
+.luxury-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid rgba(184, 137, 58, 0.32);
+  font-size: 13px;
+  color: #1a1410;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: 'Jost', sans-serif;
+}
+
+.luxury-input:focus {
+  border-color: #b8893a;
+}
+
+.luxury-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #6b5d4c;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.luxury-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 32px;
+  background: #1a1410;
+  color: #e8d49b;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: 1px solid #1a1410;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.luxury-btn:hover {
+  background: #b8893a;
+  color: #1a1410;
+  border-color: #b8893a;
+}
+
+.luxury-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 32px;
+  background: transparent;
+  color: #1a1410;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: 1px solid #1a1410;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.luxury-btn-outline:hover {
+  background: #1a1410;
+  color: #e8d49b;
+}
+
+.badge-new {
+  background: #1a1410;
+  color: #e8d49b;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 4px 9px;
+  text-transform: uppercase;
+}
+
+.badge-sale {
+  background: #7a2e2e;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 4px 9px;
+  text-transform: uppercase;
+}
+
+.badge-bestseller {
+  background: #b8893a;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 4px 9px;
+  text-transform: uppercase;
+}

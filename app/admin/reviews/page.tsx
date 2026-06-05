@@ -1,0 +1,125 @@
+'use client';
+
+import { useState } from 'react';
+import { reviews } from '@/data/jewelleryData';
+import { Star, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+
+export default function AdminReviewsPage() {
+  const [reviewList, setReviewList] = useState(reviews);
+  const [filter, setFilter] = useState<'all' | 'verified' | 'pending'>('all');
+
+  const filtered = filter === 'all'
+    ? reviewList
+    : filter === 'verified'
+      ? reviewList.filter((r) => r.verified)
+      : reviewList.filter((r) => !r.verified);
+
+  const avgRating = (
+    reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length
+  ).toFixed(1);
+
+  const handleDelete = (id: string) => {
+    if (confirm(`Delete review ${id}?`)) {
+      setReviewList(reviewList.filter((r) => r.id !== id));
+    }
+  };
+
+  const toggleVerified = (id: string) => {
+    setReviewList(
+      reviewList.map((r) => (r.id === id ? { ...r, verified: !r.verified } : r))
+    );
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="serif text-3xl text-[#1a1410] mb-1">Reviews</h1>
+        <p className="text-sm text-[#6b5d4c]">{filtered.length} reviews · Avg {avgRating}★</p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-5">
+        <button
+          onClick={() => setFilter('all')}
+          className={`bg-white border p-4 text-center ${filter === 'all' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
+        >
+          <div className="serif text-2xl font-bold text-[#1a1410]">{reviewList.length}</div>
+          <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">All Reviews</div>
+        </button>
+        <button
+          onClick={() => setFilter('verified')}
+          className={`bg-white border p-4 text-center ${filter === 'verified' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
+        >
+          <div className="serif text-2xl font-bold text-[#3d6b5a]">{reviewList.filter((r) => r.verified).length}</div>
+          <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">Verified</div>
+        </button>
+        <button
+          onClick={() => setFilter('pending')}
+          className={`bg-white border p-4 text-center ${filter === 'pending' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
+        >
+          <div className="serif text-2xl font-bold text-[#7a2e2e]">{reviewList.filter((r) => !r.verified).length}</div>
+          <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">Pending</div>
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {filtered.map((r) => (
+          <div key={r.id} className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
+            <div className="flex items-start gap-4">
+              <div
+                className="w-12 h-12 rounded-full bg-cover bg-center border border-[#b8893a] flex-shrink-0"
+                style={{ backgroundImage: `url(${r.avatar})` }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                  <div className="font-semibold text-[#1a1410]">{r.name}</div>
+                  <div className="text-[10px] text-[#9a8c75] tracking-[1px] uppercase">{r.city}</div>
+                  {r.verified && (
+                    <span className="bg-[#3d6b5a]/10 text-[#3d6b5a] px-2 py-0.5 text-[9px] font-semibold flex items-center gap-1">
+                      <CheckCircle2 size={9} /> Verified
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={12}
+                        className={i < r.rating ? 'text-[#b8893a] fill-[#b8893a]' : 'text-[#d4cfc5]'}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-[#9a8c75]">{r.date}</span>
+                </div>
+                <p className="text-sm text-[#6b5d4c] leading-relaxed mb-2">{r.text}</p>
+                {r.product && (
+                  <div className="text-[10px] text-[#b8893a] tracking-[0.5px]">
+                    Product: {r.product}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => toggleVerified(r.id)}
+                  aria-label="Toggle verified"
+                  className={`p-2 ${r.verified ? 'text-[#7a2e2e]' : 'text-[#3d6b5a]'}`}
+                  title={r.verified ? 'Unverify' : 'Verify'}
+                >
+                  {r.verified ? <XCircle size={14} /> : <CheckCircle2 size={14} />}
+                </button>
+                <button
+                  onClick={() => handleDelete(r.id)}
+                  aria-label="Delete"
+                  className="p-2 text-[#6b5d4c] hover:text-[#7a2e2e]"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

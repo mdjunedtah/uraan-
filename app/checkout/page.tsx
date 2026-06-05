@@ -1,0 +1,371 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/Footer';
+import { useCart } from '@/context/CartContext';
+import {
+  CreditCard, Smartphone, Wallet, Building2, Banknote,
+  Lock, CheckCircle2, ShieldCheck, Truck, ChevronRight,
+} from 'lucide-react';
+
+type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
+
+export default function CheckoutPage() {
+  const { items, totalItems, totalPrice, clearCart } = useCart();
+  const [step, setStep] = useState<'address' | 'payment' | 'success'>('address');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const [orderId, setOrderId] = useState('');
+
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '',
+  });
+
+  const [cardForm, setCardForm] = useState({ number: '', name: '', expiry: '', cvv: '' });
+  const [upiId, setUpiId] = useState('');
+
+  const shipping = totalPrice >= 1999 ? 0 : 99;
+  const finalTotal = totalPrice + shipping;
+
+  const handleAddressSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setStep('payment');
+  };
+
+  const handlePlaceOrder = () => {
+    const id = 'OGP' + Date.now().toString().slice(-8);
+    setOrderId(id);
+    setStep('success');
+    clearCart();
+  };
+
+  if (items.length === 0 && step !== 'success') {
+    return (
+      <main className="min-h-screen bg-white">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <h1 className="serif text-3xl text-[#1a1410] mb-3">Your cart is empty</h1>
+          <p className="text-sm text-[#6b5d4c] mb-6">Add some products before checking out.</p>
+          <Link href="/collections" className="inline-flex items-center gap-2 px-8 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[3px] uppercase font-semibold">
+            Browse Products <ChevronRight size={14} />
+          </Link>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
+  if (step === 'success') {
+    return (
+      <main className="min-h-screen bg-white">
+        <Navbar />
+        <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+          <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-[#3d6b5a]/10 grid place-items-center">
+            <CheckCircle2 className="text-[#3d6b5a]" size={42} />
+          </div>
+          <h1 className="serif text-4xl md:text-5xl text-[#1a1410] mb-3">
+            Order <em className="gold-text">Placed</em>!
+          </h1>
+          <p className="text-sm text-[#6b5d4c] mb-2">Thank you for shopping with us.</p>
+          <p className="text-sm text-[#6b5d4c] mb-8">
+            Order ID: <span className="font-bold text-[#1a1410]">{orderId}</span>
+          </p>
+
+          <div className="bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] p-5 mb-8 text-left">
+            <div className="text-[10px] tracking-[2px] uppercase text-[#9a8c75] mb-3">Order Details</div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-[#6b5d4c]">Order ID</span>
+                <span className="font-semibold text-[#1a1410]">{orderId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6b5d4c]">Payment</span>
+                <span className="font-semibold text-[#1a1410] capitalize">
+                  {paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI' : paymentMethod}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#6b5d4c]">Total</span>
+                <span className="font-semibold text-[#1a1410]">₹{finalTotal.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-[rgba(184,137,58,0.18)]">
+                <span className="text-[#6b5d4c]">Delivery</span>
+                <span className="font-semibold text-[#1a1410]">3-7 business days</span>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-[#6b5d4c] mb-6">
+            Confirmation sent to <strong>{form.email}</strong>.
+          </p>
+
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link href="/" className="px-7 py-3 border border-[#1a1410] text-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b]">
+              Back to Home
+            </Link>
+            <Link href="/collections" className="px-7 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410]">
+              Continue Shopping
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-white">
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-4 py-3 text-[11px] text-[#9a8c75]">
+        <Link href="/" className="text-[#b8893a] font-medium">Home</Link>
+        <span className="mx-2 opacity-50">›</span>
+        <Link href="/cart" className="text-[#b8893a] font-medium">Cart</Link>
+        <span className="mx-2 opacity-50">›</span>
+        <span>Checkout</span>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 pb-4">
+        <h1 className="serif text-4xl md:text-5xl text-[#1a1410] mb-3">Checkout</h1>
+        <div className="flex items-center gap-3 text-[10px] tracking-[1.5px] uppercase">
+          <span className={step === 'address' ? 'text-[#b8893a] font-bold' : 'text-[#3d6b5a]'}>
+            1. Address {step !== 'address' && '✓'}
+          </span>
+          <span className="text-[#9a8c75]">→</span>
+          <span className={step === 'payment' ? 'text-[#b8893a] font-bold' : 'text-[#9a8c75]'}>
+            2. Payment
+          </span>
+          <span className="text-[#9a8c75]">→</span>
+          <span className="text-[#9a8c75]">3. Confirmation</span>
+        </div>
+      </div>
+
+      <section className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            {step === 'address' && (
+              <form onSubmit={handleAddressSubmit} className="bg-white border border-[rgba(184,137,58,0.18)] p-5 md:p-6">
+                <h2 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-5 pb-3 border-b border-[rgba(184,137,58,0.18)]">
+                  Shipping Address
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="luxury-label">Full Name *</label>
+                    <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="luxury-input" />
+                  </div>
+                  <div>
+                    <label className="luxury-label">Email *</label>
+                    <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="luxury-input" />
+                  </div>
+                  <div>
+                    <label className="luxury-label">Phone *</label>
+                    <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="10 digit" className="luxury-input" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="luxury-label">Address *</label>
+                    <textarea required rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="House no, street, landmark" className="luxury-input" />
+                  </div>
+                  <div>
+                    <label className="luxury-label">City *</label>
+                    <input type="text" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="luxury-input" />
+                  </div>
+                  <div>
+                    <label className="luxury-label">State *</label>
+                    <input type="text" required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="luxury-input" />
+                  </div>
+                  <div>
+                    <label className="luxury-label">PIN Code *</label>
+                    <input type="text" required pattern="[0-9]{6}" value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} className="luxury-input" />
+                  </div>
+                </div>
+                <button type="submit" className="mt-6 w-full md:w-auto px-8 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2">
+                  Continue to Payment <ChevronRight size={14} />
+                </button>
+              </form>
+            )}
+
+            {step === 'payment' && (
+              <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5 md:p-6">
+                <div className="flex items-center justify-between mb-5 pb-3 border-b border-[rgba(184,137,58,0.18)]">
+                  <h2 className="display text-sm tracking-[3px] uppercase text-[#1a1410]">
+                    Payment Method
+                  </h2>
+                  <button onClick={() => setStep('address')} className="text-[10px] tracking-[1.5px] uppercase text-[#b8893a] font-semibold hover:underline">
+                    ← Edit Address
+                  </button>
+                </div>
+
+                <div className="space-y-3 mb-5">
+                  {[
+                    { id: 'card' as const, icon: CreditCard, label: 'Credit / Debit Card', desc: 'Visa, Mastercard, Rupay, Amex' },
+                    { id: 'upi' as const, icon: Smartphone, label: 'UPI', desc: 'GPay, PhonePe, Paytm, BHIM' },
+                    { id: 'wallet' as const, icon: Wallet, label: 'Wallets', desc: 'Paytm, Amazon Pay, Mobikwik' },
+                    { id: 'netbanking' as const, icon: Building2, label: 'Net Banking', desc: 'All major Indian banks' },
+                    { id: 'cod' as const, icon: Banknote, label: 'Cash on Delivery', desc: 'Pay when you receive' },
+                  ].map((p) => (
+                    <label
+                      key={p.id}
+                      className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all ${
+                        paymentMethod === p.id
+                          ? 'border-[#b8893a] bg-[#f8f2e6]'
+                          : 'border-[rgba(184,137,58,0.18)] hover:border-[#b8893a]/50'
+                      }`}
+                    >
+                      <input type="radio" name="payment" checked={paymentMethod === p.id} onChange={() => setPaymentMethod(p.id)} className="accent-[#b8893a]" />
+                      <div className="w-10 h-10 rounded-full bg-white border border-[rgba(184,137,58,0.32)] grid place-items-center">
+                        <p.icon className="text-[#b8893a]" size={18} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-[#1a1410]">{p.label}</div>
+                        <div className="text-[11px] text-[#6b5d4c]">{p.desc}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                {paymentMethod === 'card' && (
+                  <div className="bg-[#f8f2e6] p-4 mb-5 border border-[rgba(184,137,58,0.18)]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="md:col-span-2">
+                        <label className="luxury-label">Card Number</label>
+                        <input type="text" maxLength={19} placeholder="1234 5678 9012 3456" value={cardForm.number} onChange={(e) => setCardForm({ ...cardForm, number: e.target.value })} className="luxury-input" />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="luxury-label">Name on Card</label>
+                        <input type="text" value={cardForm.name} onChange={(e) => setCardForm({ ...cardForm, name: e.target.value })} className="luxury-input" />
+                      </div>
+                      <div>
+                        <label className="luxury-label">Expiry</label>
+                        <input type="text" maxLength={5} placeholder="MM/YY" value={cardForm.expiry} onChange={(e) => setCardForm({ ...cardForm, expiry: e.target.value })} className="luxury-input" />
+                      </div>
+                      <div>
+                        <label className="luxury-label">CVV</label>
+                        <input type="password" maxLength={4} placeholder="•••" value={cardForm.cvv} onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value })} className="luxury-input" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-[#6b5d4c] mt-3">
+                      <Lock size={11} className="text-[#3d6b5a]" />
+                      <span>Your card details are encrypted</span>
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === 'upi' && (
+                  <div className="bg-[#f8f2e6] p-4 mb-5 border border-[rgba(184,137,58,0.18)]">
+                    <label className="luxury-label">UPI ID</label>
+                    <input type="text" value={upiId} onChange={(e) => setUpiId(e.target.value)} placeholder="yourname@upi" className="luxury-input" />
+                    <div className="flex items-center gap-3 mt-3 flex-wrap">
+                      {['GPay', 'PhonePe', 'Paytm', 'BHIM'].map((u) => (
+                        <span key={u} className="px-3 py-1 bg-white border border-[rgba(184,137,58,0.32)] text-[10px] font-semibold">{u}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === 'wallet' && (
+                  <div className="bg-[#f8f2e6] p-4 mb-5 border border-[rgba(184,137,58,0.18)]">
+                    <div className="text-xs text-[#6b5d4c] mb-3">Select wallet:</div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {['Paytm', 'Amazon Pay', 'Mobikwik', 'FreeCharge', 'Ola Money', 'JioMoney'].map((w) => (
+                        <button key={w} type="button" className="bg-white border border-[rgba(184,137,58,0.32)] py-2 text-xs font-semibold hover:border-[#b8893a]">{w}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === 'netbanking' && (
+                  <div className="bg-[#f8f2e6] p-4 mb-5 border border-[rgba(184,137,58,0.18)]">
+                    <label className="luxury-label">Select Bank</label>
+                    <select className="luxury-input">
+                      <option>Select your bank</option>
+                      <option>State Bank of India</option>
+                      <option>HDFC Bank</option>
+                      <option>ICICI Bank</option>
+                      <option>Axis Bank</option>
+                      <option>Punjab National Bank</option>
+                      <option>Kotak Mahindra Bank</option>
+                      <option>Bank of Baroda</option>
+                      <option>Yes Bank</option>
+                      <option>IndusInd Bank</option>
+                      <option>Other Banks</option>
+                    </select>
+                  </div>
+                )}
+
+                {paymentMethod === 'cod' && (
+                  <div className="bg-[#f8f2e6] p-4 mb-5 border border-[rgba(184,137,58,0.18)] text-xs text-[#6b5d4c]">
+                    <div className="flex items-start gap-2">
+                      <Banknote className="text-[#b8893a] flex-shrink-0 mt-0.5" size={16} />
+                      <div>
+                        Pay cash when your order arrives. Additional ₹50 COD charges apply.
+                        Available only for orders below ₹50,000.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <button onClick={handlePlaceOrder} className="w-full bg-[#1a1410] text-[#e8d49b] py-4 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2">
+                  <Lock size={14} /> Place Order · ₹{finalTotal.toLocaleString('en-IN')}
+                </button>
+
+                <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-[#6b5d4c]">
+                  <ShieldCheck size={12} className="text-[#3d6b5a]" />
+                  <span>256-bit SSL · PCI DSS · Razorpay Secured</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] p-5 sticky top-32">
+              <h3 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-4 pb-3 border-b border-[rgba(184,137,58,0.18)]">
+                Order Summary
+              </h3>
+
+              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-14 h-14 bg-white bg-cover bg-center flex-shrink-0" style={{ backgroundImage: `url(${item.image})` }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="serif text-xs text-[#1a1410] font-medium truncate">{item.name}</div>
+                      <div className="text-[10px] text-[#9a8c75]">Qty: {item.quantity}</div>
+                      <div className="text-xs text-[#b8893a] font-semibold mt-1">
+                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-[rgba(184,137,58,0.18)] text-sm">
+                <div className="flex justify-between text-[#6b5d4c]">
+                  <span>Subtotal ({totalItems})</span>
+                  <span className="text-[#1a1410] font-medium">₹{totalPrice.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-[#6b5d4c]">
+                  <span className="flex items-center gap-1"><Truck size={11} /> Shipping</span>
+                  <span className="text-[#1a1410] font-medium">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-baseline pt-3 mt-3 border-t border-[rgba(184,137,58,0.18)]">
+                <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
+                <span className="serif text-2xl text-[#1a1410] font-bold">₹{finalTotal.toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-[rgba(184,137,58,0.18)] space-y-2 text-[10px] text-[#6b5d4c]">
+                <div className="flex items-center gap-2"><ShieldCheck size={11} className="text-[#3d6b5a]" /><span>100% Secure Checkout</span></div>
+                <div className="flex items-center gap-2"><Truck size={11} className="text-[#b8893a]" /><span>Free shipping above ₹1999</span></div>
+                <div className="flex items-center gap-2"><CheckCircle2 size={11} className="text-[#3d6b5a]" /><span>Easy 7-day returns</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
+  );
+}
