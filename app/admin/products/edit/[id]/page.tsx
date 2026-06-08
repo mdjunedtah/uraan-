@@ -1,6 +1,5 @@
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductForm from '@/components/admin/ProductForm';
@@ -10,9 +9,9 @@ import { ChevronRight } from 'lucide-react';
 export default function EditProductPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const product = getProductById(id);
 
   if (!product) notFound();

@@ -1,26 +1,30 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
+import ProductGallery from '@/components/ProductGallery';
+import ShareButton from '@/components/ShareButton';
+import AddToCartButton from '@/components/AddToCartButton';
 import { getProductById, getRelatedProducts } from '@/lib/products';
+import { getGalleryImages } from '@/lib/gallery';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/wishlistContext';
 import {
-  Heart, ShoppingBag, Truck, ShieldCheck, RotateCw,
+  Heart, Truck, ShieldCheck, RotateCw,
   Star, Plus, Minus, ChevronRight, Award,
 } from 'lucide-react';
 
 export default function ProductDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const product = getProductById(id);
 
   const [quantity, setQuantity] = useState(1);
@@ -70,33 +74,25 @@ export default function ProductDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Image */}
           <div>
-            <div className="aspect-square bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] relative overflow-hidden">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${product.image})` }}
-              />
-              {product.tag && (
-                <div className="absolute top-3 left-3 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[1.5px] uppercase px-3 py-1 font-semibold">
-                  {product.tag}
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-4 gap-2 mt-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-square bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] bg-cover bg-center cursor-pointer hover:border-[#b8893a]"
-                  style={{ backgroundImage: `url(${product.image})` }}
-                />
-              ))}
-            </div>
+            <ProductGallery
+              images={getGalleryImages(product)}
+              name={product.name}
+              tag={product.tag}
+            />
           </div>
 
           {/* Info */}
           <div>
-            <h1 className="serif text-3xl md:text-4xl text-[#1a1410] mb-2 leading-tight">
-              {product.name}
-            </h1>
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h1 className="serif text-3xl md:text-4xl text-[#1a1410] leading-tight">
+                {product.name}
+              </h1>
+              <ShareButton
+                title={product.name}
+                text={`Check out ${product.name} on Uraan`}
+                className="shrink-0 mt-2 text-[#9a8c75] hover:text-[#b8893a]"
+              />
+            </div>
 
             <div className="flex items-center gap-3 mb-4">
               <div className="flex gap-0.5">
@@ -174,13 +170,12 @@ export default function ProductDetailPage({
                   <Plus size={14} />
                 </button>
               </div>
-              <button
-                onClick={handleAddToCart}
-                disabled={!product.inStock}
+              <AddToCartButton
+                product={product}
+                inStock={product.inStock}
+                quantity={quantity}
                 className="flex-1 h-12 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 disabled:opacity-40"
-              >
-                <ShoppingBag size={14} /> Add to Cart
-              </button>
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-6">
@@ -200,9 +195,15 @@ export default function ProductDetailPage({
                     image: product.image,
                   })
                 }
-                className="h-12 border border-[#1a1410] text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] flex items-center justify-center gap-2"
+                aria-pressed={inWishlist}
+                className="h-12 border border-[#1a1410] text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] flex items-center justify-center gap-2 transition-transform duration-150 active:scale-95"
               >
-                <Heart size={14} className={inWishlist ? 'fill-[#7a2e2e] text-[#7a2e2e]' : ''} />
+                <Heart
+                  size={14}
+                  className={`transition-all duration-300 ${
+                    inWishlist ? 'fill-[#7a2e2e] text-[#7a2e2e] scale-110' : 'scale-100'
+                  }`}
+                />
                 {inWishlist ? 'Wishlisted' : 'Wishlist'}
               </button>
             </div>

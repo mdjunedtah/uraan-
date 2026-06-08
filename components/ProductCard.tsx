@@ -1,17 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { Heart, Eye } from 'lucide-react';
 import { Product } from '@/data/jewelleryData';
-import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/wishlistContext';
+import AddToCartButton from '@/components/AddToCartButton';
 
 type ProductCardProps = {
   product: Product;
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart, openCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
 
@@ -19,19 +18,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     product.oldPrice && product.oldPrice > product.price
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
       : 0;
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      category: product.category,
-    });
-    openCart();
-  };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -82,23 +68,26 @@ export default function ProductCard({ product }: ProductCardProps) {
         <button
           onClick={handleWishlist}
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-          className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/95 grid place-items-center hover:bg-white transition-colors"
+          aria-pressed={inWishlist}
+          className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/95 grid place-items-center hover:bg-white hover:scale-110 active:scale-90 transition-all duration-200"
         >
           <Heart
             size={14}
-            className={inWishlist ? 'text-[#7a2e2e] fill-[#7a2e2e]' : 'text-[#6b5d4c]'}
+            className={`transition-all duration-300 ${
+              inWishlist ? 'text-[#7a2e2e] fill-[#7a2e2e] scale-110' : 'text-[#6b5d4c] scale-100'
+            }`}
           />
         </button>
 
         {/* Hover actions (desktop) */}
         <div className="hidden md:flex absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-white/95 backdrop-blur-sm border-t border-[rgba(184,137,58,0.18)] py-2 px-3 gap-2 z-10">
-          <button
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
+          <AddToCartButton
+            product={product}
+            inStock={product.inStock}
+            stopPropagation
+            iconSize={12}
             className="flex-1 flex items-center justify-center gap-1 text-[10px] tracking-[1.5px] uppercase font-semibold text-[#1a1410] hover:text-[#b8893a] disabled:opacity-40"
-          >
-            <ShoppingBag size={12} /> Add to Cart
-          </button>
+          />
           <span className="border-l border-[rgba(184,137,58,0.18)]" />
           <span className="flex-1 flex items-center justify-center gap-1 text-[10px] tracking-[1.5px] uppercase font-semibold text-[#1a1410]">
             <Eye size={12} /> Quick View
@@ -132,13 +121,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
         {/* Mobile add to cart */}
-        <button
-          onClick={handleAddToCart}
-          disabled={!product.inStock}
-          className="md:hidden w-full mt-3 py-2 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors disabled:opacity-40"
-        >
-          {product.inStock ? 'Add to Cart' : 'Sold Out'}
-        </button>
+        <AddToCartButton
+          product={product}
+          inStock={product.inStock}
+          stopPropagation
+          label="Add to Cart"
+          soldOutLabel="Sold Out"
+          className="md:hidden w-full mt-3 py-2 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5"
+        />
       </div>
     </Link>
   );
