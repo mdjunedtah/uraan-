@@ -6,6 +6,7 @@ import { Order, getStatusColor } from '@/lib/orders';
 type OrderTableProps = {
   orders: Order[];
   onView?: (id: string) => void;
+  
 };
 
 export default function OrderTable({ orders, onView }: OrderTableProps) {
