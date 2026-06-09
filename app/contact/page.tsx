@@ -47,9 +47,9 @@ export default function ContactPage() {
 
       <section className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-3 gap-5">
         {[
-          { icon: Phone, title: 'Call Us', primary: '+91 98765 43210', secondary: '+91 12345 67890', href: 'tel:+919876543210' },
-          { icon: Mail, title: 'Email Us', primary: 'info@omgauripulta.com', secondary: 'support@omgauripulta.com', href: 'mailto:info@omgauripulta.com' },
-          { icon: MapPin, title: 'Visit Us', primary: 'Main Bazaar Road', secondary: 'Your City, India - 123456', href: '#map' },
+          { icon: Phone, title: 'Call Us', primary: '+91 98100 12345', secondary: '+91 98100 12346', href: 'tel:+919810012345' },
+          { icon: Mail, title: 'Email Us', primary: 'hello@omgauripulta.com', secondary: 'support@omgauripulta.com', href: 'mailto:hello@omgauripulta.com' },
+          { icon: MapPin, title: 'Visit Us', primary: '12, Jewellers Lane', secondary: 'Zaveri Bazaar, Mumbai - 400003', href: '#find-us' },
         ].map((c, i) => (
           <a key={i} href={c.href} className="luxury-card p-5 text-center group">
             <div className="w-14 h-14 rounded-full bg-[#f8f2e6] mx-auto mb-3 grid place-items-center group-hover:bg-[#b8893a] transition-colors">
@@ -131,8 +131,8 @@ export default function ContactPage() {
                 <div>
                   <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-1">Address</div>
                   <div className="text-sm text-[#1a1410] leading-relaxed">
-                    Main Bazaar Road, Near Temple Lane<br />
-                    Your City, India - 123456
+                    12, Jewellers Lane, Near Mumbadevi Temple<br />
+                    Zaveri Bazaar, Mumbai - 400003
                   </div>
                 </div>
               </div>
@@ -150,8 +150,8 @@ export default function ContactPage() {
                 <Phone className="text-[#b8893a] flex-shrink-0 mt-0.5" size={18} />
                 <div>
                   <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-1">Phone</div>
-                  <a href="tel:+919876543210" className="text-sm text-[#1a1410] hover:text-[#b8893a]">
-                    +91 98765 43210
+                  <a href="tel:+919810012345" className="text-sm text-[#1a1410] hover:text-[#b8893a]">
+                    +91 98100 12345
                   </a>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function ContactPage() {
                   { icon: FaInstagram, href: 'https://instagram.com', label: 'Instagram' },
                   { icon: FaFacebook, href: 'https://facebook.com', label: 'Facebook' },
                   { icon: FaYoutube, href: 'https://youtube.com', label: 'YouTube' },
-                  { icon: MessageCircle, href: 'https://wa.me/919876543210', label: 'WhatsApp' },
+                  { icon: MessageCircle, href: 'https://wa.me/919810012345', label: 'WhatsApp' },
                 ].map((s, i) => (
                   <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-10 h-10 rounded-full border border-[#b8893a]/40 grid place-items-center hover:bg-[#b8893a] hover:text-white transition-colors">
                     <s.icon size={16} className="text-[#b8893a]" />
@@ -174,15 +174,38 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div id="map" className="bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] aspect-video grid place-items-center text-center p-6">
-            <div>
-              <MapPin className="text-[#b8893a] mx-auto mb-2" size={32} />
-              <p className="serif text-lg text-[#1a1410] mb-1">Find Us on Google Maps</p>
-              <p className="text-xs text-[#6b5d4c] mb-3">Click to get directions</p>
-              <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold">
-                Open Maps
-              </a>
+          <div id="find-us" className="bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] p-6">
+            <h2 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-4">
+              Find Us
+            </h2>
+            <div className="flex items-start gap-3 mb-4">
+              <MapPin className="text-[#b8893a] flex-shrink-0 mt-1" size={20} />
+              <div>
+                <div className="text-sm font-semibold text-[#1a1410] mb-1">Om Gauri Pulta Jewellery</div>
+                <div className="text-sm text-[#6b5d4c] leading-relaxed">
+                  12, Jewellers Lane, Near Mumbadevi Temple<br />
+                  Zaveri Bazaar, Mumbai - 400003<br />
+                  Maharashtra, India
+                </div>
+              </div>
             </div>
+            <div className="border-t border-[rgba(184,137,58,0.18)] pt-4 mb-4">
+              <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-2">How to Reach Us</div>
+              <ul className="text-xs text-[#6b5d4c] space-y-1.5 leading-relaxed">
+                <li><span className="text-[#b8893a] font-semibold">By Train:</span> Nearest station — Charni Road (Western Line), 5 min walk</li>
+                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Marine Lines Metro Station, 7 min walk</li>
+                <li><span className="text-[#b8893a] font-semibold">By Road:</span> Off P. D&apos;Mello Road, behind Zaveri Bazaar main street</li>
+                <li><span className="text-[#b8893a] font-semibold">Parking:</span> Available at Zaveri Bazaar Municipal Parking</li>
+              </ul>
+            </div>
+            <a
+              href="https://maps.google.com/?q=Zaveri+Bazaar+Mumbai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+            >
+              <MapPin size={12} /> Get Directions
+            </a>
           </div>
         </div>
       </section>

@@ -37,7 +37,7 @@ export default function Footer() {
               { icon: FaInstagram, href: 'https://instagram.com', label: 'Instagram' },
               { icon: FaFacebook, href: 'https://facebook.com', label: 'Facebook' },
               { icon: FaYoutube, href: 'https://youtube.com', label: 'YouTube' },
-              { icon: MessageCircle, href: 'https://wa.me/919876543210', label: 'WhatsApp' },
+              { icon: MessageCircle, href: 'https://wa.me/919810012345', label: 'WhatsApp' },
             ].map((s, i) => (
               <a
                 key={i}
@@ -88,16 +88,16 @@ export default function Footer() {
           <ul className="space-y-3 text-xs text-[#e8d49b]/70">
             <li className="flex items-start gap-2">
               <MapPin size={13} className="text-[#b8893a] flex-shrink-0 mt-0.5" />
-              <span>Main Bazaar Road,<br />Your City, India - 123456</span>
+              <span>12, Jewellers Lane,<br />Zaveri Bazaar, Mumbai - 400003</span>
             </li>
             <li className="flex items-center gap-2">
               <Phone size={13} className="text-[#b8893a] flex-shrink-0" />
-              <a href="tel:+919876543210" className="hover:text-[#b8893a]">+91 98765 43210</a>
+              <a href="tel:+919810012345" className="hover:text-[#b8893a]">+91 98100 12345</a>
             </li>
             <li className="flex items-center gap-2">
               <Mail size={13} className="text-[#b8893a] flex-shrink-0" />
-              <a href="mailto:info@omgauripulta.com" className="hover:text-[#b8893a] break-all">
-                info@omgauripulta.com
+              <a href="mailto:hello@omgauripulta.com" className="hover:text-[#b8893a] break-all">
+                hello@omgauripulta.com
               </a>
             </li>
           </ul>
