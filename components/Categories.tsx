@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Gem } from 'lucide-react';
+import { Gem, ChevronRight } from 'lucide-react';
 import { categories } from '@/data/jewelleryData';
 import { CATEGORY_THEME, CATEGORY_IMAGES } from '@/lib/categoryStyles';
 
@@ -48,6 +48,15 @@ export default function Categories() {
             </Link>
           );
         })}
+      </div>
+
+      <div className="mt-8 md:mt-10 text-center">
+        <Link
+          href="/collections"
+          className="inline-flex items-center gap-2 px-7 py-3 border border-[#b8893a] text-[#b8893a] text-[10px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+        >
+          View All Categories <ChevronRight size={12} />
+        </Link>
       </div>
     </section>
   );
