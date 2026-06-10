@@ -4,30 +4,14 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
-  X, Heart, ShoppingBag, User, Phone, ChevronRight,
-  Crown, Sparkles, Diamond, Gem, Flower2, Link2,
-  Sparkle, Circle, CircleDot, Watch, Hexagon,
+  X, Heart, ShoppingBag, User, Phone, ChevronRight, Gem,
 } from 'lucide-react';
 import { categories } from '@/data/jewelleryData';
+import { CATEGORY_ICONS } from '@/lib/categoryStyles';
 
 type MobileMenuProps = {
   isOpen: boolean;
   onClose: () => void;
-};
-
-const CATEGORY_ICONS: Record<string, typeof Crown> = {
-  gold: Crown,
-  silver: Sparkles,
-  diamond: Diamond,
-  gems: Gem,
-  rudraksh: Flower2,
-  necklaces: Link2,
-  earrings: Sparkle,
-  rings: Circle,
-  bangles: CircleDot,
-  bracelets: Watch,
-  pendants: Hexagon,
-  bridal: Heart,
 };
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
