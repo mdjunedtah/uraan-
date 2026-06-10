@@ -26,7 +26,6 @@ import {
   ChevronRight,
   Sparkles,
   MessageCircle,
-  PlayCircle,
   Diamond,
   Gift,
 } from 'lucide-react';
@@ -83,11 +82,6 @@ export default function HomePage() {
             <source src="/videos/signature-collection.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/30 to-black/75" />
-
-          <div className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 text-white/85 text-[11px] tracking-[1px]">
-            <PlayCircle size={16} />
-            Autoplay Video
-          </div>
 
           <div className="absolute inset-0 flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16">
             <p className="text-xs md:text-sm italic text-[#e8d49b] tracking-[4px] uppercase mb-3">
