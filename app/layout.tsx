@@ -4,6 +4,7 @@ import '../styles/luxury.css';
 import '../styles/animations.css';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/wishlistContext';
+import MobileBottomNav from '@/components/MobileBottomNav';
 
 export const metadata: Metadata = {
   title: 'Om Gauri Pulta — Gems, Jewellery & Rudraksh',
@@ -39,9 +40,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body className="pb-14 md:pb-0">
         <CartProvider>
-          <WishlistProvider>{children}</WishlistProvider>
+          <WishlistProvider>
+            {children}
+            <MobileBottomNav />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

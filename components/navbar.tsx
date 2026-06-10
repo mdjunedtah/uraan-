@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, Search, ShoppingBag, Heart, User, X, Phone } from 'lucide-react';
+import { Menu, Search, ShoppingBag, Heart, User, X, Phone, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/wishlistContext';
 import AnnouncementBar from './AnnouncementBar';
@@ -53,14 +53,14 @@ export default function Navbar() {
           {/* Center — Brand */}
           <Link href="/" className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-[#1a1410]">
-              <span className="w-1.5 h-1.5 bg-[#b8893a] rotate-45" />
+              <Star size={10} className="text-[#b8893a] fill-[#b8893a]" />
               <span className="display text-sm md:text-base font-semibold tracking-[3px]">
-                OM GAURI PULTA
+                OM GAURI
               </span>
-              <span className="w-1.5 h-1.5 bg-[#b8893a] rotate-45" />
+              <Star size={10} className="text-[#b8893a] fill-[#b8893a]" />
             </div>
             <div className="text-[7px] md:text-[8px] tracking-[3px] text-[#9a8c75] mt-1 uppercase font-medium">
-              Gems · Jewellery · Rudraksh
+              Pulta · Gems · Rudraksh
             </div>
           </Link>
 

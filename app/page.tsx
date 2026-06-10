@@ -41,7 +41,7 @@ export default function HomePage() {
       <Hero />
 
       {/* 2. TRUST STRIP */}
-      <section className="bg-[#1a1410] border-y border-[rgba(184,137,58,0.18)]">
+      <section className="bg-[#3a2f24] border-y border-[rgba(184,137,58,0.18)]">
         <div className="max-w-7xl mx-auto grid grid-cols-4">
           {[
             { icon: Truck, title: 'Free Shipping', sub: 'Complimentary Above ₹1,999' },
