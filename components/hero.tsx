@@ -30,25 +30,25 @@ export default function Hero() {
             style={{ backgroundImage: `url(${slide.image})` }}
           />
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/30 to-transparent md:from-white/55 md:via-white/15" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent md:from-black/45 md:via-black/15" />
 
           {/* Content */}
           <div className="absolute inset-0 flex items-center px-6 md:px-16 lg:px-24">
             <div className="max-w-md">
-              <p className="serif italic text-[#7a5a1f] text-sm md:text-base tracking-[3px] mb-3 uppercase animate-fade-up">
-                — {slide.eyebrow} —
+              <p className="serif italic text-[#b8893a] text-sm md:text-base tracking-[3px] mb-3 uppercase animate-fade-up max-w-[140px] leading-tight">
+                {slide.eyebrow}
               </p>
-              <h1 className="serif text-5xl md:text-7xl font-normal text-[#1a1410] leading-none mb-4 animate-slide-in">
+              <h1 className="serif text-5xl md:text-7xl font-normal text-white leading-none mb-4 mt-3 animate-slide-in">
                 {slide.title}
                 <br />
                 <em className="gold-text font-medium">{slide.titleEm}</em>
               </h1>
-              <p className="text-sm md:text-base text-[#6b5d4c] leading-relaxed mb-6 max-w-xs animate-fade-up">
+              <p className="text-sm md:text-base text-white/85 leading-relaxed mb-6 max-w-xs animate-fade-up">
                 {slide.desc}
               </p>
               <Link
                 href={slide.href}
-                className="inline-flex items-center gap-3 px-8 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+                className="inline-flex items-center gap-3 px-8 py-3 bg-[#b8893a] text-[#1a1410] text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#e8d49b] hover:text-[#1a1410] transition-all"
               >
                 {slide.cta} <ChevronRight size={14} />
               </Link>
@@ -65,7 +65,7 @@ export default function Hero() {
             aria-label={`Go to slide ${idx + 1}`}
             onClick={() => setCurrent(idx)}
             className={`h-[2px] transition-all duration-300 ${
-              idx === current ? 'w-10 bg-[#b8893a]' : 'w-6 bg-[#1a1410]/30'
+              idx === current ? 'w-10 bg-[#b8893a]' : 'w-6 bg-white/40'
             }`}
           />
         ))}
