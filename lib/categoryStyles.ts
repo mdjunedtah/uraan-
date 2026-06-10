@@ -35,3 +35,21 @@ export const CATEGORY_THEME: Record<string, { bg: string; text: string }> = {
   pendants: { bg: '#F0E7FB', text: '#9356D9' },
   bridal: { bg: '#E0F5EE', text: '#3CA088' },
 };
+
+// A distinct, category-appropriate product photo for each card in the
+// homepage "Shop By Category" grid (mirrors the per-category imagery in
+// the reference design — gold set, diamond ring, gemstone, etc.).
+export const CATEGORY_IMAGES: Record<string, string> = {
+  gold: '/images/gallery/necklace-1.jpg',
+  silver: '/images/gallery/necklace-2.jpg',
+  diamond: '/images/gallery/ring-5.jpg',
+  gems: '/images/gallery/ring-2.jpg',
+  rudraksh: '/images/gallery/necklace-7.jpg',
+  necklaces: '/images/gallery/necklace-4.jpg',
+  earrings: '/images/gallery/earrings-4.jpg',
+  rings: '/images/gallery/ring-1.jpg',
+  bangles: '/images/gallery/bracelet-3.jpg',
+  bracelets: '/images/gallery/bracelet-1.jpg',
+  pendants: '/images/gallery/necklace-6.jpg',
+  bridal: '/images/gallery/necklace-8.jpg',
+};

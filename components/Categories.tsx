@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Gem } from 'lucide-react';
 import { categories } from '@/data/jewelleryData';
-import { CATEGORY_ICONS, CATEGORY_THEME } from '@/lib/categoryStyles';
+import { CATEGORY_THEME, CATEGORY_IMAGES } from '@/lib/categoryStyles';
 
 export default function Categories() {
   return (
@@ -17,27 +17,26 @@ export default function Categories() {
       <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6 mt-8">
         {categories.slice(0, 12).map((cat) => {
           const theme = CATEGORY_THEME[cat.slug] ?? { bg: '#FFFFFF', text: '#1a1410' };
-          const Icon = CATEGORY_ICONS[cat.slug] ?? Gem;
+          const image = CATEGORY_IMAGES[cat.slug] ?? cat.image;
           return (
             <Link
               key={cat.slug}
               href={`/collections?type=${cat.slug}`}
-              className="group relative rounded-2xl p-4 md:p-5 text-center flex flex-col items-center gap-3 hover:shadow-[0_12px_40px_rgba(122,90,31,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              className="group relative rounded-2xl overflow-hidden flex flex-col hover:shadow-[0_14px_44px_rgba(122,90,31,0.16)] hover:-translate-y-1 transition-all duration-300"
               style={{ backgroundColor: theme.bg }}
             >
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#d4a857] via-[#b8893a] to-[#8c6726] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] z-10 bg-gradient-to-r from-[#d4a857] via-[#b8893a] to-[#8c6726] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
 
-              <div
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-cover bg-center bg-[#f8f2e6]"
-                style={{
-                  backgroundImage: `url(${cat.image})`,
-                  boxShadow: 'inset 0 0 0 1px rgba(184,137,58,0.32)',
-                }}
-              />
-
-              <div>
+              <div className="relative w-full aspect-[4/5] overflow-hidden">
                 <div
-                  className="display text-[10px] md:text-[11px] font-semibold tracking-[1.5px] uppercase"
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                  style={{ backgroundImage: `url(${image})` }}
+                />
+              </div>
+
+              <div className="px-2 py-3 md:py-4 text-center">
+                <div
+                  className="display text-[10px] md:text-[11px] font-semibold tracking-[1.5px] uppercase leading-tight"
                   style={{ color: theme.text }}
                 >
                   {cat.name}
@@ -46,8 +45,6 @@ export default function Categories() {
                   {cat.count} Products
                 </div>
               </div>
-
-              <Icon size={18} strokeWidth={1.5} style={{ color: theme.text }} />
             </Link>
           );
         })}
