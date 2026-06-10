@@ -26,11 +26,11 @@ export default function Hero() {
         >
           {/* Background */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-right md:bg-center"
             style={{ backgroundImage: `url(${slide.image})` }}
           />
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/40 to-transparent md:from-white/70 md:via-white/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/30 to-transparent md:from-white/55 md:via-white/15" />
 
           {/* Content */}
           <div className="absolute inset-0 flex items-center px-6 md:px-16 lg:px-24">
