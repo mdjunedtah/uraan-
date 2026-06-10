@@ -41,23 +41,23 @@ export default function HomePage() {
       <Hero />
 
       {/* 2. TRUST STRIP */}
-      <section className="bg-[#fbf8f1] border-y border-[rgba(184,137,58,0.18)]">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4">
+      <section className="bg-[#1a1410] border-y border-[rgba(184,137,58,0.18)]">
+        <div className="max-w-7xl mx-auto grid grid-cols-4">
           {[
-            { icon: Truck, title: 'Free Shipping', sub: 'On orders above ₹1999' },
-            { icon: ShieldCheck, title: 'Certified', sub: '100% Hallmarked' },
-            { icon: RotateCw, title: 'Easy Returns', sub: '7 days policy' },
-            { icon: Lock, title: 'Secure Pay', sub: '100% Safe Checkout' },
+            { icon: Truck, title: 'Free Shipping', sub: 'Complimentary Above ₹1,999' },
+            { icon: ShieldCheck, title: 'Certified', sub: 'BIS Hallmarked Purity' },
+            { icon: RotateCw, title: 'Easy Returns', sub: '7-Day Hassle-Free' },
+            { icon: Lock, title: 'Secure Pay', sub: '256-bit SSL Encrypted' },
           ].map((item, i) => (
             <div
               key={i}
-              className="flex flex-col items-center text-center py-6 px-4 border-r border-[rgba(184,137,58,0.18)] last:border-r-0"
+              className="flex flex-col items-center text-center py-5 md:py-6 px-1.5 md:px-4 border-r border-[rgba(184,137,58,0.18)] last:border-r-0"
             >
               <item.icon className="text-[#b8893a] mb-2" size={22} />
-              <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-[#1a1410]">
+              <div className="text-[8px] md:text-[10px] font-semibold tracking-[1px] md:tracking-[1.5px] uppercase text-[#e8d49b]">
                 {item.title}
               </div>
-              <div className="text-[10px] text-[#9a8c75] mt-1">{item.sub}</div>
+              <div className="text-[8px] md:text-[10px] text-[#e8d49b]/60 mt-1 leading-tight">{item.sub}</div>
             </div>
           ))}
         </div>
