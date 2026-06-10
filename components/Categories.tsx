@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Gem, ChevronRight } from 'lucide-react';
+import { Gem, ChevronRight, LayoutGrid } from 'lucide-react';
 import { categories } from '@/data/jewelleryData';
 import { CATEGORY_THEME, CATEGORY_IMAGES } from '@/lib/categoryStyles';
 
@@ -50,12 +50,14 @@ export default function Categories() {
         })}
       </div>
 
-      <div className="mt-8 md:mt-10 text-center">
+      <div className="mt-8 md:mt-10 flex justify-center">
         <Link
           href="/collections"
-          className="inline-flex items-center gap-2 px-7 py-3 border border-[#b8893a] text-[#b8893a] text-[10px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+          className="group inline-flex items-center gap-4 w-full max-w-md justify-between px-7 py-4 rounded-2xl border border-[#c79a48] bg-[#faf5e9] text-[#b8893a] text-xs md:text-sm tracking-[4px] uppercase font-semibold hover:bg-[#b8893a] hover:text-white hover:border-[#b8893a] transition-all"
         >
-          View All Categories <ChevronRight size={12} />
+          <LayoutGrid size={20} className="shrink-0" />
+          <span className="flex-1 text-center">View All Categories</span>
+          <ChevronRight size={18} className="shrink-0" />
         </Link>
       </div>
     </section>
