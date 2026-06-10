@@ -26,6 +26,9 @@ import {
   ChevronRight,
   Sparkles,
   MessageCircle,
+  PlayCircle,
+  Diamond,
+  Gift,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaYoutube, } from "react-icons/fa";
 
@@ -66,49 +69,64 @@ export default function HomePage() {
       {/* 3. SHOP BY CATEGORY */}
       <Categories />
 
-      {/* 4. SIGNATURE COLLECTIONS BANNER */}
-      <section className="px-4 md:px-8 py-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link
-            href="/collections?type=bridal"
-            className="relative h-64 md:h-80 overflow-hidden group bg-[#f8f2e6]"
+      {/* 4. SIGNATURE COLLECTION VIDEO */}
+      <section className="relative">
+        <div className="relative h-[560px] md:h-[680px] overflow-hidden bg-[#1a1410]">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/videos/signature-collection-poster.jpg"
+            className="absolute inset-0 w-full h-full object-cover"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent z-10" />
-            <div
-              className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
-              style={{ backgroundImage: 'url(/images/bridal-set.jpg)' }}
-            />
-            <div className="absolute inset-0 flex flex-col justify-center px-8 z-20 text-white">
-              <p className="text-xs italic text-[#e8d49b] tracking-[3px] mb-2">SIGNATURE</p>
-              <h3 className="serif text-4xl md:text-5xl mb-3">Bridal Collection</h3>
-              <p className="text-xs opacity-80 max-w-[220px] mb-4">
-                Heirloom pieces for your sacred day
-              </p>
-              <span className="text-[10px] tracking-[3px] border-b border-[#e8d49b] inline-block pb-1 w-fit">
-                EXPLORE NOW
-              </span>
+            <source src="/videos/signature-collection.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/30 to-black/75" />
+
+          <div className="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-2 text-white/85 text-[11px] tracking-[1px]">
+            <PlayCircle size={16} />
+            Autoplay Video
+          </div>
+
+          <div className="absolute inset-0 flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16">
+            <p className="text-xs md:text-sm italic text-[#e8d49b] tracking-[4px] uppercase mb-3">
+              Signature Collection
+            </p>
+            <h2 className="serif text-4xl md:text-6xl text-white leading-[1.15] mb-1">
+              Timeless Jewellery
+            </h2>
+            <h2 className="serif text-2xl md:text-5xl text-white leading-[1.15] mb-2 whitespace-nowrap">
+              Crafted For Every Celebration
+            </h2>
+            <div className="luxury-divider !my-4 before:bg-[#e8d49b]/40 after:bg-[#e8d49b]/40 text-[#e8d49b]">
+              <Sparkles size={12} />
             </div>
-          </Link>
-          <Link
-            href="/collections?type=rudraksh"
-            className="relative h-64 md:h-80 overflow-hidden group bg-[#f8f2e6]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent z-10" />
-            <div
-              className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
-              style={{ backgroundImage: 'url(/images/luxury-bg.jpg)' }}
-            />
-            <div className="absolute inset-0 flex flex-col justify-center px-8 z-20 text-white">
-              <p className="text-xs italic text-[#e8d49b] tracking-[3px] mb-2">SACRED</p>
-              <h3 className="serif text-4xl md:text-5xl mb-3">Rudraksh</h3>
-              <p className="text-xs opacity-80 max-w-[220px] mb-4">
-                Authentic, certified spiritual treasures
-              </p>
-              <span className="text-[10px] tracking-[3px] border-b border-[#e8d49b] inline-block pb-1 w-fit">
-                DISCOVER
-              </span>
+            <p className="text-sm text-white/80 mb-6">
+              Exquisite designs. Eternal elegance.
+            </p>
+            <Link
+              href="/collections"
+              className="inline-flex items-center px-10 py-3 bg-[#b8893a] text-[#1a1410] text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#e8d49b] transition-all"
+            >
+              Explore Collection
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-[#1a1410] grid grid-cols-3 divide-x divide-[rgba(184,137,58,0.18)]">
+          {[
+            { icon: Diamond, line1: 'Certified', line2: 'Authentic' },
+            { icon: ShieldCheck, line1: 'Lifetime', line2: 'Assurance' },
+            { icon: Gift, line1: 'Premium', line2: 'Gifting' },
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col items-center text-center py-5 md:py-6 px-2">
+              <item.icon className="text-[#b8893a] mb-2" size={20} />
+              <div className="text-[9px] md:text-[10px] tracking-[1.5px] uppercase text-[#e8d49b] font-medium leading-snug">
+                {item.line1}<br />{item.line2}
+              </div>
             </div>
-          </Link>
+          ))}
         </div>
       </section>
 
