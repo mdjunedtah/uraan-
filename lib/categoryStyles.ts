@@ -44,7 +44,7 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   silver: '/images/gallery/necklace-2.jpg',
   diamond: '/images/gallery/ring-5.jpg',
   gems: '/images/gallery/ring-2.jpg',
-  rudraksh: '/images/gallery/necklace-7.jpg',
+  rudraksh: '/images/gallery/rudraksh-1.jpg',
   necklaces: '/images/gallery/necklace-4.jpg',
   earrings: '/images/gallery/earrings-4.jpg',
   rings: '/images/gallery/ring-1.jpg',
