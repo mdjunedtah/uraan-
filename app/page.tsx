@@ -446,9 +446,9 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 rounded-2xl md:rounded-3xl overflow-hidden border-2 border-[#d4a857]/80 shadow-[0_12px_28px_rgba(58,42,24,0.18)]">
+          <div className="mt-8 max-w-sm mx-auto rounded-2xl md:rounded-3xl overflow-hidden border-2 border-[#d4a857]/80 shadow-[0_12px_28px_rgba(58,42,24,0.18)]">
             <div
-              className="aspect-[4/3] bg-cover bg-top"
+              className="aspect-[2/3] bg-cover bg-center"
               style={{ backgroundImage: 'url(/images/style-model.jpg)' }}
             />
           </div>
