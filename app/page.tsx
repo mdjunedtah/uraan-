@@ -429,24 +429,24 @@ export default function HomePage() {
           <p className="text-center text-[13px] md:text-base text-[#3a2f24] mt-2 mb-8">
             Elevate your elegance with the perfect jewelry styling
           </p>
-          <div className="grid grid-cols-4 divide-x divide-[#e8dcc8]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-7 md:gap-y-0 md:divide-x md:divide-[#e8dcc8]">
             {[
               { Icon: StyleHairIcon, lead: 'Pair with sleek', rest: 'bun or open hair to highlight the earrings.' },
               { Icon: StyleNecklaceIcon, lead: 'Let the', rest: 'necklace be the statement piece.' },
               { Icon: StyleDrapeIcon, lead: 'Wear with', rest: 'sarees or draped outfits for a regal look.' },
               { Icon: StyleSparkleIcon, lead: 'Avoid heavy', rest: 'neckpieces — this set speaks for itself.' },
             ].map((t, i) => (
-              <div key={i} className="px-1.5 md:px-4 text-center">
-                <div className="w-12 h-12 md:w-[72px] md:h-[72px] rounded-full bg-[#f6efe1] border border-[#8e1f2f]/15 flex items-center justify-center mx-auto mb-2.5">
-                  <t.Icon className="w-6 h-6 md:w-9 md:h-9 text-[#8e1f2f]" />
+              <div key={i} className="px-3 md:px-4 text-center">
+                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full bg-[#f6efe1] border border-[#8e1f2f]/15 flex items-center justify-center mx-auto mb-2.5">
+                  <t.Icon className="w-7 h-7 md:w-9 md:h-9 text-[#8e1f2f]" />
                 </div>
-                <p className="text-[10px] md:text-sm leading-snug text-[#3a2f24]">
+                <p className="text-[12px] md:text-sm leading-snug text-[#3a2f24]">
                   <span className="text-[#8e1f2f] font-semibold">{t.lead}</span> {t.rest}
                 </p>
               </div>
             ))}
           </div>
-          <div className="mt-8 max-w-sm mx-auto rounded-2xl md:rounded-3xl overflow-hidden border-2 border-[#d4a857]/80 shadow-[0_12px_28px_rgba(58,42,24,0.18)]">
+          <div className="mt-8 max-w-xs md:max-w-md mx-auto rounded-2xl md:rounded-3xl overflow-hidden border-2 border-[#d4a857]/80 shadow-[0_12px_28px_rgba(58,42,24,0.18)]">
             <div
               className="aspect-[2/3] bg-cover bg-center"
               style={{ backgroundImage: 'url(/images/style-model.jpg)' }}
