@@ -7,35 +7,38 @@ export default function About() {
   return (
     <>
       {/* Heritage Section */}
-      <section className="bg-[#f8f2e6] py-16 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-          <div
-            className="aspect-[4/5] bg-cover bg-center"
-            style={{ backgroundImage: 'url(/images/model.jpg)' }}
-          />
-          <div>
-            <p className="section-tag-italic !text-left">Our Heritage</p>
-            <h2 className="serif text-3xl md:text-4xl text-[#1a1410] mb-4 leading-tight">
-              A Legacy of <em className="gold-text">Trust</em>
-              <br />Since Generations
-            </h2>
-            <p className="text-sm text-[#6b5d4c] leading-relaxed mb-4">
-              At Om Gauri Pulta, every ornament tells a story — of devotion,
-              of craftsmanship, of celebrations. Three generations of master
-              artisans handcraft each piece with care, ensuring purity of
-              gold, brilliance of gems, and authenticity of every Rudraksh bead.
-            </p>
-            <p className="text-sm text-[#6b5d4c] leading-relaxed mb-6">
-              From bridal masterpieces to spiritual blessings, we honour the
-              richness of Indian tradition while embracing modern elegance.
-            </p>
-            <Link
-              href="/about"
-              className="inline-flex items-center gap-2 text-[11px] tracking-[3px] uppercase font-semibold border-b border-[#1a1410] pb-1 hover:text-[#b8893a] hover:border-[#b8893a]"
-            >
-              Read Our Story <ChevronRight size={12} />
-            </Link>
-          </div>
+      <section className="bg-[#f8f2e6] py-10 md:py-14 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <svg viewBox="0 0 24 14" className="w-7 h-4 mx-auto text-[#c9a24a] mb-2" fill="currentColor" aria-hidden="true">
+            <path d="M12 1 C10.5 3.4 10.5 6 12 8.4 C13.5 6 13.5 3.4 12 1 Z" />
+            <path d="M7.2 3.8 C8.4 6 10 7.6 12 8.4 C10.7 9.5 8.7 9.4 7.3 8.3 C6.3 7.3 6.3 5 7.2 3.8 Z" />
+            <path d="M16.8 3.8 C15.6 6 14 7.6 12 8.4 C13.3 9.5 15.3 9.4 16.7 8.3 C17.7 7.3 17.7 5 16.8 3.8 Z" />
+            <circle cx="12" cy="11" r="1.1" />
+            <rect x="7.5" y="12.6" width="9" height="0.8" rx="0.4" />
+          </svg>
+          <h2 className="serif text-3xl md:text-4xl text-[#8e1f2f] font-semibold mb-2">Our Heritage</h2>
+          <p className="text-[13px] md:text-base text-[#3a2f24] mb-8">
+            Timeless craftsmanship inspired by tradition, designed for today&apos;s woman.
+          </p>
+          <h3 className="serif text-2xl md:text-3xl text-[#1a1410] mb-4 leading-tight">
+            A Legacy of <em className="gold-text">Trust</em> Since Generations
+          </h3>
+          <p className="text-sm text-[#6b5d4c] leading-relaxed mb-4 max-w-xl mx-auto">
+            At Om Gauri Pulta, every ornament tells a story — of devotion,
+            of craftsmanship, of celebrations. Three generations of master
+            artisans handcraft each piece with care, ensuring purity of
+            gold, brilliance of gems, and authenticity of every Rudraksh bead.
+          </p>
+          <p className="text-sm text-[#6b5d4c] leading-relaxed mb-6 max-w-xl mx-auto">
+            From bridal masterpieces to spiritual blessings, we honour the
+            richness of Indian tradition while embracing modern elegance.
+          </p>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-2 text-[11px] tracking-[3px] uppercase font-semibold border-b border-[#1a1410] pb-1 hover:text-[#b8893a] hover:border-[#b8893a]"
+          >
+            Read Our Story <ChevronRight size={12} />
+          </Link>
         </div>
       </section>
 

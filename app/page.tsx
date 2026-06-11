@@ -139,6 +139,67 @@ function GemIcon() {
   );
 }
 
+// Gold fleur ornament + maroon line icons for the How To Style section.
+function FleurOrnament({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 14" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M12 1 C10.5 3.4 10.5 6 12 8.4 C13.5 6 13.5 3.4 12 1 Z" />
+      <path d="M7.2 3.8 C8.4 6 10 7.6 12 8.4 C10.7 9.5 8.7 9.4 7.3 8.3 C6.3 7.3 6.3 5 7.2 3.8 Z" />
+      <path d="M16.8 3.8 C15.6 6 14 7.6 12 8.4 C13.3 9.5 15.3 9.4 16.7 8.3 C17.7 7.3 17.7 5 16.8 3.8 Z" />
+      <circle cx="12" cy="11" r="1.1" />
+      <rect x="7.5" y="12.6" width="9" height="0.8" rx="0.4" />
+    </svg>
+  );
+}
+
+function StyleHairIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="11" cy="10.5" r="5.5" />
+      <circle cx="16.6" cy="5.6" r="2.1" />
+      <path d="M15.6 14.3 v1.4" />
+      <circle cx="15.6" cy="17.2" r="1.4" />
+    </svg>
+  );
+}
+
+function StyleNecklaceIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5.5 5.5 C5.5 11 8.4 14 12 14 C15.6 14 18.5 11 18.5 5.5" />
+      <circle cx="6.6" cy="9.4" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="9" cy="12.2" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="12.2" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="17.4" cy="9.4" r="0.9" fill="currentColor" stroke="none" />
+      <path d="M12 14 v1.6" />
+      <circle cx="12" cy="18" r="2" />
+    </svg>
+  );
+}
+
+function StyleDrapeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 4.5 C10 6 14 6 15 4.5" />
+      <path d="M9 4.5 C8 9 7.5 14 6.5 19.5" />
+      <path d="M15 4.5 C16 9 16.5 14 17.5 19.5" />
+      <path d="M6.5 19.5 h11" />
+      <path d="M15 4.5 C11 8.5 9 13 7.8 19.5" />
+      <path d="M16.2 9.5 C12.8 12.5 11 15.5 10.2 19.5" />
+    </svg>
+  );
+}
+
+function StyleSparkleIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M9 4 L10.3 8.7 L15 10 L10.3 11.3 L9 16 L7.7 11.3 L3 10 L7.7 8.7 Z" />
+      <path d="M17 11 L17.9 14.1 L21 15 L17.9 15.9 L17 19 L16.1 15.9 L13 15 L16.1 14.1 Z" />
+      <path d="M15.5 3.5 L16.1 5.4 L18 6 L16.1 6.6 L15.5 8.5 L14.9 6.6 L13 6 L14.9 5.4 Z" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const trending = getSaleProducts(6);
 
@@ -329,7 +390,7 @@ export default function HomePage() {
       </section>
 
       {/* 9. TRENDING NOW (sale products) */}
-      <section className="pt-6 pb-16 px-4 max-w-7xl mx-auto">
+      <section className="pt-6 pb-8 px-4 max-w-7xl mx-auto">
         <div className="flex items-center justify-center gap-2.5 mb-1.5">
           <span className="flex items-center gap-1.5" aria-hidden="true">
             <span className="h-px w-7 md:w-10 bg-[#b8893a]/50" />
@@ -354,7 +415,47 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 10 + 11. ABOUT + STATS */}
+      {/* 10. HOW TO STYLE */}
+      <section className="pt-2 pb-10 px-4">
+        <div className="max-w-5xl mx-auto">
+          <FleurOrnament className="w-7 h-4 mx-auto text-[#c9a24a] mb-2" />
+          <div className="flex items-center justify-center gap-3 md:gap-5">
+            <span className="h-px w-8 md:w-14 bg-[#c9a24a]/70" />
+            <h2 className="display text-xl md:text-3xl tracking-[3px] md:tracking-[5px] uppercase text-[#8e1f2f] whitespace-nowrap">
+              How To Style
+            </h2>
+            <span className="h-px w-8 md:w-14 bg-[#c9a24a]/70" />
+          </div>
+          <p className="text-center text-[13px] md:text-base text-[#3a2f24] mt-2 mb-8">
+            Elevate your elegance with the perfect jewelry styling
+          </p>
+          <div className="grid grid-cols-4 divide-x divide-[#e8dcc8]">
+            {[
+              { Icon: StyleHairIcon, lead: 'Pair with sleek', rest: 'bun or open hair to highlight the earrings.' },
+              { Icon: StyleNecklaceIcon, lead: 'Let the', rest: 'necklace be the statement piece.' },
+              { Icon: StyleDrapeIcon, lead: 'Wear with', rest: 'sarees or draped outfits for a regal look.' },
+              { Icon: StyleSparkleIcon, lead: 'Avoid heavy', rest: 'neckpieces — this set speaks for itself.' },
+            ].map((t, i) => (
+              <div key={i} className="px-1.5 md:px-4 text-center">
+                <div className="w-12 h-12 md:w-[72px] md:h-[72px] rounded-full bg-[#f6efe1] border border-[#8e1f2f]/15 flex items-center justify-center mx-auto mb-2.5">
+                  <t.Icon className="w-6 h-6 md:w-9 md:h-9 text-[#8e1f2f]" />
+                </div>
+                <p className="text-[10px] md:text-sm leading-snug text-[#3a2f24]">
+                  <span className="text-[#8e1f2f] font-semibold">{t.lead}</span> {t.rest}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-2xl md:rounded-3xl overflow-hidden border-2 border-[#d4a857]/80 shadow-[0_12px_28px_rgba(58,42,24,0.18)]">
+            <div
+              className="aspect-[4/3] bg-cover bg-top"
+              style={{ backgroundImage: 'url(/images/style-model.jpg)' }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 11 + 12. ABOUT + STATS */}
       <About />
 
       {/* 12. CUSTOMER REVIEWS */}
