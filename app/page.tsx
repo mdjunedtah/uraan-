@@ -87,13 +87,17 @@ function TagIcon() {
           <stop offset="100%" stopColor="#2B5790" />
         </linearGradient>
       </defs>
-      <path d="M15 17 Q24 11 31 19" stroke="#C9A24A" strokeWidth="2.6" fill="none" strokeLinecap="round" />
-      <g transform="rotate(45 33 33)">
-        <rect x="21" y="21" width="24" height="24" rx="5.5" fill="url(#tagBody)" />
-        <rect x="21" y="21" width="24" height="9" rx="5.5" fill="#FFFFFF" opacity="0.15" />
-        <circle cx="27" cy="27" r="3" fill="#EAF1FB" />
+      <g transform="rotate(-19 32 30)">
+        <path
+          d="M30.6 11.2 Q32 9.8 33.4 11.2 L42.2 20.2 Q43.5 21.5 43.5 23.4 V45.2 Q43.5 50.4 38.3 50.4 H25.7 Q20.5 50.4 20.5 45.2 V23.4 Q20.5 21.5 21.8 20.2 Z"
+          fill="url(#tagBody)"
+        />
+        <path d="M32 11 L42 21 V26.5 H22 V21 Z" fill="#FFFFFF" opacity="0.15" />
+        <text x="32" y="42" textAnchor="middle" fontSize="15" fontWeight="700" fill="#FFFFFF" fontFamily="serif">₹</text>
       </g>
-      <text x="33" y="41" textAnchor="middle" fontSize="17" fontWeight="700" fill="#FFFFFF" fontFamily="serif">₹</text>
+      <path d="M28.5 20 C 27 11, 35.5 4.5, 41 8.5 C 45.5 11.8, 42.5 18, 35 14" stroke="#C9A24A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <circle cx="28.6" cy="20.1" r="2.9" fill="#EAF1FB" />
+      <circle cx="28.6" cy="20.1" r="1.3" fill="#2B5790" />
     </svg>
   );
 }
