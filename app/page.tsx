@@ -28,8 +28,34 @@ import {
   MessageCircle,
   Diamond,
   Gift,
+  Tag,
+  ShoppingBag,
+  Package,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaYoutube, } from "react-icons/fa";
+
+// Delicate gold leaf-branch corner ornament for the "Shop By Budget" section.
+function LeafBranch({ className }: { className?: string }) {
+  const leaves = [
+    { x: 15, y: 20, r: -50 },
+    { x: 38, y: 46, r: 135 },
+    { x: 26, y: 74, r: -40 },
+    { x: 50, y: 100, r: 140 },
+    { x: 38, y: 128, r: -35 },
+    { x: 62, y: 150, r: 130 },
+  ];
+  return (
+    <svg viewBox="0 0 100 170" className={className} fill="none" aria-hidden="true">
+      <path d="M8 6 C 50 45, 25 95, 68 164" stroke="#d4a857" strokeWidth="1.4" />
+      {leaves.map((l, i) => (
+        <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.r})`}>
+          <path d="M0 0 C 6 -6 17 -6 23 0 C 17 6 6 6 0 0 Z" stroke="#d4a857" strokeWidth="1.1" />
+          <path d="M2 0 L 21 0" stroke="#d4a857" strokeWidth="0.9" />
+        </g>
+      ))}
+    </svg>
+  );
+}
 
 export default function HomePage() {
   const trending = getSaleProducts(6);
@@ -128,32 +154,54 @@ export default function HomePage() {
       <Trending />
 
       {/* 6. SHOP BY BUDGET */}
-      <section className="py-12 px-4 bg-[#fbf8f1]">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative overflow-hidden py-12 px-4 bg-gradient-to-br from-[#fdf6ea] via-[#fbf3e3] to-[#f5e8d3]">
+        <LeafBranch className="pointer-events-none select-none absolute top-0 left-0 w-24 md:w-40 opacity-50" />
+        <LeafBranch className="pointer-events-none select-none absolute top-0 right-0 w-24 md:w-40 opacity-50 -scale-x-100" />
+
+        <div className="max-w-7xl mx-auto relative">
           <p className="section-tag-italic">Find Your Perfect Piece</p>
           <h2 className="section-heading">Shop By Budget</h2>
           <div className="luxury-divider">
-            <Wallet size={10} />
+            <span className="w-7 h-7 rounded-full border border-[#b8893a]/40 flex items-center justify-center">
+              <ShoppingBag size={12} />
+            </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-6">
             {[
-              { label: 'Under ₹4,999', range: '999-4999', count: '120+' },
-              { label: '₹5,000 - ₹9,999', range: '5000-9999', count: '85+' },
-              { label: '₹10,000 - ₹24,999', range: '10000-24999', count: '60+' },
-              { label: 'Above ₹25,000', range: 'above-25000', count: '40+' },
+              { label: 'Under ₹4,999', range: '999-4999', count: '120+', icon: Wallet, iconBg: '#DCEFE2', accent: '#3E9C73' },
+              { label: '₹5,000 - ₹9,999', range: '5000-9999', count: '85+', icon: Tag, iconBg: '#DDEAFB', accent: '#3D6FA8' },
+              { label: '₹10,000 - ₹24,999', range: '10000-24999', count: '60+', icon: ShoppingBag, iconBg: '#EAE0FA', accent: '#8856D6' },
+              { label: 'Above ₹25,000', range: 'above-25000', count: '40+', icon: Diamond, iconBg: '#F8EDCB', accent: '#A6790C' },
             ].map((b, i) => (
               <Link
                 key={i}
                 href={`/collections?price=${b.range}`}
-                className="luxury-card p-5 md:p-6 text-center"
+                className="luxury-card rounded-2xl p-5 md:p-7 text-center flex flex-col items-center"
               >
-                <div className="text-[10px] tracking-[2px] uppercase text-[#9a8c75] mb-2">
-                  Budget
+                <div
+                  className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-3 md:mb-4"
+                  style={{ backgroundColor: b.iconBg }}
+                >
+                  <b.icon size={24} style={{ color: b.accent }} />
                 </div>
-                <div className="serif text-lg md:text-xl text-[#1a1410] font-semibold mb-1">
+                <div
+                  className="flex items-center gap-2 text-[9px] md:text-[10px] tracking-[2px] uppercase font-semibold mb-2"
+                  style={{ color: b.accent }}
+                >
+                  <span className="h-px w-3 md:w-4 opacity-50" style={{ backgroundColor: b.accent }} />
+                  Budget
+                  <span className="h-px w-3 md:w-4 opacity-50" style={{ backgroundColor: b.accent }} />
+                </div>
+                <div className="serif text-base md:text-2xl text-[#1a1410] font-semibold mb-3">
                   {b.label}
                 </div>
-                <div className="text-[10px] text-[#b8893a] tracking-[1px]">
+                <div className="flex items-center gap-2 w-full mb-3">
+                  <span className="h-px flex-1 bg-[#b8893a]/25" />
+                  <span className="w-1.5 h-1.5 rotate-45 bg-[#b8893a] shrink-0" />
+                  <span className="h-px flex-1 bg-[#b8893a]/25" />
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] md:text-sm font-medium" style={{ color: b.accent }}>
+                  <Package size={14} />
                   {b.count} Products
                 </div>
               </Link>
