@@ -277,7 +277,7 @@ export default function HomePage() {
                   Budget
                   <span className="h-px w-3 md:w-4 opacity-50" style={{ backgroundColor: b.accent }} />
                 </div>
-                <div className="serif oldstyle-nums text-lg md:text-2xl text-[#1a1410] font-normal mb-3 whitespace-nowrap">
+                <div className="serif lining-nums text-lg md:text-2xl text-[#1a1410] font-normal mb-3 whitespace-nowrap">
                   {b.label}
                 </div>
                 <div className="flex items-center gap-2 w-full mb-3">
