@@ -254,7 +254,7 @@ export default function HomePage() {
               <Link
                 key={i}
                 href={`/collections?price=${b.range}`}
-                className="luxury-card rounded-2xl p-5 md:p-7 text-center flex flex-col items-center"
+                className="luxury-card rounded-2xl p-4 md:p-7 text-center flex flex-col items-center"
               >
                 <div
                   className="w-16 h-16 md:w-[72px] md:h-[72px] rounded-full flex items-center justify-center mb-3 md:mb-4"
@@ -273,7 +273,7 @@ export default function HomePage() {
                   Budget
                   <span className="h-px w-3 md:w-4 opacity-50" style={{ backgroundColor: b.accent }} />
                 </div>
-                <div className="serif text-base md:text-2xl text-[#1a1410] font-semibold mb-3">
+                <div className="serif text-lg md:text-2xl text-[#1a1410] font-semibold mb-3 whitespace-nowrap">
                   {b.label}
                 </div>
                 <div className="flex items-center gap-2 w-full mb-3">
