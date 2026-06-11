@@ -28,7 +28,6 @@ import {
   MessageCircle,
   Diamond,
   Gift,
-  Tag,
   ShoppingBag,
   Package,
 } from 'lucide-react';
@@ -53,6 +52,85 @@ function LeafBranch({ className }: { className?: string }) {
           <path d="M2 0 L 21 0" stroke="#d4a857" strokeWidth="0.9" />
         </g>
       ))}
+    </svg>
+  );
+}
+
+// Glossy 3D-style budget icons (green wallet, blue price tag, purple
+// shopping bag, gold diamond) to match the luxury reference design.
+function WalletIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-9 h-9 drop-shadow-[0_2px_3px_rgba(0,0,0,0.18)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="walletBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#62B488" />
+          <stop offset="100%" stopColor="#2C7A50" />
+        </linearGradient>
+      </defs>
+      <rect x="20" y="13" width="26" height="13" rx="2.5" fill="#FBEFD3" />
+      <rect x="22" y="16" width="22" height="2.4" rx="1.2" fill="#D8B873" />
+      <rect x="11" y="20" width="42" height="29" rx="6.5" fill="url(#walletBody)" />
+      <path d="M11 27 a6.5 6.5 0 0 1 6.5 -7 H53 v7 Z" fill="#FFFFFF" opacity="0.16" />
+      <rect x="11" y="33" width="42" height="2.6" fill="#000000" opacity="0.1" />
+      <circle cx="45" cy="38" r="4" fill="#FBEFD3" />
+      <circle cx="45" cy="38" r="1.7" fill="#2C7A50" />
+    </svg>
+  );
+}
+
+function TagIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-9 h-9 drop-shadow-[0_2px_3px_rgba(0,0,0,0.18)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="tagBody" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#5C92D4" />
+          <stop offset="100%" stopColor="#2B5790" />
+        </linearGradient>
+      </defs>
+      <path d="M15 17 Q24 11 31 19" stroke="#C9A24A" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <g transform="rotate(45 33 33)">
+        <rect x="21" y="21" width="24" height="24" rx="5.5" fill="url(#tagBody)" />
+        <rect x="21" y="21" width="24" height="9" rx="5.5" fill="#FFFFFF" opacity="0.15" />
+        <circle cx="27" cy="27" r="3" fill="#EAF1FB" />
+      </g>
+      <text x="33" y="41" textAnchor="middle" fontSize="17" fontWeight="700" fill="#FFFFFF" fontFamily="serif">₹</text>
+    </svg>
+  );
+}
+
+function BagIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-9 h-9 drop-shadow-[0_2px_3px_rgba(0,0,0,0.18)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="bagBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#9E72E2" />
+          <stop offset="100%" stopColor="#6B3CBD" />
+        </linearGradient>
+      </defs>
+      <path d="M23 23 a9 9 0 0 1 18 0" stroke="#C9A24A" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <path d="M19 22 H45 L48 47 a4 4 0 0 1 -4 4 H23 a4 4 0 0 1 -4 -4 Z" fill="url(#bagBody)" />
+      <path d="M19 22 H45 L45.7 28 H18.3 Z" fill="#FFFFFF" opacity="0.16" />
+      <rect x="24" y="29" width="4.5" height="17" rx="2.25" fill="#FFFFFF" opacity="0.18" />
+    </svg>
+  );
+}
+
+function GemIcon() {
+  return (
+    <svg viewBox="0 0 64 64" className="w-9 h-9 drop-shadow-[0_2px_3px_rgba(0,0,0,0.18)]" aria-hidden="true">
+      <defs>
+        <linearGradient id="gemBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F1D079" />
+          <stop offset="100%" stopColor="#C5942A" />
+        </linearGradient>
+      </defs>
+      <path d="M15 26 L22 15 H42 L49 26 L32 52 Z" fill="url(#gemBody)" />
+      <g stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="1.1">
+        <path d="M15 26 H49" />
+        <path d="M22 15 L27 26 L32 52" />
+        <path d="M42 15 L37 26 L32 52" />
+        <path d="M27 26 H37" />
+      </g>
     </svg>
   );
 }
@@ -168,10 +246,10 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-6">
             {[
-              { label: 'Under ₹4,999', range: '999-4999', count: '120+', icon: Wallet, iconBg: '#DCEFE2', accent: '#3E9C73' },
-              { label: '₹5,000 - ₹9,999', range: '5000-9999', count: '85+', icon: Tag, iconBg: '#DDEAFB', accent: '#3D6FA8' },
-              { label: '₹10,000 - ₹24,999', range: '10000-24999', count: '60+', icon: ShoppingBag, iconBg: '#EAE0FA', accent: '#8856D6' },
-              { label: 'Above ₹25,000', range: 'above-25000', count: '40+', icon: Diamond, iconBg: '#F8EDCB', accent: '#A6790C' },
+              { label: 'Under ₹4,999', range: '999-4999', count: '120+', Icon: WalletIcon, light: '#DCEFE2', deep: '#BFE1CE', accent: '#3E9C73' },
+              { label: '₹5,000 - ₹9,999', range: '5000-9999', count: '85+', Icon: TagIcon, light: '#DDEAFB', deep: '#C3D8F5', accent: '#3D6FA8' },
+              { label: '₹10,000 - ₹24,999', range: '10000-24999', count: '60+', Icon: BagIcon, light: '#EAE0FA', deep: '#D7C5F3', accent: '#8856D6' },
+              { label: 'Above ₹25,000', range: 'above-25000', count: '40+', Icon: GemIcon, light: '#F8EDCB', deep: '#EEDDA6', accent: '#A6790C' },
             ].map((b, i) => (
               <Link
                 key={i}
@@ -179,10 +257,13 @@ export default function HomePage() {
                 className="luxury-card rounded-2xl p-5 md:p-7 text-center flex flex-col items-center"
               >
                 <div
-                  className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-3 md:mb-4"
-                  style={{ backgroundColor: b.iconBg }}
+                  className="w-16 h-16 md:w-[72px] md:h-[72px] rounded-full flex items-center justify-center mb-3 md:mb-4"
+                  style={{
+                    background: `radial-gradient(circle at 34% 28%, ${b.light} 0%, ${b.deep} 100%)`,
+                    boxShadow: `inset 0 1px 2px rgba(255,255,255,0.7), inset 0 0 0 1px ${b.accent}33, 0 6px 14px ${b.accent}26`,
+                  }}
                 >
-                  <b.icon size={24} style={{ color: b.accent }} />
+                  <b.Icon />
                 </div>
                 <div
                   className="flex items-center gap-2 text-[9px] md:text-[10px] tracking-[2px] uppercase font-semibold mb-2"
