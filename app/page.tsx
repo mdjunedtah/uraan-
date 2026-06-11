@@ -299,10 +299,10 @@ export default function HomePage() {
       <Bestseller />
 
       {/* 8. RUDRAKSH FEATURE BLOCK (dark) */}
-      <section className="px-4 md:px-8 py-12">
-        <div className="max-w-7xl mx-auto bg-[#1a1410] text-[#e8d49b] py-12 px-6 md:px-12 text-center relative overflow-hidden">
+      <section className="px-4 md:px-8">
+        <div className="max-w-7xl mx-auto rounded-2xl bg-gradient-to-br from-[#3b2a17] via-[#2c1f11] to-[#1d140a] text-[#e8d49b] py-8 md:py-12 px-6 md:px-12 text-center relative overflow-hidden shadow-[0_14px_30px_rgba(43,31,18,0.28)]">
           <div
-            className="absolute inset-0 flex items-center justify-center text-[280px] md:text-[400px] text-[#b8893a] opacity-[0.04] font-serif leading-none"
+            className="absolute top-1/2 -translate-y-1/2 -right-6 md:right-6 text-[240px] md:text-[360px] text-[#c89043] opacity-[0.15] font-serif leading-none"
             aria-hidden="true"
           >
             ॐ
@@ -314,13 +314,13 @@ export default function HomePage() {
             <h2 className="serif text-4xl md:text-5xl text-white font-normal mb-4">
               Authentic <em className="text-[#d4a857]">Rudraksh</em>
             </h2>
-            <p className="text-xs md:text-sm text-[#e8d49b]/70 leading-relaxed max-w-md mx-auto mb-6">
+            <p className="text-sm md:text-base text-[#efe0bd]/85 leading-relaxed max-w-xs md:max-w-md mx-auto mb-6">
               Certified beads sourced from Nepal & Indonesia. From 1 Mukhi to 21 Mukhi —
               for prosperity, peace, and protection.
             </p>
             <Link
               href="/collections?type=rudraksh"
-              className="inline-flex items-center gap-2 px-7 py-3 border border-[#b8893a] text-[#d4a857] text-[10px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-[#d4a857]/80 text-[#e3b96b] text-[11px] md:text-xs tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
             >
               Explore Sacred Collection <ChevronRight size={12} />
             </Link>
@@ -329,8 +329,20 @@ export default function HomePage() {
       </section>
 
       {/* 9. TRENDING NOW (sale products) */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <p className="section-tag-italic">Most Loved This Season</p>
+      <section className="pt-6 pb-16 px-4 max-w-7xl mx-auto">
+        <div className="flex items-center justify-center gap-2.5 mb-1.5">
+          <span className="flex items-center gap-1.5" aria-hidden="true">
+            <span className="h-px w-7 md:w-10 bg-[#b8893a]/50" />
+            <span className="text-[#b8893a] text-[9px] leading-none">✦</span>
+            <span className="h-px w-3.5 md:w-5 bg-[#b8893a]/50" />
+          </span>
+          <p className="section-tag-italic !mb-0">Most Loved This Season</p>
+          <span className="flex items-center gap-1.5" aria-hidden="true">
+            <span className="h-px w-3.5 md:w-5 bg-[#b8893a]/50" />
+            <span className="text-[#b8893a] text-[9px] leading-none">✦</span>
+            <span className="h-px w-7 md:w-10 bg-[#b8893a]/50" />
+          </span>
+        </div>
         <h2 className="section-heading">Trending Now</h2>
         <div className="luxury-divider">
           <Sparkles size={10} />
