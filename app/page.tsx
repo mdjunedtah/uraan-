@@ -429,15 +429,15 @@ export default function HomePage() {
           <p className="text-center text-[13px] md:text-base text-[#3a2f24] mt-2 mb-8">
             Elevate your elegance with the perfect jewelry styling
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-7 md:gap-y-0 md:divide-x md:divide-[#e3d6bf]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[
               { Icon: StyleHairIcon, lead: 'Pair with sleek', rest: 'bun or open hair to highlight the earrings.' },
               { Icon: StyleNecklaceIcon, lead: 'Let the', rest: 'necklace be the statement piece.' },
               { Icon: StyleDrapeIcon, lead: 'Wear with', rest: 'sarees or draped outfits for a regal look.' },
               { Icon: StyleSparkleIcon, lead: 'Avoid heavy', rest: 'neckpieces — this set speaks for itself.' },
             ].map((t, i) => (
-              <div key={i} className="px-3 md:px-4 text-center">
-                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full bg-white border border-[#d4a857]/40 flex items-center justify-center mx-auto mb-2.5">
+              <div key={i} className="bg-white rounded-xl border border-[#e3d6bf] px-3 py-5 text-center">
+                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full bg-[#f9f3e8] border border-[#d4a857]/40 flex items-center justify-center mx-auto mb-2.5">
                   <t.Icon className="w-7 h-7 md:w-9 md:h-9 text-[#8e1f2f]" />
                 </div>
                 <p className="text-[12px] md:text-sm leading-snug text-[#3a2f24]">
