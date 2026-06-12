@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, Gem, Award, Heart, Star } from 'lucide-react';
+import { ChevronRight, Gem, Award, Heart, Star, Sparkles } from 'lucide-react';
 
 export default function About() {
   return (
@@ -51,11 +51,21 @@ export default function About() {
             { num: '500+', label: 'Unique Designs', icon: Gem },
             { num: '4.9★', label: 'Average Rating', icon: Star },
           ].map((s, i) => (
-            <div key={i} className="text-center bg-white p-5 border border-[rgba(184,137,58,0.18)]">
-              <s.icon className="text-[#b8893a] mx-auto mb-2" size={22} />
-              <div className="serif text-3xl text-[#1a1410] font-semibold">{s.num}</div>
-              <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mt-1">
+            <div key={i} className="text-center bg-white px-5 py-6 rounded-xl border border-[rgba(184,137,58,0.18)]">
+              <span className="relative inline-block mb-2">
+                <s.icon className="text-[#b8893a]" size={26} />
+                <Sparkles size={11} className="absolute -top-1.5 -right-3 text-[#d4a857]" />
+              </span>
+              <div className="serif lining-nums text-4xl md:text-[40px] text-[#b08430] font-semibold">
+                {s.num}
+              </div>
+              <div className="text-[10px] md:text-xs tracking-[1.5px] uppercase text-[#5f5546] mt-2">
                 {s.label}
+              </div>
+              <div className="flex items-center justify-center gap-1.5 mt-3 text-[#c9a24a]">
+                <span className="h-px w-6 bg-[#c9a24a]/60" />
+                <Heart size={8} fill="currentColor" />
+                <span className="h-px w-6 bg-[#c9a24a]/60" />
               </div>
             </div>
           ))}
