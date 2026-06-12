@@ -30,6 +30,9 @@ import {
   Gift,
   ShoppingBag,
   Package,
+  User,
+  Gem,
+  Shirt,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaYoutube, } from "react-icons/fa";
 
@@ -431,14 +434,14 @@ export default function HomePage() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[
-              { Icon: StyleHairIcon, lead: 'Pair with sleek', rest: 'bun or open hair to highlight the earrings.' },
-              { Icon: StyleNecklaceIcon, lead: 'Let the', rest: 'necklace be the statement piece.' },
-              { Icon: StyleDrapeIcon, lead: 'Wear with', rest: 'sarees or draped outfits for a regal look.' },
-              { Icon: StyleSparkleIcon, lead: 'Avoid heavy', rest: 'neckpieces — this set speaks for itself.' },
+              { Icon: User, lead: 'Pair with sleek', rest: 'bun or open hair to highlight the earrings.' },
+              { Icon: Gem, lead: 'Let the', rest: 'necklace be the statement piece.' },
+              { Icon: Shirt, lead: 'Wear with', rest: 'sarees or draped outfits for a regal look.' },
+              { Icon: Sparkles, lead: 'Avoid heavy', rest: 'neckpieces — this set speaks for itself.' },
             ].map((t, i) => (
               <div key={i} className="bg-white rounded-xl border border-[#e3d6bf] px-3 py-5 text-center">
                 <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full bg-[#f9f3e8] border border-[#d4a857]/40 flex items-center justify-center mx-auto mb-2.5">
-                  <t.Icon className="w-7 h-7 md:w-9 md:h-9 text-[#8e1f2f]" />
+                  <t.Icon className="w-6 h-6 md:w-8 md:h-8 text-[#8e1f2f]" strokeWidth={1.7} />
                 </div>
                 <p className="text-[12px] md:text-sm leading-snug text-[#3a2f24]">
                   <span className="text-[#8e1f2f] font-semibold">{t.lead}</span> {t.rest}
