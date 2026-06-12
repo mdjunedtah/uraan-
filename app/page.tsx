@@ -243,18 +243,13 @@ export default function HomePage() {
       {/* 4. SIGNATURE COLLECTION VIDEO */}
       <section className="relative">
         <div className="relative h-[560px] md:h-[680px] overflow-hidden bg-[#1a1410]">
-          {/* Static poster on mobile; autoplay video only from md up */}
-          <div
-            className="md:hidden absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: 'url(/videos/signature-collection-poster.jpg)' }}
-          />
           <video
             autoPlay
             loop
             muted
             playsInline
             poster="/videos/signature-collection-poster.jpg"
-            className="hidden md:block absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
           >
             <source src="/videos/signature-collection.mp4" type="video/mp4" />
           </video>
@@ -481,16 +476,22 @@ export default function HomePage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6">
           {[
-            { icon: CreditCard, title: 'Cards', desc: 'Visa, Mastercard, Rupay, Amex' },
-            { icon: Smartphone, title: 'UPI', desc: 'GPay, PhonePe, Paytm, BHIM' },
-            { icon: Wallet, title: 'Wallets', desc: 'Paytm, Amazon Pay, Mobikwik' },
-            { icon: Banknote, title: 'Net Banking & EMI', desc: 'All major banks + No-cost EMI' },
+            { icon: CreditCard, title: 'Cards', desc: 'Visa, Mastercard, Rupay, Amex', accent: '#1F5F8B', tint: '#DDEAFB' },
+            { icon: Smartphone, title: 'UPI', desc: 'GPay, PhonePe, Paytm, BHIM', accent: '#3E9C73', tint: '#DCEFE2' },
+            { icon: Wallet, title: 'Wallets', desc: 'Paytm, Amazon Pay, Mobikwik', accent: '#8856D6', tint: '#EAE0FA' },
+            { icon: Banknote, title: 'Net Banking & EMI', desc: 'All major banks + No-cost EMI', accent: '#A6790C', tint: '#F8EDCB' },
           ].map((p, i) => (
-            <div key={i} className="luxury-card p-5 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#f8f2e6] flex items-center justify-center">
-                <p.icon className="text-[#b8893a]" size={22} />
+            <div key={i} className="luxury-card rounded-2xl p-5 text-center">
+              <div
+                className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+                style={{
+                  background: `radial-gradient(circle at 34% 28%, #ffffff 0%, ${p.tint} 100%)`,
+                  boxShadow: `inset 0 0 0 1px ${p.accent}33, 0 4px 10px ${p.accent}22`,
+                }}
+              >
+                <p.icon size={22} style={{ color: p.accent }} />
               </div>
-              <div className="display text-sm tracking-[2px] uppercase text-[#1a1410] mb-2">
+              <div className="display text-sm tracking-[2px] uppercase mb-2" style={{ color: p.accent }}>
                 {p.title}
               </div>
               <div className="text-[11px] text-[#6b5d4c] leading-relaxed">{p.desc}</div>
@@ -499,18 +500,27 @@ export default function HomePage() {
         </div>
 
         {/* Payment Logos Strip */}
-        <div className="mt-8 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] py-5 px-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[#1a1410]">
-            {['VISA', 'Mastercard', 'RuPay', 'Amex', 'UPI', 'GPay', 'PhonePe', 'Paytm', 'Razorpay'].map(
-              (p, i) => (
-                <div
-                  key={i}
-                  className="display text-xs md:text-sm tracking-[2px] text-[#3a2f24] font-semibold opacity-70"
-                >
-                  {p}
-                </div>
-              )
-            )}
+        <div className="mt-8 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] rounded-xl py-5 px-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+            {[
+              ['VISA', '#1A1F71'],
+              ['Mastercard', '#EB001B'],
+              ['RuPay', '#2E7D32'],
+              ['Amex', '#006FCF'],
+              ['UPI', '#3D8B37'],
+              ['GPay', '#4285F4'],
+              ['PhonePe', '#5F259F'],
+              ['Paytm', '#00BAF2'],
+              ['Razorpay', '#3395FF'],
+            ].map(([name, color], i) => (
+              <div
+                key={i}
+                className="display text-xs md:text-sm tracking-[2px] font-semibold"
+                style={{ color }}
+              >
+                {name}
+              </div>
+            ))}
           </div>
           <div className="flex items-center justify-center gap-2 mt-4 text-[10px] text-[#9a8c75]">
             <Lock size={11} className="text-[#3d6b5a]" />

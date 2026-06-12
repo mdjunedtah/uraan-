@@ -93,12 +93,12 @@ export const reviews: Review[] = [
 ];
 
 export const instagramImages = [
-  '/images/insta1.jpg',
-  '/images/insta2.jpg',
-  '/images/insta3.jpg',
-  '/images/insta4.jpg',
-  '/images/insta1.jpg',
-  '/images/insta2.jpg',
+  '/images/gallery/lifestyle-1.jpg',
+  '/images/gallery/necklace-7.jpg',
+  '/images/gallery/lifestyle-2.jpg',
+  '/images/gallery/earrings-2.jpg',
+  '/images/gallery/lifestyle-3.jpg',
+  '/images/gallery/rudraksh-1.jpg',
 ];
 
 export const heroSlides = [
