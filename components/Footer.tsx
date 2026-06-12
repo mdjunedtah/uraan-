@@ -37,7 +37,7 @@ export default function Footer() {
               { icon: FaInstagram, href: 'https://instagram.com', label: 'Instagram' },
               { icon: FaFacebook, href: 'https://facebook.com', label: 'Facebook' },
               { icon: FaYoutube, href: 'https://youtube.com', label: 'YouTube' },
-              { icon: MessageCircle, href: 'https://wa.me/919810012345', label: 'WhatsApp' },
+              { icon: MessageCircle, href: 'https://wa.me/918851911653', label: 'WhatsApp' },
             ].map((s, i) => (
               <a
                 key={i}
@@ -88,16 +88,30 @@ export default function Footer() {
           <ul className="space-y-3 text-xs text-[#e8d49b]/70">
             <li className="flex items-start gap-2">
               <MapPin size={13} className="text-[#b8893a] flex-shrink-0 mt-0.5" />
-              <span>12, Jewellers Lane,<br />Zaveri Bazaar, Mumbai - 400003</span>
+              <span>
+                Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
+                Veer Singh Colony, Budh Vihar Phase-2,<br />
+                Rohini, North West Delhi, New Delhi – 110086
+              </span>
             </li>
             <li className="flex items-center gap-2">
               <Phone size={13} className="text-[#b8893a] flex-shrink-0" />
-              <a href="tel:+919810012345" className="hover:text-[#b8893a]">+91 98100 12345</a>
+              <a href="tel:+918851911653" className="hover:text-[#b8893a]">+91 88519 11653</a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Phone size={13} className="text-[#b8893a] flex-shrink-0" />
+              <a href="tel:+919811810235" className="hover:text-[#b8893a]">+91 98118 10235</a>
             </li>
             <li className="flex items-center gap-2">
               <Mail size={13} className="text-[#b8893a] flex-shrink-0" />
-              <a href="mailto:hello@omgauripulta.com" className="hover:text-[#b8893a] break-all">
-                hello@omgauripulta.com
+              <a href="mailto:info@omgpgems.com" className="hover:text-[#b8893a] break-all">
+                info@omgpgems.com
+              </a>
+            </li>
+            <li className="flex items-center gap-2">
+              <Mail size={13} className="text-[#b8893a] flex-shrink-0" />
+              <a href="mailto:jitendarsoni1975@gmail.com" className="hover:text-[#b8893a] break-all">
+                jitendarsoni1975@gmail.com
               </a>
             </li>
           </ul>

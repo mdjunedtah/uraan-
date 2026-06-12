@@ -47,9 +47,9 @@ export default function ContactPage() {
 
       <section className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-3 gap-5">
         {[
-          { icon: Phone, title: 'Call Us', primary: '+91 98100 12345', secondary: '+91 98100 12346', href: 'tel:+919810012345' },
-          { icon: Mail, title: 'Email Us', primary: 'hello@omgauripulta.com', secondary: 'support@omgauripulta.com', href: 'mailto:hello@omgauripulta.com' },
-          { icon: MapPin, title: 'Visit Us', primary: '12, Jewellers Lane', secondary: 'Zaveri Bazaar, Mumbai - 400003', href: '#find-us' },
+          { icon: Phone, title: 'Call Us', primary: '+91 88519 11653', secondary: '+91 98118 10235', href: 'tel:+918851911653' },
+          { icon: Mail, title: 'Email Us', primary: 'info@omgpgems.com', secondary: 'jitendarsoni1975@gmail.com', href: 'mailto:info@omgpgems.com' },
+          { icon: MapPin, title: 'Visit Us', primary: 'Plot No. G-6, Veer Singh Colony', secondary: 'Budh Vihar Phase-2, Rohini, New Delhi – 110086', href: '#find-us' },
         ].map((c, i) => (
           <a key={i} href={c.href} className="luxury-card p-5 text-center group">
             <div className="w-14 h-14 rounded-full bg-[#f8f2e6] mx-auto mb-3 grid place-items-center group-hover:bg-[#b8893a] transition-colors">
@@ -131,8 +131,9 @@ export default function ContactPage() {
                 <div>
                   <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-1">Address</div>
                   <div className="text-sm text-[#1a1410] leading-relaxed">
-                    12, Jewellers Lane, Near Mumbadevi Temple<br />
-                    Zaveri Bazaar, Mumbai - 400003
+                    Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
+                    Veer Singh Colony, Budh Vihar Phase-2,<br />
+                    Rohini, North West Delhi, New Delhi – 110086
                   </div>
                 </div>
               </div>
@@ -150,8 +151,12 @@ export default function ContactPage() {
                 <Phone className="text-[#b8893a] flex-shrink-0 mt-0.5" size={18} />
                 <div>
                   <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-1">Phone</div>
-                  <a href="tel:+919810012345" className="text-sm text-[#1a1410] hover:text-[#b8893a]">
-                    +91 98100 12345
+                  <a href="tel:+918851911653" className="text-sm text-[#1a1410] hover:text-[#b8893a]">
+                    +91 88519 11653
+                  </a>
+                  <span className="text-sm text-[#1a1410]"> · </span>
+                  <a href="tel:+919811810235" className="text-sm text-[#1a1410] hover:text-[#b8893a]">
+                    +91 98118 10235
                   </a>
                 </div>
               </div>
@@ -164,7 +169,7 @@ export default function ContactPage() {
                   { icon: FaInstagram, href: 'https://instagram.com', label: 'Instagram' },
                   { icon: FaFacebook, href: 'https://facebook.com', label: 'Facebook' },
                   { icon: FaYoutube, href: 'https://youtube.com', label: 'YouTube' },
-                  { icon: MessageCircle, href: 'https://wa.me/919810012345', label: 'WhatsApp' },
+                  { icon: MessageCircle, href: 'https://wa.me/918851911653', label: 'WhatsApp' },
                 ].map((s, i) => (
                   <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-10 h-10 rounded-full border border-[#b8893a]/40 grid place-items-center hover:bg-[#b8893a] hover:text-white transition-colors">
                     <s.icon size={16} className="text-[#b8893a]" />

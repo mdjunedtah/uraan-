@@ -12,6 +12,7 @@ import InstagramGallery from '@/components/InstagramGallery';
 import Newsletter from '@/components/Newsletter';
 import About from '@/components/About';
 import CartDrawer from '@/components/CartDrawer';
+import FloatingActions from '@/components/FloatingActions';
 import ProductCard from '@/components/ProductCard';
 import { getSaleProducts } from '@/lib/products';
 import {
@@ -210,6 +211,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       <CartDrawer />
+      <FloatingActions />
 
       {/* 1. HERO SLIDER */}
       <Hero />
