@@ -446,14 +446,14 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 max-w-xs md:max-w-md mx-auto rounded-2xl md:rounded-3xl overflow-hidden border-2 border-[#d4a857]/80 shadow-[0_12px_28px_rgba(58,42,24,0.18)]">
+          <div className="mt-8 max-w-xs md:max-w-md mx-auto">
             <img
               src="/images/style-model.jpg"
               alt="Model wearing traditional gold temple jewellery"
               width={960}
               height={1440}
               loading="lazy"
-              className="block w-full h-auto"
+              className="block w-full h-auto rounded-2xl md:rounded-3xl border-2 border-[#d4a857]/80"
             />
           </div>
         </div>
