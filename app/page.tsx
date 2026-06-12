@@ -416,7 +416,7 @@ export default function HomePage() {
       </section>
 
       {/* 10. HOW TO STYLE */}
-      <section className="pt-2 pb-10 px-4">
+      <section className="pt-10 pb-12 px-4 bg-[#f9f3e8]">
         <div className="max-w-5xl mx-auto">
           <FleurOrnament className="w-7 h-4 mx-auto text-[#c9a24a] mb-2" />
           <div className="flex items-center justify-center gap-3 md:gap-5">
@@ -429,7 +429,7 @@ export default function HomePage() {
           <p className="text-center text-[13px] md:text-base text-[#3a2f24] mt-2 mb-8">
             Elevate your elegance with the perfect jewelry styling
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-7 md:gap-y-0 md:divide-x md:divide-[#e8dcc8]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-7 md:gap-y-0 md:divide-x md:divide-[#e3d6bf]">
             {[
               { Icon: StyleHairIcon, lead: 'Pair with sleek', rest: 'bun or open hair to highlight the earrings.' },
               { Icon: StyleNecklaceIcon, lead: 'Let the', rest: 'necklace be the statement piece.' },
@@ -437,7 +437,7 @@ export default function HomePage() {
               { Icon: StyleSparkleIcon, lead: 'Avoid heavy', rest: 'neckpieces — this set speaks for itself.' },
             ].map((t, i) => (
               <div key={i} className="px-3 md:px-4 text-center">
-                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full bg-[#f6efe1] border border-[#8e1f2f]/15 flex items-center justify-center mx-auto mb-2.5">
+                <div className="w-14 h-14 md:w-[72px] md:h-[72px] rounded-full bg-white border border-[#d4a857]/40 flex items-center justify-center mx-auto mb-2.5">
                   <t.Icon className="w-7 h-7 md:w-9 md:h-9 text-[#8e1f2f]" />
                 </div>
                 <p className="text-[12px] md:text-sm leading-snug text-[#3a2f24]">
@@ -446,14 +446,14 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 max-w-xs md:max-w-md mx-auto">
+          <div className="mt-8 max-w-[280px] md:max-w-md mx-auto bg-white p-2 rounded-2xl border border-[#d4a857]/60">
             <img
               src="/images/style-model.jpg"
               alt="Model wearing traditional gold temple jewellery"
-              width={960}
-              height={1440}
+              width={760}
+              height={1140}
               loading="lazy"
-              className="block w-full h-auto rounded-2xl md:rounded-3xl border-2 border-[#d4a857]/80"
+              className="block w-full h-auto"
             />
           </div>
         </div>
