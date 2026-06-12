@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUp, HelpCircle } from 'lucide-react';
+import { ArrowUp, Headphones } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 export default function FloatingActions() {
@@ -16,14 +16,18 @@ export default function FloatingActions() {
   }, []);
 
   return (
-    <div className="fixed right-4 bottom-20 md:bottom-8 z-[150] flex flex-col items-center gap-3">
+    <>
+      {/* Standard support widget, bottom-left */}
       <Link
         href="/contact"
         aria-label="Help & Support"
-        className="w-11 h-11 rounded-full bg-[#b8893a] text-white grid place-items-center shadow-[0_4px_14px_rgba(0,0,0,0.25)]"
+        className="fixed left-4 bottom-20 md:bottom-8 z-[150] h-12 rounded-full bg-[#1a1410] text-[#e8d49b] border border-[#b8893a]/60 shadow-[0_4px_14px_rgba(0,0,0,0.3)] flex items-center gap-2 px-4"
       >
-        <HelpCircle size={22} />
+        <Headphones size={18} className="text-[#d4a857]" />
+        <span className="text-[10px] tracking-[2px] uppercase font-semibold">Help</span>
       </Link>
+
+      <div className="fixed right-4 bottom-20 md:bottom-8 z-[150] flex flex-col items-center gap-3">
       <a
         href="https://wa.me/918851911653"
         target="_blank"
@@ -42,6 +46,7 @@ export default function FloatingActions() {
           <ArrowUp size={22} />
         </button>
       )}
-    </div>
+      </div>
+    </>
   );
 }

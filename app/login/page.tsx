@@ -1,18 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
-import { Mail, Lock, Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ChevronRight, AlertCircle, ShieldCheck } from 'lucide-react';
+import { loginUser, getCurrentUser } from '@/lib/auth';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (getCurrentUser()) router.replace('/profile');
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Login functionality — connect to your backend / auth provider.');
+    setError('');
+    setLoading(true);
+    const res = await loginUser(form.email, form.password);
+    setLoading(false);
+    if (res.ok) {
+      router.push('/profile');
+    } else {
+      setError(res.error);
+    }
   };
 
   return (
@@ -81,12 +98,25 @@ export default function LoginPage() {
             <a href="#" className="text-[#b8893a] hover:underline">Forgot password?</a>
           </div>
 
+          {error && (
+            <div className="flex items-start gap-2 bg-[#b91c1c]/10 border border-[#b91c1c]/30 text-[#b91c1c] text-xs p-3 rounded">
+              <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 transition-all"
+            disabled={loading}
+            className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 transition-all disabled:opacity-60"
           >
-            Sign In <ChevronRight size={14} />
+            {loading ? 'Signing In…' : 'Sign In'} <ChevronRight size={14} />
           </button>
+
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#9a8c75]">
+            <ShieldCheck size={12} className="text-[#3d6b5a]" />
+            <span className="tracking-[1px] uppercase">Secure login · Password encrypted, never stored as text</span>
+          </div>
 
           <div className="relative my-2">
             <div className="absolute inset-0 flex items-center">

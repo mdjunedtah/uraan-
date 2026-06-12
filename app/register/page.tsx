@@ -1,29 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
-import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronRight, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { registerUser, getCurrentUser, passwordIssue, passwordStrength } from '@/lib/auth';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', password: '', confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (getCurrentUser()) router.replace('/profile');
+  }, [router]);
+
+  const strength = form.password ? passwordStrength(form.password) : null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    const issue = passwordIssue(form.password);
+    if (issue) {
+      setError(issue);
+      return;
+    }
     if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match.');
       return;
     }
     if (!agree) {
-      alert('Please agree to terms');
+      setError('Please agree to the Terms of Service and Privacy Policy.');
       return;
     }
-    alert('Registration — connect to your backend.');
+    setLoading(true);
+    const res = await registerUser(form);
+    setLoading(false);
+    if (res.ok) {
+      router.push('/profile');
+    } else {
+      setError(res.error);
+    }
   };
 
   return (
@@ -74,11 +98,27 @@ export default function RegisterPage() {
             <label className="luxury-label">Password</label>
             <div className="relative">
               <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type={showPassword ? 'text' : 'password'} required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="luxury-input pl-9 pr-10" placeholder="Min 6 characters" />
+              <input type={showPassword ? 'text' : 'password'} required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="luxury-input pl-9 pr-10" placeholder="Min 8 characters, letters + numbers" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label="Toggle" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a8c75]">
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
             </div>
+            {strength && (
+              <div className="mt-2">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span
+                      key={n}
+                      className="h-1 flex-1 rounded-full"
+                      style={{ backgroundColor: n <= strength.score ? strength.color : '#e8dcc8' }}
+                    />
+                  ))}
+                </div>
+                <div className="text-[10px] mt-1 font-semibold tracking-[1px] uppercase" style={{ color: strength.color }}>
+                  {strength.label} password
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -96,9 +136,21 @@ export default function RegisterPage() {
             </span>
           </label>
 
-          <button type="submit" className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2">
-            Create Account <ChevronRight size={14} />
+          {error && (
+            <div className="flex items-start gap-2 bg-[#b91c1c]/10 border border-[#b91c1c]/30 text-[#b91c1c] text-xs p-3 rounded">
+              <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <button type="submit" disabled={loading} className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 disabled:opacity-60">
+            {loading ? 'Creating Account…' : 'Create Account'} <ChevronRight size={14} />
           </button>
+
+          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#9a8c75]">
+            <ShieldCheck size={12} className="text-[#3d6b5a]" />
+            <span className="tracking-[1px] uppercase">Your password is encrypted before saving</span>
+          </div>
 
           <div className="bg-[#f8f2e6] p-3 text-xs text-[#6b5d4c] text-center">
             <CheckCircle2 size={14} className="text-[#3d6b5a] inline mr-1" />
