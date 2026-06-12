@@ -15,7 +15,11 @@ export default function AnnouncementBar() {
 
   return (
     <div className="bg-[#1a1410] text-[#e8d49b] py-2 overflow-hidden">
-      <div className="flex animate-scroll-x whitespace-nowrap">
+      {/* Static on mobile (continuous marquee overwhelms weak mobile GPUs) */}
+      <div className="md:hidden text-center text-[10px] tracking-[2px] uppercase font-medium px-4 truncate">
+        {messages[0]}
+      </div>
+      <div className="hidden md:flex animate-scroll-x whitespace-nowrap">
         <div className="flex items-center gap-12 px-6 text-[10px] tracking-[2px] uppercase font-medium">
           {allMessages.map((msg, i) => (
             <span key={i}>{msg}</span>

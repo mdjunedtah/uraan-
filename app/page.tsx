@@ -243,13 +243,18 @@ export default function HomePage() {
       {/* 4. SIGNATURE COLLECTION VIDEO */}
       <section className="relative">
         <div className="relative h-[560px] md:h-[680px] overflow-hidden bg-[#1a1410]">
+          {/* Static poster on mobile; autoplay video only from md up */}
+          <div
+            className="md:hidden absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/videos/signature-collection-poster.jpg)' }}
+          />
           <video
             autoPlay
             loop
             muted
             playsInline
             poster="/videos/signature-collection-poster.jpg"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="hidden md:block absolute inset-0 w-full h-full object-cover"
           >
             <source src="/videos/signature-collection.mp4" type="video/mp4" />
           </video>

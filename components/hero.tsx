@@ -21,7 +21,7 @@ export default function Hero() {
         <div
           key={idx}
           className={`absolute inset-0 transition-opacity duration-1000 ${
-            idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0 max-md:hidden'
           }`}
         >
           {/* Background */}
