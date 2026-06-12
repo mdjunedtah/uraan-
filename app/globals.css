@@ -148,3 +148,16 @@ textarea {
   background: #b8893a;
   opacity: 0.5;
 }
+/* Weak mobile GPUs smear continuously animated layers into static bands
+   and ghost trails while scrolling; run every animation and transition
+   instantly on phones so the compositor has zero ongoing work. */
+@media (max-width: 767px) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

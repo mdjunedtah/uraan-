@@ -5,6 +5,7 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import { reviews } from '@/data/jewelleryData';
+import { reviewAccent, initialsOf } from '@/lib/reviewStyle';
 import { Heart, Star, CheckCircle2 } from 'lucide-react';
 
 export default function ReviewsPage() {
@@ -45,13 +46,17 @@ export default function ReviewsPage() {
 
       <section className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {reviews.map((r) => (
+          {reviews.map((r, idx) => {
+            const accent = reviewAccent(idx);
+            return (
             <div
               key={r.id}
-              className="bg-white border border-[rgba(184,137,58,0.18)] p-5 md:p-6 relative hover:shadow-luxury hover:border-[rgba(184,137,58,0.32)] transition-all duration-300"
+              className="bg-white border border-[rgba(184,137,58,0.18)] rounded-xl p-5 md:p-6 relative hover:shadow-luxury hover:border-[rgba(184,137,58,0.32)] transition-all duration-300"
+              style={{ borderTop: `3px solid ${accent}` }}
             >
               <div
-                className="absolute top-2 right-4 serif text-6xl text-[#b8893a] opacity-15 leading-none pointer-events-none"
+                className="absolute top-2 right-4 serif text-6xl opacity-20 leading-none pointer-events-none"
+                style={{ color: accent }}
                 aria-hidden="true"
               >
                 &ldquo;
@@ -73,12 +78,14 @@ export default function ReviewsPage() {
 
               <div className="flex items-center gap-3 pt-4 border-t border-[rgba(184,137,58,0.18)]">
                 <div
-                  className="w-10 h-10 rounded-full bg-cover bg-center border border-[#b8893a] flex-shrink-0"
-                  style={{ backgroundImage: `url(${r.avatar})` }}
-                />
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0 border-2 border-[#e8d49b]"
+                  style={{ backgroundColor: accent }}
+                >
+                  {initialsOf(r.name)}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-[#1a1410]">{r.name}</div>
-                  <div className="text-[10px] text-[#9a8c75] tracking-[1px] uppercase mt-0.5">
+                  <div className="text-sm font-semibold" style={{ color: accent }}>{r.name}</div>
+                  <div className="text-[10px] text-[#b08430] tracking-[1px] uppercase mt-0.5">
                     {r.city} · {new Date(r.date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                   </div>
                 </div>
@@ -92,11 +99,12 @@ export default function ReviewsPage() {
 
               {r.product && (
                 <div className="mt-3 text-[10px] text-[#6b5d4c] tracking-[0.5px]">
-                  Purchased: <span className="text-[#b8893a]">{r.product}</span>
+                  Purchased: <span className="font-semibold" style={{ color: accent }}>{r.product}</span>
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="luxury-divider mt-12">
