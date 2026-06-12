@@ -20,7 +20,7 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-[100] grid grid-cols-5 bg-white/95 backdrop-blur-md border-t border-[rgba(184,137,58,0.18)]">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-[100] grid grid-cols-5 bg-white border-t border-[rgba(184,137,58,0.18)]">
       {items.map((item) => {
         const active =
           item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
