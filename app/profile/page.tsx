@@ -10,7 +10,7 @@ import {
   User, Package, Heart, MapPin, CreditCard, Settings,
   LogOut, ChevronRight, Edit2, Phone, Mail, ShoppingBag,
 } from 'lucide-react';
-import { getStatusColor } from '@/lib/orders';
+import { orders as allOrders, getStatusColor } from '@/lib/orders';
 import { getCurrentUser, logoutUser, type AuthUser } from '@/lib/auth';
 
 type Tab = 'overview' | 'orders' | 'addresses' | 'settings';
@@ -55,7 +55,8 @@ export default function ProfilePage() {
     totalSpent: 0,
   };
 
-  const userOrders: typeof import('@/lib/orders').orders = [];
+  // New accounts start with no order history.
+  const userOrders: typeof allOrders = [];
 
   return (
     <main className="min-h-screen bg-white">
