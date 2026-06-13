@@ -109,9 +109,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+            className="w-full text-white py-3.5 rounded-xl text-[12px] tracking-[3px] uppercase font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-60 shadow-[0_6px_18px_rgba(214,40,120,0.35)] bg-gradient-to-r from-[#f7941e] via-[#ec1c7d] to-[#9b1fb5] hover:brightness-105"
           >
-            {loading ? 'Signing In…' : 'Sign In'} <ChevronRight size={14} />
+            {loading ? 'Signing In…' : 'Sign In'} <ChevronRight size={16} />
           </button>
 
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#9a8c75]">
@@ -132,7 +132,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setSocialNotice('Google sign-in is being set up. Please continue with your email — it takes under a minute and you get 10% off your first order!')}
-              className="w-full py-3 border border-[rgba(184,137,58,0.32)] text-[11px] tracking-[1.5px] uppercase font-semibold hover:bg-[#f8f2e6] flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-white border border-[#dadce0] text-[#3c4043] text-[11px] tracking-[1.5px] uppercase font-semibold hover:bg-[#f8f9fa] shadow-sm flex items-center justify-center gap-2"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" />
@@ -145,9 +145,9 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setSocialNotice('Facebook sign-in is being set up. Please continue with your email — it takes under a minute!')}
-              className="w-full py-3 border border-[rgba(184,137,58,0.32)] text-[11px] tracking-[1.5px] uppercase font-semibold hover:bg-[#f8f2e6] flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-[#1877F2] text-white text-[11px] tracking-[1.5px] uppercase font-semibold hover:bg-[#0d65d9] shadow-sm flex items-center justify-center gap-2"
             >
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#1877F2" aria-hidden="true">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#FFFFFF" aria-hidden="true">
                 <path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z" />
               </svg>
               Continue with Facebook

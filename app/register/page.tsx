@@ -143,8 +143,8 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 disabled:opacity-60">
-            {loading ? 'Creating Account…' : 'Create Account'} <ChevronRight size={14} />
+          <button type="submit" disabled={loading} className="w-full text-white py-3.5 rounded-xl text-[12px] tracking-[3px] uppercase font-bold flex items-center justify-center gap-2 disabled:opacity-60 shadow-[0_6px_18px_rgba(214,40,120,0.35)] bg-gradient-to-r from-[#f7941e] via-[#ec1c7d] to-[#9b1fb5] hover:brightness-105">
+            {loading ? 'Creating Account…' : 'Create Account'} <ChevronRight size={16} />
           </button>
 
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#9a8c75]">
