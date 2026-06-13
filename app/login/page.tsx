@@ -65,7 +65,7 @@ export default function LoginPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="luxury-input pl-9"
+                className="luxury-input !pl-11"
                 placeholder="your@email.com"
               />
             </div>
@@ -80,7 +80,7 @@ export default function LoginPage() {
                 required
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="luxury-input pl-9 pr-10"
+                className="luxury-input !pl-11 !pr-11"
                 placeholder="Enter your password"
               />
               <button

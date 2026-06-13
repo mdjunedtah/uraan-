@@ -77,7 +77,7 @@ export default function RegisterPage() {
             <label className="luxury-label">Full Name</label>
             <div className="relative">
               <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="luxury-input pl-9" placeholder="Your name" />
+              <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="luxury-input !pl-11" placeholder="Your name" />
             </div>
           </div>
 
@@ -85,7 +85,7 @@ export default function RegisterPage() {
             <label className="luxury-label">Email</label>
             <div className="relative">
               <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="luxury-input pl-9" placeholder="your@email.com" />
+              <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="luxury-input !pl-11" placeholder="your@email.com" />
             </div>
           </div>
 
@@ -93,7 +93,7 @@ export default function RegisterPage() {
             <label className="luxury-label">Phone</label>
             <div className="relative">
               <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="luxury-input pl-9" placeholder="10 digit mobile" />
+              <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="luxury-input !pl-11" placeholder="10 digit mobile" />
             </div>
           </div>
 
@@ -101,7 +101,7 @@ export default function RegisterPage() {
             <label className="luxury-label">Password</label>
             <div className="relative">
               <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type={showPassword ? 'text' : 'password'} required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="luxury-input pl-9 pr-10" placeholder="Min 8 characters, letters + numbers" />
+              <input type={showPassword ? 'text' : 'password'} required minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="luxury-input !pl-11 !pr-11" placeholder="Min 8 characters, letters + numbers" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label="Toggle" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a8c75]">
                 {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
@@ -128,7 +128,7 @@ export default function RegisterPage() {
             <label className="luxury-label">Confirm Password</label>
             <div className="relative">
               <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type={showPassword ? 'text' : 'password'} required value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="luxury-input pl-9" placeholder="Re-enter password" />
+              <input type={showPassword ? 'text' : 'password'} required value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="luxury-input !pl-11" placeholder="Re-enter password" />
             </div>
           </div>
 
