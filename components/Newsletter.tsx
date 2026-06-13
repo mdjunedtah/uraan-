@@ -6,15 +6,36 @@ import { CheckCircle2 } from 'lucide-react';
 export default function Newsletter() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setTimeout(() => {
+    if (!email) return;
+    setError('');
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Newsletter Subscriber',
+          email,
+          message: 'Newsletter signup from homepage',
+          source: 'Newsletter Signup',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setSubmitted(true);
         setEmail('');
-        setSubmitted(false);
-      }, 3500);
+      } else {
+        setError(data.error || 'Could not subscribe. Please try again.');
+      }
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -35,25 +56,29 @@ export default function Newsletter() {
             <span className="text-sm font-medium">Thanks for subscribing! Check your email.</span>
           </div>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="flex border border-[#1a1410] bg-white max-w-md mx-auto"
-          >
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              className="flex-1 px-4 py-3 text-sm outline-none bg-transparent text-[#1a1410]"
-            />
-            <button
-              type="submit"
-              className="px-6 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] transition-colors"
+          <>
+            <form
+              onSubmit={handleSubmit}
+              className="flex border border-[#1a1410] bg-white max-w-md mx-auto"
             >
-              Subscribe
-            </button>
-          </form>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                className="flex-1 px-4 py-3 text-sm outline-none bg-transparent text-[#1a1410]"
+              />
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-6 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] transition-colors disabled:opacity-60"
+              >
+                {submitting ? '…' : 'Subscribe'}
+              </button>
+            </form>
+            {error && <p className="text-[#b91c1c] text-xs mt-3">{error}</p>}
+          </>
         )}
       </div>
     </section>

@@ -8,7 +8,7 @@ import CartDrawer from '@/components/CartDrawer';
 import {
   Phone, Mail, MapPin, Clock,
    MessageCircle,
-  Send, CheckCircle2,
+  Send, CheckCircle2, AlertCircle,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa";
 export default function ContactPage() {
@@ -16,14 +16,37 @@ export default function ContactPage() {
     name: '', email: '', phone: '', subject: '', message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setForm({ name: '', email: '', phone: '', subject: '', message: '' });
-      setSubmitted(false);
-    }, 4000);
+    setError('');
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          message: `${form.subject ? `[${form.subject}] ` : ''}${form.message}`,
+          source: 'Contact Page',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setSubmitted(true);
+        setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -112,8 +135,19 @@ export default function ContactPage() {
                 <label className="luxury-label">Message *</label>
                 <textarea required rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Tell us how we can help..." className="luxury-input" />
               </div>
-              <button type="submit" className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2">
-                <Send size={14} /> Send Message
+              {error && (
+                <div className="flex items-start gap-2 bg-[#b91c1c]/10 border border-[#b91c1c]/30 text-[#b91c1c] text-xs p-3 rounded">
+                  <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-[#1a1410] text-[#e8d49b] py-3 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                <Send size={14} /> {submitting ? 'Sending…' : 'Send Message'}
               </button>
             </form>
           )}
