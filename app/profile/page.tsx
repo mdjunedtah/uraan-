@@ -10,15 +10,23 @@ import {
   User, Package, Heart, MapPin, CreditCard, Settings,
   LogOut, ChevronRight, Edit2, Phone, Mail, ShoppingBag,
 } from 'lucide-react';
-import { orders as allOrders, getStatusColor } from '@/lib/orders';
 import { getCurrentUser, logoutUser, type AuthUser } from '@/lib/auth';
+import { getUserOrders, type StoredOrder } from '@/lib/userOrders';
 
 type Tab = 'overview' | 'orders' | 'addresses' | 'settings';
+
+function orderColor(status: string): string {
+  if (status === 'Delivered') return 'bg-[#3d6b5a]/15 text-[#3d6b5a]';
+  if (status === 'Shipped') return 'bg-[#3d6fa8]/15 text-[#3d6fa8]';
+  if (status === 'Cancelled') return 'bg-[#7a2e2e]/15 text-[#7a2e2e]';
+  return 'bg-[#b8893a]/15 text-[#b8893a]';
+}
 
 export default function ProfilePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [account, setAccount] = useState<AuthUser | null>(null);
+  const [userOrders, setUserOrders] = useState<StoredOrder[]>([]);
 
   // New customers must sign in before seeing the profile.
   useEffect(() => {
@@ -27,6 +35,7 @@ export default function ProfilePage() {
       router.replace('/login');
     } else {
       setAccount(u);
+      setUserOrders(getUserOrders());
     }
   }, [router]);
 
@@ -51,12 +60,9 @@ export default function ProfilePage() {
     email: account.email,
     phone: account.phone,
     memberSince: account.joinedOn,
-    totalOrders: 0,
-    totalSpent: 0,
+    totalOrders: userOrders.length,
+    totalSpent: userOrders.reduce((sum, o) => sum + o.amount, 0),
   };
-
-  // New accounts start with no order history.
-  const userOrders: typeof allOrders = [];
 
   return (
     <main className="min-h-screen bg-white">
@@ -190,7 +196,7 @@ export default function ProfilePage() {
                         </div>
                         <div className="text-right">
                           <div className="font-semibold text-[#1a1410] lining-nums">₹{o.amount.toLocaleString('en-IN')}</div>
-                          <span className={`inline-block mt-1 px-2 py-0.5 text-[9px] font-semibold ${getStatusColor(o.status)}`}>
+                          <span className={`inline-block mt-1 px-2 py-0.5 text-[9px] font-semibold ${orderColor(o.status)}`}>
                             {o.status}
                           </span>
                         </div>
@@ -223,7 +229,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="text-right">
                         <div className="font-semibold text-[#1a1410] lining-nums">₹{o.amount.toLocaleString('en-IN')}</div>
-                        <span className={`inline-block mt-1 px-2 py-0.5 text-[9px] font-semibold ${getStatusColor(o.status)}`}>
+                        <span className={`inline-block mt-1 px-2 py-0.5 text-[9px] font-semibold ${orderColor(o.status)}`}>
                           {o.status}
                         </span>
                       </div>

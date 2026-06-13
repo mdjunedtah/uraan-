@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { getCurrentUser } from '@/lib/auth';
+import { saveOrder } from '@/lib/userOrders';
 import {
   CreditCard, Smartphone, Wallet, Building2, Banknote,
   Lock, CheckCircle2, ShieldCheck, Truck, ChevronRight,
@@ -13,14 +16,27 @@ import {
 type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const { items, totalItems, totalPrice, clearCart } = useCart();
   const [step, setStep] = useState<'address' | 'payment' | 'success'>('address');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [orderId, setOrderId] = useState('');
+  const [authChecked, setAuthChecked] = useState(false);
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '',
   });
+
+  // Checkout requires an account so the order is tied to it; prefill from profile.
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user) {
+      router.replace('/login?next=/checkout');
+      return;
+    }
+    setForm((f) => ({ ...f, name: user.name, email: user.email, phone: user.phone }));
+    setAuthChecked(true);
+  }, [router]);
 
   const [cardForm, setCardForm] = useState({ number: '', name: '', expiry: '', cvv: '' });
   const [upiId, setUpiId] = useState('');
@@ -35,10 +51,33 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = () => {
     const id = 'OGP' + Date.now().toString().slice(-8);
+    const paymentLabel =
+      paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI' :
+      paymentMethod === 'card' ? 'Card' : paymentMethod === 'wallet' ? 'Wallet' : 'Net Banking';
+    saveOrder({
+      id,
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
+      amount: finalTotal,
+      payment: paymentLabel,
+      status: paymentMethod === 'cod' ? 'Processing' : 'Confirmed',
+      address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+    });
     setOrderId(id);
     setStep('success');
     clearCart();
   };
+
+  if (!authChecked && step !== 'success') {
+    return (
+      <main className="min-h-screen bg-white">
+        <Navbar />
+        <div className="py-32 text-center text-sm text-[#9a8c75] tracking-[2px] uppercase">
+          Loading checkout…
+        </div>
+      </main>
+    );
+  }
 
   if (items.length === 0 && step !== 'success') {
     return (
@@ -101,10 +140,10 @@ export default function CheckoutPage() {
           </p>
 
           <div className="flex gap-3 justify-center flex-wrap">
-            <Link href="/" className="px-7 py-3 border border-[#1a1410] text-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b]">
-              Back to Home
+            <Link href="/profile" className="px-7 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410]">
+              View My Orders
             </Link>
-            <Link href="/collections" className="px-7 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410]">
+            <Link href="/collections" className="px-7 py-3 border border-[#1a1410] text-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b]">
               Continue Shopping
             </Link>
           </div>

@@ -16,8 +16,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [socialNotice, setSocialNotice] = useState('');
 
+  const nextUrl = () =>
+    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('next')) || '/profile';
+
   useEffect(() => {
-    if (getCurrentUser()) router.replace('/profile');
+    if (getCurrentUser()) router.replace(nextUrl());
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +30,7 @@ export default function LoginPage() {
     const res = await loginUser(form.email, form.password);
     setLoading(false);
     if (res.ok) {
-      router.push('/profile');
+      router.push(nextUrl());
     } else {
       setError(res.error);
     }

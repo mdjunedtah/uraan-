@@ -18,8 +18,11 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const nextUrl = () =>
+    (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('next')) || '/profile';
+
   useEffect(() => {
-    if (getCurrentUser()) router.replace('/profile');
+    if (getCurrentUser()) router.replace(nextUrl());
   }, [router]);
 
   const strength = form.password ? passwordStrength(form.password) : null;
@@ -44,7 +47,7 @@ export default function RegisterPage() {
     const res = await registerUser(form);
     setLoading(false);
     if (res.ok) {
-      router.push('/profile');
+      router.push(nextUrl());
     } else {
       setError(res.error);
     }
