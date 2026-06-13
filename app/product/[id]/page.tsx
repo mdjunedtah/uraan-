@@ -114,11 +114,11 @@ export default function ProductDetailPage({
             </div>
 
             <div className="flex items-baseline gap-3 mb-5 pb-5 border-b border-[rgba(184,137,58,0.18)]">
-              <span className="serif text-3xl md:text-4xl text-[#1a1410] font-semibold">
+              <span className="serif lining-nums text-3xl md:text-4xl text-[#1a1410] font-semibold">
                 ₹{product.price.toLocaleString('en-IN')}
               </span>
               {product.oldPrice && (
-                <span className="text-base text-[#9a8c75] line-through">
+                <span className="lining-nums text-base text-[#9a8c75] line-through">
                   ₹{product.oldPrice.toLocaleString('en-IN')}
                 </span>
               )}

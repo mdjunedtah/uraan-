@@ -170,7 +170,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between items-baseline mb-5">
                   <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
-                  <span className="serif text-2xl text-[#1a1410] font-bold">
+                  <span className="serif lining-nums text-2xl text-[#1a1410] font-bold">
                     ₹{finalTotal.toLocaleString('en-IN')}
                   </span>
                 </div>

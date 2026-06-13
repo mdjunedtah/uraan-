@@ -250,6 +250,7 @@ export default function HomePage() {
             loop
             muted
             playsInline
+            preload="metadata"
             poster="/videos/signature-collection-poster.jpg"
             className="absolute inset-0 w-full h-full object-cover"
           >

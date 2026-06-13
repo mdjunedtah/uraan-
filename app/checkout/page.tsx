@@ -391,7 +391,7 @@ export default function CheckoutPage() {
 
               <div className="flex justify-between items-baseline pt-3 mt-3 border-t border-[rgba(184,137,58,0.18)]">
                 <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
-                <span className="serif text-2xl text-[#1a1410] font-bold">₹{finalTotal.toLocaleString('en-IN')}</span>
+                <span className="serif lining-nums text-2xl text-[#1a1410] font-bold">₹{finalTotal.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="mt-5 pt-4 border-t border-[rgba(184,137,58,0.18)] space-y-2 text-[10px] text-[#6b5d4c]">
