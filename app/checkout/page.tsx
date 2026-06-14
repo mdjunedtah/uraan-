@@ -71,43 +71,47 @@ export default function CheckoutPage() {
     paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI' :
     paymentMethod === 'card' ? 'Card' : paymentMethod === 'wallet' ? 'Wallet' : 'Net Banking';
 
-  // Saves the order (locally + to the database) and shows the success screen.
-  const placeOrder = (paymentId?: string) => {
-    const id = 'OGP' + Date.now().toString().slice(-8);
-    const label = paymentId ? `${paymentLabel()} · ${paymentId}` : paymentLabel();
-    const address = `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`;
-    const lineItems = items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image }));
-
+  // Save to the customer's own (browser) order history and show success.
+  const finishLocal = (id: string, label: string) => {
     saveOrder({
       id,
       date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-      items: lineItems,
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
       amount: finalTotal,
       payment: label,
-      status: paymentMethod === 'cod' ? 'Processing' : 'Confirmed',
-      address,
+      status: 'Processing',
+      address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
     });
-
-    // Persist to the store database (best-effort) so it shows in the admin
-    // orders list from any device. Falls back silently when the DB is off.
-    fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id, customer: form.name, email: form.email, phone: form.phone,
-        amount: finalTotal, items: lineItems, payment: label, status: 'Processing', address,
-      }),
-    }).catch(() => { /* offline / not configured — order is still saved locally */ });
-
     setOrderId(id);
     setStep('success');
     clearCart();
   };
 
+  const orderPayload = () => ({
+    customer: form.name,
+    email: form.email,
+    phone: form.phone,
+    amount: finalTotal,
+    items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
+    address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+  });
+
+  // COD / demo (no online payment): record the order directly as unpaid.
+  const placeDirect = () => {
+    const id = 'OGP' + Date.now().toString().slice(-8);
+    const label = paymentLabel();
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...orderPayload(), payment: label, status: 'Processing', paid: false }),
+    }).catch(() => { /* offline / not configured — saved locally */ });
+    finishLocal(id, label);
+  };
+
   const handlePlaceOrder = async () => {
     // COD, or no gateway configured → place the order directly.
     if (paymentMethod === 'cod' || !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
-      placeOrder();
+      placeDirect();
       return;
     }
     setProcessing(true);
@@ -120,7 +124,7 @@ export default function CheckoutPage() {
       const data = await res.json();
       // Server has no keys → fall back to a direct (demo) order.
       if (!data.ok || !data.configured) {
-        placeOrder();
+        placeDirect();
         return;
       }
       const loaded = await loadRazorpay();
@@ -143,11 +147,12 @@ export default function CheckoutPage() {
             const v = await fetch('/api/payment/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(response),
+              body: JSON.stringify({ ...response, order: { ...orderPayload(), payment: paymentLabel() } }),
             });
             const vd = await v.json();
             if (vd.ok && vd.valid) {
-              placeOrder(response.razorpay_payment_id);
+              const id = (vd.orderId as string) || ('OGP' + Date.now().toString().slice(-8));
+              finishLocal(id, `${paymentLabel()} · Paid`);
             } else {
               alert('Payment verify nahi ho paaya. Agar paisa kata hai to support se contact karein.');
               setProcessing(false);

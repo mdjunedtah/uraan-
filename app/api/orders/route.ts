@@ -49,6 +49,8 @@ export async function POST(request: Request) {
     payment: String(body.payment || '').trim() || undefined,
     status: String(body.status || 'Processing').trim(),
     address: String(body.address || '').trim() || undefined,
+    paid: Boolean(body.paid),
+    paymentId: String(body.paymentId || '').trim() || undefined,
   });
 
   if (!saved) {

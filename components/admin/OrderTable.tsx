@@ -40,7 +40,18 @@ export default function OrderTable({ orders, onView, onStatusChange }: OrderTabl
                 ₹{o.amount.toLocaleString('en-IN')}
               </td>
               <td className="py-3 px-4 text-[#6b5d4c]">{o.items}</td>
-              <td className="py-3 px-4 text-[#6b5d4c]">{o.payment}</td>
+              <td className="py-3 px-4 text-[#6b5d4c]">
+                <div>{o.payment}</div>
+                {o.paid !== undefined && (
+                  <span
+                    className={`inline-block mt-1 px-1.5 py-0.5 text-[9px] font-semibold tracking-[0.5px] ${
+                      o.paid ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-gray-500/10 text-gray-600'
+                    }`}
+                  >
+                    {o.paid ? 'PAID' : 'UNPAID'}
+                  </span>
+                )}
+              </td>
               <td className="py-3 px-4">
                 {onStatusChange ? (
                   <select

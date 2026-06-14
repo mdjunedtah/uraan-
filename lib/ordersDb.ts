@@ -18,6 +18,8 @@ type Row = {
   item_count: number;
   status: string;
   payment: string | null;
+  payment_id: string | null;
+  paid: boolean | null;
   address: string | null;
   created_at: string;
 };
@@ -39,6 +41,8 @@ function toOrder(r: Row): Order {
       year: 'numeric',
     }),
     address: r.address || undefined,
+    paid: Boolean(r.paid),
+    paymentId: r.payment_id || undefined,
   };
 }
 
@@ -63,6 +67,8 @@ export interface NewOrderInput {
   payment?: string;
   status?: string;
   address?: string;
+  paid?: boolean;
+  paymentId?: string;
 }
 
 export async function dbInsertOrder(input: NewOrderInput): Promise<boolean> {
@@ -78,6 +84,8 @@ export async function dbInsertOrder(input: NewOrderInput): Promise<boolean> {
     item_count: input.items.reduce((sum, i) => sum + i.quantity, 0),
     status: input.status || 'Processing',
     payment: input.payment || null,
+    payment_id: input.paymentId || null,
+    paid: input.paid ?? false,
     address: input.address || null,
   });
   if (error) {

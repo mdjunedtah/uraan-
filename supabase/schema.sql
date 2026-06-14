@@ -27,10 +27,15 @@ create table if not exists public.orders (
   item_count  integer not null default 0,
   status      text not null default 'Processing',
   payment     text,
+  payment_id  text,                              -- Razorpay payment id (if paid online)
+  paid        boolean not null default false,
   address     text,
   created_at  timestamptz not null default now()
 );
 create index if not exists orders_created_at_idx on public.orders (created_at desc);
+-- If you ran an earlier version of this file, add the new columns with:
+--   alter table public.orders add column if not exists payment_id text;
+--   alter table public.orders add column if not exists paid boolean not null default false;
 
 -- ── Products (for the upcoming catalogue migration) ────────────────────
 create table if not exists public.products (
