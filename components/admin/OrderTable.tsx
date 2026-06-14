@@ -1,16 +1,18 @@
 'use client';
 
 import { Eye, Truck, MessageCircle } from 'lucide-react';
-import { Order, getStatusColor } from '@/lib/orders';
+import { Order, OrderStatus, getStatusColor } from '@/lib/orders';
 import { whatsappLink, orderUpdateMessage } from '@/lib/whatsapp';
+
+const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 type OrderTableProps = {
   orders: Order[];
   onView?: (id: string) => void;
-  
+  onStatusChange?: (id: string, status: OrderStatus) => void;
 };
 
-export default function OrderTable({ orders, onView }: OrderTableProps) {
+export default function OrderTable({ orders, onView, onStatusChange }: OrderTableProps) {
   return (
     <div className="bg-white border border-[rgba(184,137,58,0.18)] overflow-x-auto">
       <table className="w-full text-sm">
@@ -40,9 +42,21 @@ export default function OrderTable({ orders, onView }: OrderTableProps) {
               <td className="py-3 px-4 text-[#6b5d4c]">{o.items}</td>
               <td className="py-3 px-4 text-[#6b5d4c]">{o.payment}</td>
               <td className="py-3 px-4">
-                <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold ${getStatusColor(o.status)}`}>
-                  {o.status}
-                </span>
+                {onStatusChange ? (
+                  <select
+                    value={o.status}
+                    onChange={(e) => onStatusChange(o.id, e.target.value as OrderStatus)}
+                    className={`text-[11px] font-semibold px-2 py-1 outline-none cursor-pointer border-0 ${getStatusColor(o.status)}`}
+                  >
+                    {ORDER_STATUSES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold ${getStatusColor(o.status)}`}>
+                    {o.status}
+                  </span>
+                )}
               </td>
               <td className="py-3 px-4 text-xs text-[#6b5d4c]">{o.date}</td>
               <td className="py-3 px-4">

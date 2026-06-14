@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import OrderTable from '@/components/admin/OrderTable';
-import { orders as demoOrders, type Order } from '@/lib/orders';
+import { orders as demoOrders, type Order, type OrderStatus } from '@/lib/orders';
 import { Search, Database, HardDrive } from 'lucide-react';
 
 export default function AdminOrdersPage() {
@@ -42,6 +42,17 @@ export default function AdminOrdersPage() {
 
   const handleView = (id: string) => {
     alert(`Viewing order: ${id}`);
+  };
+
+  const handleStatusChange = async (id: string, status: OrderStatus) => {
+    setData((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    if (configured) {
+      await fetch(`/api/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+    }
   };
 
   return (
@@ -113,7 +124,7 @@ export default function AdminOrdersPage() {
         </select>
       </div>
 
-      <OrderTable orders={filtered} onView={handleView} />
+      <OrderTable orders={filtered} onView={handleView} onStatusChange={handleStatusChange} />
     </div>
   );
 }

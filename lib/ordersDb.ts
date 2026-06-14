@@ -86,3 +86,14 @@ export async function dbInsertOrder(input: NewOrderInput): Promise<boolean> {
   }
   return true;
 }
+
+export async function dbUpdateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+  const { error } = await sb.from('orders').update({ status }).eq('id', id);
+  if (error) {
+    console.error('[ordersDb] status:', error.message);
+    return false;
+  }
+  return true;
+}

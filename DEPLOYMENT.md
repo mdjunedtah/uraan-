@@ -65,9 +65,29 @@ data.
 After that, any product you **add / edit / delete** in the admin shows on the
 live website for all visitors.
 
+**Product image uploads:** in Supabase → **Storage**, click **New bucket**, name
+it exactly `product-images`, and tick **Public**. Now the **Upload** button on
+the product form works.
+
 ---
 
-## 4. WhatsApp
+## 4. Payments (Razorpay) — take real money
+
+Real card / UPI / netbanking / wallet payments at checkout.
+
+1. Create an account at **https://razorpay.com** and complete the KYC.
+2. **Dashboard → Settings → API Keys → Generate Key.**
+3. Add to Vercel env vars and **Redeploy**:
+   - **Key Id** → `NEXT_PUBLIC_RAZORPAY_KEY_ID`
+   - **Key Secret** → `RAZORPAY_KEY_SECRET`
+
+Payments are verified server-side, so only genuine payments confirm an order.
+Until these keys are set, checkout still works but places the order **without**
+taking an online payment (handy for testing and Cash-on-Delivery).
+
+---
+
+## 5. WhatsApp
 
 - **Chat button (works now):** set `NEXT_PUBLIC_WHATSAPP_NUMBER` to your number
   in international format, digits only (e.g. `9188519XXXXX`). All "Chat on
@@ -80,7 +100,7 @@ live website for all visitors.
 
 ---
 
-## 5. CRM (HubSpot, optional)
+## 6. CRM (HubSpot, optional)
 
 Website enquiries already save to your Supabase database (step 3) and show in
 **CRM / Leads**. To *also* push them to HubSpot, set `HUBSPOT_PORTAL_ID` and
@@ -88,7 +108,7 @@ Website enquiries already save to your Supabase database (step 3) and show in
 
 ---
 
-## 6. Instagram feed (optional)
+## 7. Instagram feed (optional)
 
 Set `INSTAGRAM_ACCESS_TOKEN` to show your live Instagram grid on the homepage,
 and `NEXT_PUBLIC_INSTAGRAM_URL` for the "Follow" button.
@@ -100,6 +120,9 @@ and `NEXT_PUBLIC_INSTAGRAM_URL` for the "Follow" button.
 - [ ] Deployed on Vercel
 - [ ] Changed `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET`
 - [ ] Ran `supabase/schema.sql` and added `SUPABASE_*` keys
+- [ ] Created the public `product-images` Storage bucket
+- [ ] Imported the catalogue (Admin → Products → Import)
+- [ ] Added Razorpay keys (`NEXT_PUBLIC_RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`)
 - [ ] Set `NEXT_PUBLIC_WHATSAPP_NUMBER`
 - [ ] (optional) WhatsApp Cloud API, HubSpot, Instagram keys
 

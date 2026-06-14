@@ -1,0 +1,70 @@
+// Server-side Razorpay helpers. Creates payment orders and verifies the
+// signature returned by Razorpay Checkout. Like the other integrations here it
+// degrades gracefully: when keys are missing, isRazorpayConfigured() is false
+// and checkout falls back to placing the order without an online payment.
+//
+// Env vars (Vercel → Settings → Environment Variables):
+//   NEXT_PUBLIC_RAZORPAY_KEY_ID  — Razorpay Key Id (safe in the browser)
+//   RAZORPAY_KEY_SECRET          — Razorpay Key Secret (server only!)
+// Get them from https://dashboard.razorpay.com → Settings → API Keys.
+
+import crypto from 'crypto';
+
+export function razorpayKeyId(): string | undefined {
+  return process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+}
+
+export function isRazorpayConfigured(): boolean {
+  return Boolean(razorpayKeyId() && process.env.RAZORPAY_KEY_SECRET);
+}
+
+export interface RazorpayOrder {
+  id: string;
+  amount: number;
+  currency: string;
+}
+
+export async function createRazorpayOrder(
+  amountPaise: number,
+  receipt: string
+): Promise<RazorpayOrder | null> {
+  const keyId = razorpayKeyId();
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !secret) return null;
+
+  try {
+    const res = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${keyId}:${secret}`).toString('base64'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount: amountPaise, currency: 'INR', receipt }),
+    });
+    if (!res.ok) {
+      console.error('[razorpay] create order failed:', res.status, await res.text());
+      return null;
+    }
+    return (await res.json()) as RazorpayOrder;
+  } catch (err) {
+    console.error('[razorpay] create order error:', err);
+    return null;
+  }
+}
+
+export function verifyRazorpaySignature(
+  orderId: string,
+  paymentId: string,
+  signature: string
+): boolean {
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) return false;
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${orderId}|${paymentId}`)
+    .digest('hex');
+  // Constant-time comparison.
+  const a = Buffer.from(expected);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
