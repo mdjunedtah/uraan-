@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { whatsappLink } from '@/lib/whatsapp';
 import {
   Phone,
   Mail,
@@ -37,7 +38,7 @@ export default function Footer() {
               { icon: FaInstagram, href: 'https://instagram.com', label: 'Instagram' },
               { icon: FaFacebook, href: 'https://facebook.com', label: 'Facebook' },
               { icon: FaYoutube, href: 'https://youtube.com', label: 'YouTube' },
-              { icon: MessageCircle, href: 'https://wa.me/918851911653', label: 'WhatsApp' },
+              { icon: MessageCircle, href: whatsappLink(), label: 'WhatsApp' },
             ].map((s, i) => (
               <a
                 key={i}

@@ -13,6 +13,7 @@ import Newsletter from '@/components/Newsletter';
 import About from '@/components/About';
 import CartDrawer from '@/components/CartDrawer';
 import FloatingActions from '@/components/FloatingActions';
+import { whatsappLink } from '@/lib/whatsapp';
 import ProductCard from '@/components/ProductCard';
 import { getSaleProducts } from '@/lib/products';
 import {
@@ -547,7 +548,7 @@ export default function HomePage() {
             { icon: FaInstagram, label: 'Instagram', href: 'https://instagram.com' },
             { icon: FaFacebook, label: 'Facebook', href: 'https://facebook.com' },
             { icon: FaYoutube, label: 'YouTube', href: 'https://youtube.com' },
-            { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/919876543210' },
+            { icon: MessageCircle, label: 'WhatsApp', href: whatsappLink() },
           ].map((s, i) => (
             <a
               key={i}

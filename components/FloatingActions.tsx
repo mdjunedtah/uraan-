@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowUp, Headphones } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import { whatsappLink } from '@/lib/whatsapp';
 
 export default function FloatingActions() {
   const [showTop, setShowTop] = useState(false);
@@ -29,7 +30,7 @@ export default function FloatingActions() {
 
       <div className="fixed right-4 bottom-20 md:bottom-8 z-[150] flex flex-col items-center gap-3">
       <a
-        href="https://wa.me/918851911653"
+        href={whatsappLink()}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"

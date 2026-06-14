@@ -11,6 +11,8 @@ import {
   Send, CheckCircle2, AlertCircle,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa";
+import { addLead } from '@/lib/leads';
+import { whatsappLink } from '@/lib/whatsapp';
 export default function ContactPage() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', subject: '', message: '',
@@ -37,6 +39,16 @@ export default function ContactPage() {
       });
       const data = await res.json();
       if (res.ok && data.ok) {
+        // Also record in the in-app CRM so it shows in the admin pipeline.
+        try {
+          addLead({
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            message: `${form.subject ? `[${form.subject}] ` : ''}${form.message}`,
+            source: 'Contact Page',
+          });
+        } catch { /* CRM is best-effort; never block the user */ }
         setSubmitted(true);
         setForm({ name: '', email: '', phone: '', subject: '', message: '' });
       } else {
@@ -203,7 +215,7 @@ export default function ContactPage() {
                   { icon: FaInstagram, href: 'https://instagram.com', label: 'Instagram' },
                   { icon: FaFacebook, href: 'https://facebook.com', label: 'Facebook' },
                   { icon: FaYoutube, href: 'https://youtube.com', label: 'YouTube' },
-                  { icon: MessageCircle, href: 'https://wa.me/918851911653', label: 'WhatsApp' },
+                  { icon: MessageCircle, href: whatsappLink(), label: 'WhatsApp' },
                 ].map((s, i) => (
                   <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-10 h-10 rounded-full border border-[#b8893a]/40 grid place-items-center hover:bg-[#b8893a] hover:text-white transition-colors">
                     <s.icon size={16} className="text-[#b8893a]" />

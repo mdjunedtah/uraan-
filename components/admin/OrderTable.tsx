@@ -1,7 +1,8 @@
 'use client';
 
-import { Eye, Truck } from 'lucide-react';
+import { Eye, Truck, MessageCircle } from 'lucide-react';
 import { Order, getStatusColor } from '@/lib/orders';
+import { whatsappLink, orderUpdateMessage } from '@/lib/whatsapp';
 
 type OrderTableProps = {
   orders: Order[];
@@ -44,14 +45,26 @@ export default function OrderTable({ orders, onView }: OrderTableProps) {
                 </span>
               </td>
               <td className="py-3 px-4 text-xs text-[#6b5d4c]">{o.date}</td>
-              <td className="py-3 px-4 text-right">
-                <button
-                  onClick={() => onView && onView(o.id)}
-                  aria-label="View order"
-                  className="text-[#6b5d4c] hover:text-[#b8893a]"
-                >
-                  <Eye size={14} />
-                </button>
+              <td className="py-3 px-4">
+                <div className="flex items-center justify-end gap-3">
+                  <a
+                    href={whatsappLink(orderUpdateMessage(o), o.phone)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Send order update on WhatsApp"
+                    title="Send order update on WhatsApp"
+                    className="text-[#16796F] hover:opacity-70"
+                  >
+                    <MessageCircle size={15} />
+                  </a>
+                  <button
+                    onClick={() => onView && onView(o.id)}
+                    aria-label="View order"
+                    className="text-[#6b5d4c] hover:text-[#b8893a]"
+                  >
+                    <Eye size={14} />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

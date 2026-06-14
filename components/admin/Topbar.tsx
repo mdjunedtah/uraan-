@@ -1,20 +1,31 @@
 'use client';
 
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, Menu } from 'lucide-react';
 
-export default function Topbar() {
+type TopbarProps = {
+  onMenuClick?: () => void;
+};
+
+export default function Topbar({ onMenuClick }: TopbarProps) {
   return (
-    <header className="bg-white border-b border-[rgba(184,137,58,0.18)] py-3 px-6 flex items-center justify-between flex-shrink-0">
-      <div className="flex items-center gap-3 flex-1 max-w-md">
-        <Search size={14} className="text-[#9a8c75]" />
+    <header className="bg-white border-b border-[rgba(184,137,58,0.18)] py-3 px-4 md:px-6 flex items-center justify-between gap-3 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-md min-w-0">
+        <button
+          onClick={onMenuClick}
+          aria-label="Open menu"
+          className="lg:hidden w-9 h-9 -ml-1 rounded-full grid place-items-center hover:bg-[#fbf8f1] text-[#1a1410] flex-shrink-0"
+        >
+          <Menu size={20} />
+        </button>
+        <Search size={14} className="text-[#9a8c75] flex-shrink-0" />
         <input
           type="text"
           placeholder="Search anything..."
-          className="flex-1 bg-transparent outline-none text-sm"
+          className="flex-1 bg-transparent outline-none text-sm min-w-0"
         />
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-shrink-0">
         <button aria-label="Notifications" className="relative w-9 h-9 rounded-full grid place-items-center hover:bg-[#fbf8f1]">
           <Bell size={16} />
           <span className="absolute top-1 right-1 w-2 h-2 bg-[#7a2e2e] rounded-full" />
