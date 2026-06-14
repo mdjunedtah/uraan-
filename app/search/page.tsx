@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
 import { searchProducts } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import { Search, X } from 'lucide-react';
 
 function SearchContent() {
@@ -16,7 +17,8 @@ function SearchContent() {
   const initialQuery = searchParams.get('q') || '';
 
   const [query, setQuery] = useState(initialQuery);
-  const results = initialQuery ? searchProducts(initialQuery) : [];
+  const { products: list } = useProducts();
+  const results = initialQuery ? searchProducts(initialQuery, list) : [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductForm from '@/components/admin/ProductForm';
 import { getProductById } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import { ChevronRight } from 'lucide-react';
 
 export default function EditProductPage({
@@ -12,9 +13,19 @@ export default function EditProductPage({
   params: { id: string };
 }) {
   const { id } = params;
-  const product = getProductById(id);
+  const { products: list, loaded } = useProducts();
+  const product = getProductById(id, list);
 
-  if (!product) notFound();
+  if (!product) {
+    if (!loaded) {
+      return (
+        <div className="py-20 text-center text-sm text-[#9a8c75] tracking-[2px] uppercase">
+          Loading…
+        </div>
+      );
+    }
+    notFound();
+  }
 
   return (
     <div>

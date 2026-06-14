@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { Award, ChevronRight } from 'lucide-react';
 import { getBestsellers } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import ProductCard from './ProductCard';
 
 export default function Bestseller() {
-  const bestsellers = getBestsellers(8);
+  const { products: list } = useProducts();
+  const bestsellers = getBestsellers(8, list);
 
   return (
     <section className="pt-16 pb-6 px-4 max-w-7xl mx-auto">

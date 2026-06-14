@@ -16,6 +16,7 @@ import FloatingActions from '@/components/FloatingActions';
 import { whatsappLink } from '@/lib/whatsapp';
 import ProductCard from '@/components/ProductCard';
 import { getSaleProducts } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import {
   Truck,
   ShieldCheck,
@@ -206,7 +207,8 @@ function StyleSparkleIcon({ className }: { className?: string }) {
 }
 
 export default function HomePage() {
-  const trending = getSaleProducts(6);
+  const { products: list } = useProducts();
+  const trending = getSaleProducts(6, list);
 
   return (
     <main className="min-h-screen bg-white">

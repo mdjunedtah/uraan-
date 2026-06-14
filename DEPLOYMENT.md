@@ -56,9 +56,14 @@ device.
      `SUPABASE_SERVICE_ROLE_KEY`
 4. Add both to Vercel env vars and **Redeploy**.
 
-Now the admin **Orders** and **CRM / Leads** pages show a green **“Database”**
-badge and store live data. Without it, they show sample data with a **“This
-browser”** badge.
+Now the admin **Orders**, **CRM / Leads** and **Products** pages show a green
+**“Database”** badge and store live data. Without it, they show sample/bundled
+data.
+
+**Load your catalogue:** open **Admin → Products**. The first time, click
+**“Import catalogue”** to copy the bundled demo products into your database.
+After that, any product you **add / edit / delete** in the admin shows on the
+live website for all visitors.
 
 ---
 
@@ -100,7 +105,7 @@ and `NEXT_PUBLIC_INSTAGRAM_URL` for the "Follow" button.
 
 All variable names and hints live in [`.env.example`](./.env.example).
 
-> **Note on the product catalogue:** products currently come from the bundled
-> catalogue file. Moving the catalogue into the database (so product edits in
-> the admin show for all visitors) is the next planned step — the `products`
-> table is already included in `supabase/schema.sql`.
+> **Product catalogue:** with the database connected and the catalogue imported
+> (step 3), products are fully managed from **Admin → Products** — add, edit and
+> delete show on the live site for everyone. Until then the site serves the
+> bundled demo catalogue so it's never empty.

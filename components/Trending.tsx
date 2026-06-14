@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { Sparkles, ChevronRight } from 'lucide-react';
 import { getNewArrivals } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import ProductCard from './ProductCard';
 
 export default function Trending() {
-  const trending = getNewArrivals(8);
+  const { products: list } = useProducts();
+  const trending = getNewArrivals(8, list);
 
   return (
     <section className="py-16 px-4 max-w-7xl mx-auto">

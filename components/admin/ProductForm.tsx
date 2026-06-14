@@ -30,14 +30,28 @@ export default function ProductForm({ initialProduct, mode = 'add' }: ProductFor
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    // In a real app, send this to your API
-    setTimeout(() => {
-      alert(`Product ${mode === 'add' ? 'added' : 'updated'} successfully!`);
-      router.push('/admin/products');
-    }, 800);
+    try {
+      const url = mode === 'add' ? '/api/products' : `/api/products/${initialProduct?.id}`;
+      const res = await fetch(url, {
+        method: mode === 'add' ? 'POST' : 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        router.push('/admin/products');
+        router.refresh();
+      } else {
+        alert(data.error || 'Could not save. Connect a database (Supabase) — see DEPLOYMENT.md.');
+        setSubmitted(false);
+      }
+    } catch {
+      alert('Network error. Please try again.');
+      setSubmitted(false);
+    }
   };
 
   return (
