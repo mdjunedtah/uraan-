@@ -1,11 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/admin/Sidebar';
 import Topbar from '@/components/admin/Topbar';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // The login page is rendered without the admin chrome (sidebar/topbar).
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex bg-[#fbf8f1] min-h-screen">

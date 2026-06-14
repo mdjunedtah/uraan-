@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
   Grid3x3, Image as ImageIcon, Star, Ticket, Settings, UserCog, LogOut, Gem,
-  Contact, X,
+  Contact, X, Home,
 } from 'lucide-react';
 
 const menuItems = [
@@ -30,6 +30,18 @@ type SidebarProps = {
 
 export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch {
+      /* ignore — we redirect regardless */
+    }
+    onClose?.();
+    router.push('/admin/login');
+    router.refresh();
+  };
 
   return (
     <>
@@ -93,14 +105,21 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
           })}
         </nav>
 
-        <div className="border-t border-[#b8893a]/20 p-4">
+        <div className="border-t border-[#b8893a]/20 p-4 space-y-1">
           <Link
             href="/"
             className="flex items-center gap-3 px-3 py-2 text-xs text-[#e8d49b]/70 hover:text-[#b8893a]"
           >
-            <LogOut size={14} />
+            <Home size={14} />
             <span>Back to Store</span>
           </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[#e8d49b]/70 hover:text-[#7a2e2e]"
+          >
+            <LogOut size={14} />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
     </>
