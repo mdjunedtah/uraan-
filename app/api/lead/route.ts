@@ -28,21 +28,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Please enter a valid phone number.' }, { status: 400 });
   }
 
-  const result = await submitLead({ name, email, phone, message, source });
-
-  if (!result.ok) {
-    return NextResponse.json(
-      { ok: false, error: result.error || 'Something went wrong. Please try again.' },
-      { status: 502 }
-    );
-  }
-
-  // Also store in our own database (best-effort) so the lead shows in the
-  // admin CRM even if HubSpot isn't configured.
+  // Save to our own database first (primary store, so nothing is ever lost).
   try {
     await dbInsertLead({ name, email, phone, message, source });
   } catch (err) {
     console.error('[lead] db insert failed:', err);
+  }
+
+  // Push to HubSpot (best-effort): a CRM hiccup must not fail the visitor's
+  // form — the lead is already saved above and any error is logged server-side.
+  const result = await submitLead({ name, email, phone, message, source });
+  if (!result.ok) {
+    console.error('[lead] HubSpot push failed:', result.error);
   }
 
   return NextResponse.json({ ok: true, configured: result.configured });
