@@ -9,7 +9,7 @@
 export const ADMIN_COOKIE = 'ogp_admin';
 
 export const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@omgauripulta.com').trim();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'omgauri2024';
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || 'omgauri2024').trim();
 const ADMIN_SECRET = process.env.ADMIN_SESSION_SECRET || 'om-gauri-pulta-admin-secret';
 
 async function sha256Hex(input: string): Promise<string> {
@@ -27,5 +27,5 @@ export function adminSessionToken(): Promise<string> {
 
 /** Whether the submitted credentials match the configured admin. */
 export function verifyAdmin(email: string, password: string): boolean {
-  return email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD;
+  return email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password.trim() === ADMIN_PASSWORD;
 }
