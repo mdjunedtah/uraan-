@@ -1,15 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import OrderTable from '@/components/admin/OrderTable';
-import { orders } from '@/lib/orders';
-import { Search } from 'lucide-react';
+import { orders as demoOrders, type Order } from '@/lib/orders';
+import { Search, Database, HardDrive } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [data, setData] = useState<Order[]>(demoOrders);
+  const [configured, setConfigured] = useState(false);
 
-  const filtered = orders.filter((o) => {
+  // Prefer real orders from the database; fall back to the demo data.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/orders');
+        const json = await res.json();
+        if (res.ok && json.configured) {
+          setConfigured(true);
+          setData(json.orders as Order[]);
+        }
+      } catch {
+        /* keep demo data */
+      }
+    })();
+  }, []);
+
+  const filtered = data.filter((o) => {
     const matchSearch =
       o.customer.toLowerCase().includes(search.toLowerCase()) ||
       o.id.toLowerCase().includes(search.toLowerCase());
@@ -30,8 +48,17 @@ export default function AdminOrdersPage() {
     <div>
       <div className="mb-6">
         <h1 className="serif text-3xl text-[#1a1410] mb-1">Orders</h1>
-        <p className="text-sm text-[#6b5d4c]">
+        <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
           {filtered.length} orders · Revenue: ₹{totalRevenue.toLocaleString('en-IN')}
+          <span
+            className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
+              configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+            }`}
+            title={configured ? 'Live orders from your database' : 'Sample data — connect a database to see real orders'}
+          >
+            {configured ? <Database size={11} /> : <HardDrive size={11} />}
+            {configured ? 'Live' : 'Sample data'}
+          </span>
         </p>
       </div>
 
@@ -44,7 +71,7 @@ export default function AdminOrdersPage() {
           { label: 'Delivered', value: 'Delivered', color: 'text-[#3d6b5a]' },
           { label: 'Cancelled', value: 'Cancelled', color: 'text-gray-600' },
         ].map((s, i) => {
-          const count = orders.filter((o) => o.status === s.value).length;
+          const count = data.filter((o) => o.status === s.value).length;
           return (
             <button
               key={i}
@@ -69,7 +96,7 @@ export default function AdminOrdersPage() {
             placeholder="Search by customer or order ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-sm"
+            className="flex-1 bg-transparent outline-none text-sm min-w-0"
           />
         </div>
         <select

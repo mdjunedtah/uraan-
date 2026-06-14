@@ -1,0 +1,106 @@
+# Deployment & Setup Guide
+
+This is the step-by-step guide to put the **Om Gauri Pulta** store live and
+turn on the admin panel, CRM, WhatsApp and database. No prior DevOps knowledge
+needed — follow the steps in order.
+
+The site works the moment you deploy it. Each integration below is optional and
+**activates only when you add its keys** — until then the site falls back to
+safe demo behaviour, so nothing ever breaks.
+
+---
+
+## 1. Put the website live on Vercel (required)
+
+1. Push this repo to GitHub (already done if you're reading this on GitHub).
+2. Go to **https://vercel.com** → sign in with GitHub → **Add New… → Project**.
+3. Pick this repository and click **Deploy**. That's it — your site is live at
+   `https://<your-project>.vercel.app`.
+4. To add a custom domain: Vercel → your project → **Settings → Domains**.
+
+You change all the settings below in:
+**Vercel → your project → Settings → Environment Variables**
+(add each key + value, then **Redeploy** from the Deployments tab).
+
+---
+
+## 2. Secure the admin panel (do this before going live)
+
+The admin panel lives at `/admin` and is protected by a login. Set your own
+credentials:
+
+| Variable | What to put |
+| --- | --- |
+| `ADMIN_EMAIL` | the email you'll log in with |
+| `ADMIN_PASSWORD` | a strong password |
+| `ADMIN_SESSION_SECRET` | any long random string (e.g. mash the keyboard) |
+
+> If you skip this, the defaults are `admin@omgauripulta.com` / `omgauri2024`.
+> **Change them** before sharing the site.
+
+Log in at `https://<your-site>/admin/login`.
+
+---
+
+## 3. Turn on the database (Supabase) — real orders & leads
+
+This makes orders and CRM leads save permanently and show in the admin from any
+device.
+
+1. Create a free project at **https://supabase.com**.
+2. Open **SQL Editor → New query**, paste the contents of
+   [`supabase/schema.sql`](./supabase/schema.sql), and click **Run**.
+3. Go to **Project Settings → API** and copy:
+   - **Project URL** → set as `SUPABASE_URL`
+   - **service_role** key (under "Project API keys") → set as
+     `SUPABASE_SERVICE_ROLE_KEY`
+4. Add both to Vercel env vars and **Redeploy**.
+
+Now the admin **Orders** and **CRM / Leads** pages show a green **“Database”**
+badge and store live data. Without it, they show sample data with a **“This
+browser”** badge.
+
+---
+
+## 4. WhatsApp
+
+- **Chat button (works now):** set `NEXT_PUBLIC_WHATSAPP_NUMBER` to your number
+  in international format, digits only (e.g. `9188519XXXXX`). All "Chat on
+  WhatsApp" buttons use it.
+- **Automatic messages + inbound leads (optional):** create a WhatsApp app at
+  **https://developers.facebook.com → WhatsApp → API Setup** and set
+  `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`. Point
+  the webhook to `https://<your-site>/api/whatsapp/webhook` using the same
+  verify token. Inbound chats then appear automatically in the CRM.
+
+---
+
+## 5. CRM (HubSpot, optional)
+
+Website enquiries already save to your Supabase database (step 3) and show in
+**CRM / Leads**. To *also* push them to HubSpot, set `HUBSPOT_PORTAL_ID` and
+`HUBSPOT_FORM_GUID` (see `.env.example`).
+
+---
+
+## 6. Instagram feed (optional)
+
+Set `INSTAGRAM_ACCESS_TOKEN` to show your live Instagram grid on the homepage,
+and `NEXT_PUBLIC_INSTAGRAM_URL` for the "Follow" button.
+
+---
+
+## Quick checklist
+
+- [ ] Deployed on Vercel
+- [ ] Changed `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET`
+- [ ] Ran `supabase/schema.sql` and added `SUPABASE_*` keys
+- [ ] Set `NEXT_PUBLIC_WHATSAPP_NUMBER`
+- [ ] (optional) WhatsApp Cloud API, HubSpot, Instagram keys
+
+All variable names and hints live in [`.env.example`](./.env.example).
+
+> **Note on the product catalogue:** products currently come from the bundled
+> catalogue file. Moving the catalogue into the database (so product edits in
+> the admin show for all visitors) is the next planned step — the `products`
+> table is already included in `supabase/schema.sql`.

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Search, Plus, X, Contact, MessageCircle, Sparkles, Trophy } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Search, Plus, X, Contact, MessageCircle, Sparkles, Trophy, Database, HardDrive } from 'lucide-react';
 import LeadsTable from '@/components/admin/LeadsTable';
 import {
   Lead,
@@ -20,35 +20,73 @@ const emptyForm = { name: '', email: '', phone: '', source: 'Phone', message: ''
 
 export default function AdminLeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [configured, setConfigured] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  // Read from localStorage on the client to avoid a hydration mismatch.
-  useEffect(() => {
+  // Prefer the database; fall back to the in-browser store when it's off.
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/leads');
+      const data = await res.json();
+      if (res.ok && data.configured) {
+        setConfigured(true);
+        setLeads(data.leads as Lead[]);
+        return;
+      }
+    } catch {
+      /* ignore — use the local fallback */
+    }
+    setConfigured(false);
     setLeads(getLeads());
   }, []);
 
-  const refresh = () => setLeads(getLeads());
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const handleStatus = (id: string, status: LeadStatus) => {
-    updateLeadStatus(id, status);
-    refresh();
+  const handleStatus = async (id: string, status: LeadStatus) => {
+    if (configured) {
+      await fetch(`/api/leads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      load();
+    } else {
+      updateLeadStatus(id, status);
+      setLeads(getLeads());
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteLead(id);
-    refresh();
+  const handleDelete = async (id: string) => {
+    if (configured) {
+      await fetch(`/api/leads/${id}`, { method: 'DELETE' });
+      load();
+    } else {
+      deleteLead(id);
+      setLeads(getLeads());
+    }
   };
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim()) return;
-    addLead(form);
+    if (configured) {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      await load();
+    } else {
+      addLead(form);
+      setLeads(getLeads());
+    }
     setForm(emptyForm);
     setShowForm(false);
-    refresh();
   };
 
   const filtered = useMemo(() => {
@@ -78,8 +116,17 @@ export default function AdminLeadsPage() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">CRM / Leads</h1>
-          <p className="text-sm text-[#6b5d4c]">
+          <p className="text-sm text-[#6b5d4c] flex items-center gap-2">
             {filtered.length} of {stats.total} leads across all channels
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
+                configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+              }`}
+              title={configured ? 'Saved to your database' : 'Stored in this browser only — connect a database to sync'}
+            >
+              {configured ? <Database size={11} /> : <HardDrive size={11} />}
+              {configured ? 'Database' : 'This browser'}
+            </span>
           </p>
         </div>
         <button

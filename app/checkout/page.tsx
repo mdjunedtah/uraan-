@@ -63,6 +63,24 @@ export default function CheckoutPage() {
       status: paymentMethod === 'cod' ? 'Processing' : 'Confirmed',
       address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
     });
+    // Persist to the store database (best-effort) so it shows in the admin
+    // orders list from any device. Falls back silently when the DB is off.
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        customer: form.name,
+        email: form.email,
+        phone: form.phone,
+        amount: finalTotal,
+        items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
+        payment: paymentLabel,
+        status: 'Processing',
+        address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+      }),
+    }).catch(() => { /* offline / not configured — order is still saved locally */ });
+
     setOrderId(id);
     setStep('success');
     clearCart();
