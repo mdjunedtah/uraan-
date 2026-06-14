@@ -26,8 +26,10 @@ export interface LeadResult {
 }
 
 export async function submitLead(input: LeadInput): Promise<LeadResult> {
-  const portalId = process.env.HUBSPOT_PORTAL_ID;
-  const formGuid = process.env.HUBSPOT_FORM_GUID;
+  // Configured values fall back to the connected HubSpot account so the
+  // integration works out of the box; override via env vars in Vercel.
+  const portalId = process.env.HUBSPOT_PORTAL_ID || '246494562';
+  const formGuid = process.env.HUBSPOT_FORM_GUID || '25e94130-48a1-4969-acd3-74db1bd5e557';
 
   // Not wired up yet: accept the lead so the form works, but flag it.
   if (!portalId || !formGuid) {
