@@ -7,7 +7,8 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
-import { products, categories } from '@/data/jewelleryData';
+import { categories } from '@/data/jewelleryData';
+import { useProducts } from '@/hooks/useProducts';
 import { SlidersHorizontal, X } from 'lucide-react';
 
 function CollectionsContent() {
@@ -21,8 +22,10 @@ function CollectionsContent() {
   const [selectedCategory, setSelectedCategory] = useState(typeParam);
   const [priceRange, setPriceRange] = useState(priceParam);
 
+  const { products: liveProducts } = useProducts();
+
   const filtered = useMemo(() => {
-    let list = [...products];
+    let list = [...liveProducts];
 
     if (typeParam === 'new') {
       list = list.filter((p) => p.tag === 'new');
@@ -62,7 +65,7 @@ function CollectionsContent() {
     else if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating);
 
     return list;
-  }, [typeParam, selectedCategory, priceRange, queryParam, sortBy]);
+  }, [typeParam, selectedCategory, priceRange, queryParam, sortBy, liveProducts]);
 
   const title = typeParam
     ? typeParam === 'new'

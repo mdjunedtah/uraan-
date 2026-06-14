@@ -11,6 +11,7 @@ import ProductGallery from '@/components/ProductGallery';
 import ShareButton from '@/components/ShareButton';
 import AddToCartButton from '@/components/AddToCartButton';
 import { getProductById, getRelatedProducts } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import { getGalleryImages } from '@/lib/gallery';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/wishlistContext';
@@ -25,7 +26,8 @@ export default function ProductDetailPage({
   params: { id: string };
 }) {
   const { id } = params;
-  const product = getProductById(id);
+  const { products: list, loaded } = useProducts();
+  const product = getProductById(id, list);
 
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'shipping'>('desc');
@@ -33,14 +35,27 @@ export default function ProductDetailPage({
   const { addToCart, openCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  if (!product) notFound();
+  if (!product) {
+    // Still fetching the live catalogue — don't 404 a DB-only product yet.
+    if (!loaded) {
+      return (
+        <main className="min-h-screen bg-white">
+          <Navbar />
+          <div className="py-32 text-center text-sm text-[#9a8c75] tracking-[2px] uppercase">
+            Loading…
+          </div>
+        </main>
+      );
+    }
+    notFound();
+  }
 
   const inWishlist = isInWishlist(product.id);
   const discount =
     product.oldPrice && product.oldPrice > product.price
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
       : 0;
-  const related = getRelatedProducts(product.id, 4);
+  const related = getRelatedProducts(product.id, 4, list);
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { submitLead } from '@/lib/crm';
+import { dbInsertLead } from '@/lib/leadsDb';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -34,6 +35,14 @@ export async function POST(request: Request) {
       { ok: false, error: result.error || 'Something went wrong. Please try again.' },
       { status: 502 }
     );
+  }
+
+  // Also store in our own database (best-effort) so the lead shows in the
+  // admin CRM even if HubSpot isn't configured.
+  try {
+    await dbInsertLead({ name, email, phone, message, source });
+  } catch (err) {
+    console.error('[lead] db insert failed:', err);
   }
 
   return NextResponse.json({ ok: true, configured: result.configured });

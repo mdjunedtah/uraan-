@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Save, Store, Mail, Phone, MapPin, Globe, CreditCard } from 'lucide-react';
+import { Save, Store, Mail, Phone, MapPin, Globe, CreditCard, MessageCircle } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 
 type SettingsData = {
   storeName: string;
@@ -20,6 +21,9 @@ type SettingsData = {
   enableCOD: boolean;
   emailNotifications: boolean;
   smsNotifications: boolean;
+  whatsappNumber: string;
+  whatsappOrderUpdates: boolean;
+  crmProvider: string;
 };
 
 export default function SettingsForm() {
@@ -40,6 +44,9 @@ export default function SettingsForm() {
     enableCOD: true,
     emailNotifications: true,
     smsNotifications: true,
+    whatsappNumber: WHATSAPP_NUMBER,
+    whatsappOrderUpdates: true,
+    crmProvider: 'HubSpot',
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -238,6 +245,62 @@ export default function SettingsForm() {
             />
           </label>
         </div>
+      </div>
+
+      {/* Integrations: WhatsApp & CRM */}
+      <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5 md:p-6">
+        <h3 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-5 pb-3 border-b border-[rgba(184,137,58,0.18)] flex items-center gap-2">
+          <MessageCircle size={14} className="text-[#b8893a]" /> Integrations · WhatsApp & CRM
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="luxury-label">WhatsApp Business Number</label>
+            <div className="relative">
+              <MessageCircle size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+              <input
+                type="tel"
+                value={settings.whatsappNumber}
+                onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
+                className="luxury-input pl-9"
+                placeholder="9188519XXXXX"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="luxury-label">CRM Provider</label>
+            <select
+              value={settings.crmProvider}
+              onChange={(e) => setSettings({ ...settings, crmProvider: e.target.value })}
+              className="luxury-input"
+            >
+              <option value="HubSpot">HubSpot</option>
+              <option value="Zoho">Zoho CRM</option>
+              <option value="None">None (in-app only)</option>
+            </select>
+          </div>
+        </div>
+
+        <label className="flex items-center justify-between p-3 bg-[#fbf8f1] cursor-pointer hover:bg-[#f8f2e6] mt-4">
+          <span className="text-sm text-[#1a1410] font-medium">
+            Send order status updates to customers on WhatsApp
+          </span>
+          <input
+            type="checkbox"
+            checked={settings.whatsappOrderUpdates}
+            onChange={(e) => setSettings({ ...settings, whatsappOrderUpdates: e.target.checked })}
+            className="accent-[#b8893a]"
+          />
+        </label>
+
+        <p className="text-[11px] text-[#9a8c75] mt-3 leading-relaxed">
+          Live sending uses the WhatsApp Cloud API and your CRM. Add{' '}
+          <code className="text-[#b8893a]">WHATSAPP_TOKEN</code>,{' '}
+          <code className="text-[#b8893a]">WHATSAPP_PHONE_NUMBER_ID</code> and{' '}
+          <code className="text-[#b8893a]">HUBSPOT_*</code> to your server environment variables.
+          Until then, the panel falls back to wa.me click-to-chat links.
+        </p>
       </div>
 
       <div className="flex justify-end gap-3">

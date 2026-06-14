@@ -13,8 +13,10 @@ import Newsletter from '@/components/Newsletter';
 import About from '@/components/About';
 import CartDrawer from '@/components/CartDrawer';
 import FloatingActions from '@/components/FloatingActions';
+import { whatsappLink } from '@/lib/whatsapp';
 import ProductCard from '@/components/ProductCard';
 import { getSaleProducts } from '@/lib/products';
+import { useProducts } from '@/hooks/useProducts';
 import {
   Truck,
   ShieldCheck,
@@ -205,7 +207,8 @@ function StyleSparkleIcon({ className }: { className?: string }) {
 }
 
 export default function HomePage() {
-  const trending = getSaleProducts(6);
+  const { products: list } = useProducts();
+  const trending = getSaleProducts(6, list);
 
   return (
     <main className="min-h-screen bg-white">
@@ -547,7 +550,7 @@ export default function HomePage() {
             { icon: FaInstagram, label: 'Instagram', href: 'https://instagram.com' },
             { icon: FaFacebook, label: 'Facebook', href: 'https://facebook.com' },
             { icon: FaYoutube, label: 'YouTube', href: 'https://youtube.com' },
-            { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/919876543210' },
+            { icon: MessageCircle, label: 'WhatsApp', href: whatsappLink() },
           ].map((s, i) => (
             <a
               key={i}

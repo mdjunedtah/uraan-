@@ -12,6 +12,8 @@ export type Order = {
   payment: string;
   date: string;
   address?: string;
+  paid?: boolean;
+  paymentId?: string;
 };
 
 export const orders: Order[] = [

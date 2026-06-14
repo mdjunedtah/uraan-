@@ -15,6 +15,13 @@ import {
 
 type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
 
+type RazorpayInstance = { open: () => void };
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => RazorpayInstance;
+  }
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalItems, totalPrice, clearCart } = useCart();
@@ -22,6 +29,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [orderId, setOrderId] = useState('');
   const [authChecked, setAuthChecked] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '',
@@ -49,23 +57,117 @@ export default function CheckoutPage() {
     setStep('payment');
   };
 
-  const handlePlaceOrder = () => {
-    const id = 'OGP' + Date.now().toString().slice(-8);
-    const paymentLabel =
-      paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI' :
-      paymentMethod === 'card' ? 'Card' : paymentMethod === 'wallet' ? 'Wallet' : 'Net Banking';
+  const loadRazorpay = (): Promise<boolean> =>
+    new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const paymentLabel = () =>
+    paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI' :
+    paymentMethod === 'card' ? 'Card' : paymentMethod === 'wallet' ? 'Wallet' : 'Net Banking';
+
+  // Save to the customer's own (browser) order history and show success.
+  const finishLocal = (id: string, label: string) => {
     saveOrder({
       id,
       date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
       items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
       amount: finalTotal,
-      payment: paymentLabel,
-      status: paymentMethod === 'cod' ? 'Processing' : 'Confirmed',
+      payment: label,
+      status: 'Processing',
       address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
     });
     setOrderId(id);
     setStep('success');
     clearCart();
+  };
+
+  const orderPayload = () => ({
+    customer: form.name,
+    email: form.email,
+    phone: form.phone,
+    amount: finalTotal,
+    items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
+    address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+  });
+
+  // COD / demo (no online payment): record the order directly as unpaid.
+  const placeDirect = () => {
+    const id = 'OGP' + Date.now().toString().slice(-8);
+    const label = paymentLabel();
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...orderPayload(), payment: label, status: 'Processing', paid: false }),
+    }).catch(() => { /* offline / not configured — saved locally */ });
+    finishLocal(id, label);
+  };
+
+  const handlePlaceOrder = async () => {
+    // COD, or no gateway configured → place the order directly.
+    if (paymentMethod === 'cod' || !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+      placeDirect();
+      return;
+    }
+    setProcessing(true);
+    try {
+      const res = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: finalTotal }),
+      });
+      const data = await res.json();
+      // Server has no keys → fall back to a direct (demo) order.
+      if (!data.ok || !data.configured) {
+        placeDirect();
+        return;
+      }
+      const loaded = await loadRazorpay();
+      if (!loaded || !window.Razorpay) {
+        alert('Payment system load nahi hua. Dobara koshish karein.');
+        setProcessing(false);
+        return;
+      }
+      const rzp = new window.Razorpay({
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency || 'INR',
+        name: 'Om Gauri Pulta',
+        description: 'Jewellery order',
+        order_id: data.orderId,
+        prefill: { name: form.name, email: form.email, contact: form.phone },
+        theme: { color: '#b8893a' },
+        handler: async (response: Record<string, string>) => {
+          try {
+            const v = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...response, order: { ...orderPayload(), payment: paymentLabel() } }),
+            });
+            const vd = await v.json();
+            if (vd.ok && vd.valid) {
+              const id = (vd.orderId as string) || ('OGP' + Date.now().toString().slice(-8));
+              finishLocal(id, `${paymentLabel()} · Paid`);
+            } else {
+              alert('Payment verify nahi ho paaya. Agar paisa kata hai to support se contact karein.');
+              setProcessing(false);
+            }
+          } catch {
+            setProcessing(false);
+          }
+        },
+        modal: { ondismiss: () => setProcessing(false) },
+      });
+      rzp.open();
+    } catch {
+      alert('Payment shuru nahi ho paaya. Dobara koshish karein.');
+      setProcessing(false);
+    }
   };
 
   if (!authChecked && step !== 'success') {
@@ -344,8 +446,8 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <button onClick={handlePlaceOrder} className="w-full bg-[#1a1410] text-[#e8d49b] py-4 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2">
-                  <Lock size={14} /> Place Order · ₹{finalTotal.toLocaleString('en-IN')}
+                <button onClick={handlePlaceOrder} disabled={processing} className="w-full bg-[#1a1410] text-[#e8d49b] py-4 text-[11px] tracking-[3px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] flex items-center justify-center gap-2 disabled:opacity-60">
+                  <Lock size={14} /> {processing ? 'Processing…' : `Place Order · ₹${finalTotal.toLocaleString('en-IN')}`}
                 </button>
 
                 <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-[#6b5d4c]">

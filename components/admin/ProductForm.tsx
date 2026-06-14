@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, X, Upload } from 'lucide-react';
 import { Product, categories } from '@/data/jewelleryData';
@@ -29,15 +29,53 @@ export default function ProductForm({ initialProduct, mode = 'add' }: ProductFor
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setForm((f) => ({ ...f, image: data.url }));
+      } else {
+        alert(data.error || 'Upload failed.');
+      }
+    } catch {
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    // In a real app, send this to your API
-    setTimeout(() => {
-      alert(`Product ${mode === 'add' ? 'added' : 'updated'} successfully!`);
-      router.push('/admin/products');
-    }, 800);
+    try {
+      const url = mode === 'add' ? '/api/products' : `/api/products/${initialProduct?.id}`;
+      const res = await fetch(url, {
+        method: mode === 'add' ? 'POST' : 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        router.push('/admin/products');
+        router.refresh();
+      } else {
+        alert(data.error || 'Could not save. Connect a database (Supabase) — see DEPLOYMENT.md.');
+        setSubmitted(false);
+      }
+    } catch {
+      alert('Network error. Please try again.');
+      setSubmitted(false);
+    }
   };
 
   return (
@@ -157,22 +195,31 @@ export default function ProductForm({ initialProduct, mode = 'add' }: ProductFor
         </div>
 
         <div className="md:col-span-2">
-          <label className="luxury-label">Image Path</label>
+          <label className="luxury-label">Product Image</label>
           <div className="flex items-center gap-3">
             <input
               type="text"
               value={form.image}
               onChange={(e) => setForm({ ...form, image: e.target.value })}
               className="luxury-input flex-1"
-              placeholder="/images/product.jpg"
+              placeholder="Paste an image URL, or click Upload"
             />
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleUpload} />
             <button
               type="button"
-              className="px-4 py-2 border border-[rgba(184,137,58,0.32)] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#fbf8f1] flex items-center gap-2"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="px-4 py-2 border border-[rgba(184,137,58,0.32)] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#fbf8f1] flex items-center gap-2 disabled:opacity-60 whitespace-nowrap"
             >
-              <Upload size={12} /> Upload
+              <Upload size={12} /> {uploading ? 'Uploading…' : 'Upload'}
             </button>
           </div>
+          {form.image && (
+            <div
+              className="mt-3 w-20 h-20 bg-[#f8f2e6] bg-cover bg-center border border-[rgba(184,137,58,0.18)]"
+              style={{ backgroundImage: `url(${form.image})` }}
+            />
+          )}
         </div>
 
         <div className="md:col-span-2">
