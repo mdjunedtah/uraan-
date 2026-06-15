@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetLeads, dbInsertLead } from '@/lib/leadsDb';
+import { isAdminRequest } from '@/lib/adminApi';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// GET → list leads from the database (admin CRM).
+// GET → list leads from the database (admin CRM only — contains customer PII).
 export async function GET() {
+  if (!(await isAdminRequest())) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized.' }, { status: 401 });
+  }
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ ok: true, configured: false, leads: [] });
   }
@@ -13,8 +17,12 @@ export async function GET() {
   return NextResponse.json({ ok: true, configured: true, leads: leads || [] });
 }
 
-// POST → create a lead (manual add from the CRM).
+// POST → create a lead (manual add from the CRM, admin only). Public website
+// enquiries use /api/lead (singular), which stays open for the contact form.
 export async function POST(request: Request) {
+  if (!(await isAdminRequest())) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized.' }, { status: 401 });
+  }
   let body: Record<string, unknown>;
   try {
     body = await request.json();
