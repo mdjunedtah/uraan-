@@ -11,6 +11,11 @@ const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  // Set NEXT_PUBLIC_GOOGLE_VERIFICATION (the content value Google Search
+  // Console gives you) to verify ownership via the meta-tag method.
+  verification: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION }
+    : undefined,
   title: {
     default: 'Om Gauri Pulta — Gold, Silver, Diamond & Rudraksh Jewellery Online',
     template: '%s | Om Gauri Pulta Jewellers',
