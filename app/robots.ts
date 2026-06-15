@@ -1,14 +1,14 @@
 import type { MetadataRoute } from 'next';
-
-const base = 'https://mdjunedtah-uraan.vercel.app';
+import { SITE_URL } from '@/lib/site';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/checkout', '/profile'],
+      // Keep private/functional areas out of Google's index.
+      disallow: ['/admin', '/api', '/checkout', '/profile'],
     },
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

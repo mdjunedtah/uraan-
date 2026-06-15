@@ -5,8 +5,9 @@ import '../styles/animations.css';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/wishlistContext';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import { SITE_URL } from '@/lib/site';
 
-const siteUrl = 'https://mdjunedtah-uraan.vercel.app';
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
