@@ -5,6 +5,7 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import Hero from '@/components/hero';
 import Categories from '@/components/Categories';
+import PromoBanners from '@/components/PromoBanners';
 import Bestseller from '@/components/Bestseller';
 import Trending from '@/components/Trending';
 import Testimonials from '@/components/Testimonials';
@@ -244,6 +245,9 @@ export default function HomePage() {
 
       {/* 3. SHOP BY CATEGORY */}
       <Categories />
+
+      {/* 3.5 PROMOTIONAL BANNERS (managed in Admin → Banners) */}
+      <PromoBanners />
 
       {/* 4. SIGNATURE COLLECTION VIDEO */}
       <section className="relative">

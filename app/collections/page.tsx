@@ -7,8 +7,8 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import CartDrawer from '@/components/CartDrawer';
-import { categories } from '@/data/jewelleryData';
 import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 import { SlidersHorizontal, X } from 'lucide-react';
 
 function CollectionsContent() {
@@ -23,6 +23,7 @@ function CollectionsContent() {
   const [priceRange, setPriceRange] = useState(priceParam);
 
   const { products: liveProducts } = useProducts();
+  const { categories } = useCategories();
 
   const filtered = useMemo(() => {
     let list = [...liveProducts];

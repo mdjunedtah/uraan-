@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { Gem, ChevronRight, LayoutGrid } from 'lucide-react';
-import { categories } from '@/data/jewelleryData';
 import { CATEGORY_THEME, CATEGORY_IMAGES } from '@/lib/categoryStyles';
+import { useCategories } from '@/hooks/useCategories';
 
 export default function Categories() {
+  const { categories } = useCategories();
   return (
     <section className="py-16 px-4 max-w-7xl mx-auto">
       <p className="section-tag-italic">Explore Our Collection</p>

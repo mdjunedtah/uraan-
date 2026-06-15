@@ -4,14 +4,16 @@ import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
-import { reviews } from '@/data/jewelleryData';
 import { reviewAccent, initialsOf } from '@/lib/reviewStyle';
 import { Heart, Star, CheckCircle2 } from 'lucide-react';
+import { useReviews, verifiedOnly } from '@/hooks/useReviews';
 
 export default function ReviewsPage() {
+  const { reviews } = useReviews();
+  const shown = verifiedOnly(reviews);
   const avgRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    shown.length > 0
+      ? shown.reduce((sum, r) => sum + r.rating, 0) / shown.length
       : 0;
 
   return (
@@ -39,14 +41,14 @@ export default function ReviewsPage() {
             ))}
           </div>
           <span className="text-sm text-[#6b5d4c]">
-            {avgRating.toFixed(1)} average · {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+            {avgRating.toFixed(1)} average · {shown.length} review{shown.length !== 1 ? 's' : ''}
           </span>
         </div>
       </div>
 
       <section className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {reviews.map((r, idx) => {
+          {shown.map((r, idx) => {
             const accent = reviewAccent(idx);
             return (
             <div

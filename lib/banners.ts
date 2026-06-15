@@ -17,7 +17,7 @@ export type Banner = {
 
 const KEY = 'ogp_banners';
 
-const seedBanners: Banner[] = [
+export const seedBanners: Banner[] = [
   { id: 'B001', title: 'Festive Collection 2026', subtitle: 'Up to 40% off on selected items', image: '/images/banner.jpg', ctaText: 'Shop Now', ctaLink: '/collections', position: 'hero', active: true },
   { id: 'B002', title: 'Bridal Special', subtitle: 'Heirloom pieces for your sacred day', image: '/images/bridal-set.jpg', ctaText: 'Explore Bridal', ctaLink: '/collections?type=bridal', position: 'middle', active: true },
   { id: 'B003', title: 'Sacred Rudraksh', subtitle: 'Authentic certified beads', image: '/images/luxury-bg.jpg', ctaText: 'Discover', ctaLink: '/collections?type=rudraksh', position: 'middle', active: false },

@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { Heart, Star, CheckCircle2, ChevronRight } from 'lucide-react';
-import { reviews } from '@/data/jewelleryData';
 import { reviewAccent, initialsOf } from '@/lib/reviewStyle';
+import { useReviews, verifiedOnly } from '@/hooks/useReviews';
 
 export default function Testimonials() {
+  const { reviews } = useReviews();
+  const shown = verifiedOnly(reviews).slice(0, 3);
   return (
     <section className="py-16 px-4 max-w-7xl mx-auto">
       <p className="section-tag-italic">Words of Love</p>
@@ -15,7 +17,7 @@ export default function Testimonials() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        {reviews.slice(0, 3).map((r, idx) => {
+        {shown.map((r, idx) => {
           const accent = reviewAccent(idx);
           return (
           <div
