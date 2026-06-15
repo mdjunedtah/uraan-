@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server';
 import { ADMIN_COOKIE, adminSessionToken, verifyAdmin } from '@/lib/adminAuth';
+import { getClientIp } from '@/lib/security/request';
+import { checkLockout, recordAttempt } from '@/lib/security/rateLimit';
+import { logAudit, logSecurityEvent } from '@/lib/audit';
 
+// This route runs on the Node.js runtime (default for route handlers) so the
+// Supabase service-role client used by the security helpers works. Every helper
+// fails open, so login behaves exactly as before when the DB is unavailable.
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const userAgent = request.headers.get('user-agent') || '';
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -12,9 +21,45 @@ export async function POST(request: Request) {
   const email = String(body.email || '').trim();
   const password = String(body.password || '');
 
+  // Brute-force protection: refuse while the account is locked.
+  const lock = await checkLockout(email);
+  if (lock.locked) {
+    await logSecurityEvent({
+      type: 'login_blocked',
+      severity: 'warning',
+      email,
+      ip,
+      userAgent,
+      metadata: { permanent: Boolean(lock.permanent) },
+    });
+    const error = lock.permanent
+      ? 'Account locked. Contact an administrator.'
+      : 'Too many attempts. Please try again later.';
+    return NextResponse.json({ ok: false, error }, { status: 429 });
+  }
+
   if (!verifyAdmin(email, password)) {
+    const { lockedNow, permanent } = await recordAttempt({
+      email,
+      ip,
+      userAgent,
+      success: false,
+      reason: 'bad_credentials',
+    });
+    await logSecurityEvent({
+      type: lockedNow ? 'account_locked' : 'login_failed',
+      severity: lockedNow ? 'critical' : 'warning',
+      email,
+      ip,
+      userAgent,
+      metadata: { permanent },
+    });
+    // Generic message — never reveal whether the email or the password was wrong.
     return NextResponse.json({ ok: false, error: 'Invalid email or password.' }, { status: 401 });
   }
+
+  await recordAttempt({ email, ip, userAgent, success: true });
+  await logAudit({ actorEmail: email, action: 'admin_login', ip, userAgent });
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set(ADMIN_COOKIE, await adminSessionToken(), {

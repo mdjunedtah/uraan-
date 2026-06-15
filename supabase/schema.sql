@@ -162,3 +162,126 @@ alter table public.categories enable row level security;
 alter table public.coupons    enable row level security;
 alter table public.banners    enable row level security;
 alter table public.reviews    enable row level security;
+
+-- ════════════════════════════════════════════════════════════════════════
+--  SECURITY / ADMIN HARDENING (Phase 1)
+--  All tables are written only via the server-side service-role key.
+-- ════════════════════════════════════════════════════════════════════════
+
+-- Team members + their RBAC role. Authentication itself moves to Supabase Auth
+-- (Phase 2); auth_id links this row to auth.users. Roles: owner | super_admin
+-- | admin | staff.
+create table if not exists public.admin_users (
+  id                  uuid primary key default gen_random_uuid(),
+  auth_id             uuid unique,
+  email               text unique not null,
+  name                text,
+  role                text not null default 'staff',
+  status              text not null default 'active',  -- active | locked | disabled
+  password_changed_at timestamptz,
+  last_login_at       timestamptz,
+  created_at          timestamptz not null default now()
+);
+
+-- Every login attempt — powers rate limiting, brute-force detection and the
+-- login-attempt monitor.
+create table if not exists public.login_attempts (
+  id          bigint generated always as identity primary key,
+  email       text,
+  ip          text,
+  user_agent  text,
+  success     boolean not null default false,
+  reason      text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists login_attempts_email_idx on public.login_attempts (email, created_at desc);
+create index if not exists login_attempts_ip_idx    on public.login_attempts (ip, created_at desc);
+
+-- Temporary + permanent account lockouts.
+create table if not exists public.account_locks (
+  email        text primary key,
+  locked_until timestamptz,
+  permanent    boolean not null default false,
+  reason       text,
+  updated_at   timestamptz not null default now()
+);
+
+-- Full audit trail of admin actions.
+create table if not exists public.audit_logs (
+  id          bigint generated always as identity primary key,
+  actor_email text,
+  actor_role  text,
+  action      text not null,
+  target      text,
+  ip          text,
+  user_agent  text,
+  metadata    jsonb not null default '{}'::jsonb,
+  created_at  timestamptz not null default now()
+);
+create index if not exists audit_logs_created_idx on public.audit_logs (created_at desc);
+
+-- Security-specific events (failed logins, lockouts, new devices, suspicious).
+create table if not exists public.security_events (
+  id          bigint generated always as identity primary key,
+  type        text not null,
+  severity    text not null default 'info',     -- info | warning | critical
+  email       text,
+  ip          text,
+  user_agent  text,
+  metadata    jsonb not null default '{}'::jsonb,
+  created_at  timestamptz not null default now()
+);
+create index if not exists security_events_created_idx on public.security_events (created_at desc);
+
+-- Recognised devices, for device verification + new-device approval.
+create table if not exists public.trusted_devices (
+  id           uuid primary key default gen_random_uuid(),
+  email        text not null,
+  fingerprint  text not null,
+  label        text,
+  browser      text,
+  os           text,
+  ip           text,
+  approved     boolean not null default false,
+  last_seen_at timestamptz not null default now(),
+  created_at   timestamptz not null default now(),
+  unique (email, fingerprint)
+);
+
+-- Password reuse prevention (stores only hashes; history check on change).
+create table if not exists public.password_history (
+  id            bigint generated always as identity primary key,
+  email         text not null,
+  password_hash text not null,
+  created_at    timestamptz not null default now()
+);
+create index if not exists password_history_email_idx on public.password_history (email, created_at desc);
+
+-- Active sessions, for the session-management dashboard + force-logout.
+create table if not exists public.auth_sessions (
+  id                 uuid primary key default gen_random_uuid(),
+  email              text not null,
+  device_fingerprint text,
+  ip                 text,
+  browser            text,
+  os                 text,
+  created_at         timestamptz not null default now(),
+  last_active_at     timestamptz not null default now(),
+  revoked_at         timestamptz
+);
+create index if not exists auth_sessions_email_idx on public.auth_sessions (email, last_active_at desc);
+
+alter table public.admin_users      enable row level security;
+alter table public.login_attempts   enable row level security;
+alter table public.account_locks    enable row level security;
+alter table public.audit_logs       enable row level security;
+alter table public.security_events  enable row level security;
+alter table public.trusted_devices  enable row level security;
+alter table public.password_history enable row level security;
+alter table public.auth_sessions    enable row level security;
+
+-- Seed the first Owner. Replace the email with yours, then in Phase 2 this row
+-- links to the Supabase Auth user you sign in with.
+insert into public.admin_users (email, name, role, status)
+values ('admin@omgauripulta.com', 'Owner', 'owner', 'active')
+on conflict (email) do nothing;
