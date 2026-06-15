@@ -1,16 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Star, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Star, Trash2, CheckCircle2, XCircle, Database, HardDrive } from 'lucide-react';
 import { type Review, getReviews, setReviewVerified, deleteReview } from '@/lib/reviewsStore';
 
 export default function AdminReviewsPage() {
   const [reviewList, setReviewList] = useState<Review[]>([]);
+  const [configured, setConfigured] = useState(false);
   const [filter, setFilter] = useState<'all' | 'verified' | 'pending'>('all');
 
-  useEffect(() => {
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/reviews');
+      const data = await res.json();
+      if (res.ok && data.configured) {
+        setConfigured(true);
+        setReviewList(data.reviews as Review[]);
+        return;
+      }
+    } catch {
+      /* ignore — use the local fallback */
+    }
+    setConfigured(false);
     setReviewList(getReviews());
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const filtered = filter === 'all'
     ? reviewList
@@ -22,23 +39,39 @@ export default function AdminReviewsPage() {
     ? (reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length).toFixed(1)
     : '0.0';
 
-  const handleDelete = (id: string) => {
-    if (confirm(`Delete review ${id}?`)) {
+  const handleDelete = async (id: string) => {
+    if (!confirm(`Delete review ${id}?`)) return;
+    if (configured) {
+      await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+      await load();
+    } else {
       deleteReview(id);
       setReviewList(getReviews());
     }
   };
 
-  const toggleVerified = (id: string, current: boolean) => {
-    setReviewVerified(id, !current);
-    setReviewList(getReviews());
+  const toggleVerified = async (id: string, current: boolean) => {
+    if (configured) {
+      await fetch(`/api/reviews/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified: !current }),
+      });
+      await load();
+    } else {
+      setReviewVerified(id, !current);
+      setReviewList(getReviews());
+    }
   };
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="serif text-3xl text-[#1a1410] mb-1">Reviews</h1>
-        <p className="text-sm text-[#6b5d4c]">{filtered.length} reviews · Avg {avgRating}★</p>
+        <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
+          {filtered.length} reviews · Avg {avgRating}★
+          <StorageBadge configured={configured} />
+        </p>
       </div>
 
       {/* Stats */}
@@ -131,5 +164,19 @@ export default function AdminReviewsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function StorageBadge({ configured }: { configured: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
+        configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+      }`}
+      title={configured ? 'Saved to your database' : 'Stored in this browser only — run supabase/schema.sql to sync'}
+    >
+      {configured ? <Database size={11} /> : <HardDrive size={11} />}
+      {configured ? 'Database' : 'This browser'}
+    </span>
   );
 }

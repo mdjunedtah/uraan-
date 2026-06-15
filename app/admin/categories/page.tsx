@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Plus, Edit2, Trash2, X, Database, HardDrive } from 'lucide-react';
 import {
   type Category,
   getCategories,
@@ -14,13 +14,31 @@ const emptyForm = { name: '', description: '', image: '' };
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [configured, setConfigured] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => {
+  // Prefer the database; fall back to the in-browser store when it's off.
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      if (res.ok && data.configured) {
+        setConfigured(true);
+        setCategories(data.categories as Category[]);
+        return;
+      }
+    } catch {
+      /* ignore — use the local fallback */
+    }
+    setConfigured(false);
     setCategories(getCategories());
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const openAdd = () => {
     setEditingSlug(null);
@@ -40,24 +58,43 @@ export default function AdminCategoriesPage() {
     setForm(emptyForm);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    if (editingSlug) {
-      updateCategory(editingSlug, {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        image: form.image.trim() || '/images/necklace.jpg',
-      });
+    const payload = {
+      name: form.name.trim(),
+      description: form.description.trim(),
+      image: form.image.trim() || '/images/necklace.jpg',
+    };
+    if (configured) {
+      if (editingSlug) {
+        await fetch(`/api/categories/${editingSlug}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+      await load();
     } else {
-      addCategory(form);
+      if (editingSlug) updateCategory(editingSlug, payload);
+      else addCategory(form);
+      setCategories(getCategories());
     }
-    setCategories(getCategories());
     closeForm();
   };
 
-  const handleDelete = (slug: string, name: string) => {
-    if (confirm(`Delete category "${name}"?`)) {
+  const handleDelete = async (slug: string, name: string) => {
+    if (!confirm(`Delete category "${name}"?`)) return;
+    if (configured) {
+      await fetch(`/api/categories/${slug}`, { method: 'DELETE' });
+      await load();
+    } else {
       deleteCategory(slug);
       setCategories(getCategories());
     }
@@ -68,7 +105,10 @@ export default function AdminCategoriesPage() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Categories</h1>
-          <p className="text-sm text-[#6b5d4c]">{categories.length} active categories</p>
+          <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
+            {categories.length} active categories
+            <StorageBadge configured={configured} />
+          </p>
         </div>
         <button
           onClick={() => (showForm ? closeForm() : openAdd())}
@@ -164,5 +204,19 @@ export default function AdminCategoriesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function StorageBadge({ configured }: { configured: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
+        configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+      }`}
+      title={configured ? 'Saved to your database' : 'Stored in this browser only — run supabase/schema.sql to sync'}
+    >
+      {configured ? <Database size={11} /> : <HardDrive size={11} />}
+      {configured ? 'Database' : 'This browser'}
+    </span>
   );
 }

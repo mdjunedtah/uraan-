@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BannerForm from '@/components/admin/BannerForm';
-import { Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Database, HardDrive } from 'lucide-react';
 import {
   type Banner,
   getBanners,
@@ -14,37 +14,81 @@ import {
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [configured, setConfigured] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | undefined>();
 
-  useEffect(() => {
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/banners');
+      const data = await res.json();
+      if (res.ok && data.configured) {
+        setConfigured(true);
+        setBanners(data.banners as Banner[]);
+        return;
+      }
+    } catch {
+      /* ignore — use the local fallback */
+    }
+    setConfigured(false);
     setBanners(getBanners());
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm(`Delete banner ${id}?`)) {
+  const handleDelete = async (id: string) => {
+    if (!confirm(`Delete banner ${id}?`)) return;
+    if (configured) {
+      await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      await load();
+    } else {
       deleteBanner(id);
       setBanners(getBanners());
     }
   };
 
-  const handleToggle = (id: string) => {
-    toggleBanner(id);
-    setBanners(getBanners());
+  const handleToggle = async (b: Banner) => {
+    if (configured) {
+      await fetch(`/api/banners/${b.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !b.active }),
+      });
+      await load();
+    } else {
+      toggleBanner(b.id);
+      setBanners(getBanners());
+    }
   };
 
-  const handleSave = (data: Omit<Banner, 'id'>) => {
-    if (editingBanner) {
-      updateBanner(editingBanner.id, data);
+  const handleSave = async (data: Omit<Banner, 'id'>) => {
+    if (configured) {
+      if (editingBanner) {
+        await fetch(`/api/banners/${editingBanner.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch('/api/banners', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      }
+      await load();
     } else {
-      addBanner(data);
+      if (editingBanner) updateBanner(editingBanner.id, data);
+      else addBanner(data);
+      setBanners(getBanners());
     }
-    setBanners(getBanners());
     setShowForm(false);
     setEditingBanner(undefined);
   };
@@ -72,8 +116,9 @@ export default function AdminBannersPage() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Banners</h1>
-          <p className="text-sm text-[#6b5d4c]">
+          <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
             {banners.length} banners · {banners.filter((b) => b.active).length} active
+            <StorageBadge configured={configured} />
           </p>
         </div>
         <button
@@ -113,7 +158,7 @@ export default function AdminBannersPage() {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => handleToggle(b.id)}
+                  onClick={() => handleToggle(b)}
                   aria-label={b.active ? 'Hide' : 'Show'}
                   className="text-[#6b5d4c] hover:text-[#b8893a] p-1"
                 >
@@ -145,5 +190,19 @@ export default function AdminBannersPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function StorageBadge({ configured }: { configured: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
+        configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+      }`}
+      title={configured ? 'Saved to your database' : 'Stored in this browser only — run supabase/schema.sql to sync'}
+    >
+      {configured ? <Database size={11} /> : <HardDrive size={11} />}
+      {configured ? 'Database' : 'This browser'}
+    </span>
   );
 }

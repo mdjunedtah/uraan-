@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, Ticket, Copy, X, Check } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive } from 'lucide-react';
 import {
   type Coupon,
   type CouponType,
@@ -23,14 +23,31 @@ const emptyForm = {
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [configured, setConfigured] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [copied, setCopied] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/coupons');
+      const data = await res.json();
+      if (res.ok && data.configured) {
+        setConfigured(true);
+        setCoupons(data.coupons as Coupon[]);
+        return;
+      }
+    } catch {
+      /* ignore — use the local fallback */
+    }
+    setConfigured(false);
     setCoupons(getCoupons());
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const openAdd = () => {
     setEditingId(null);
@@ -57,42 +74,70 @@ export default function AdminCouponsPage() {
     setForm(emptyForm);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.code.trim()) return;
-    if (editingId) {
-      updateCoupon(editingId, {
-        code: form.code.trim().toUpperCase(),
-        type: form.type,
-        value: Number(form.value) || 0,
-        minOrder: Number(form.minOrder) || 0,
-        usageLimit: Number(form.usageLimit) || 0,
-        validUntil: form.validUntil.trim(),
-      });
+    const payload = {
+      code: form.code.trim().toUpperCase(),
+      type: form.type,
+      value: Number(form.value) || 0,
+      minOrder: Number(form.minOrder) || 0,
+      usageLimit: Number(form.usageLimit) || 0,
+      validUntil: form.validUntil.trim(),
+    };
+    if (configured) {
+      if (editingId) {
+        await fetch(`/api/coupons/${editingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await fetch('/api/coupons', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+      await load();
     } else {
-      addCoupon(form);
+      if (editingId) updateCoupon(editingId, payload);
+      else addCoupon(form);
+      setCoupons(getCoupons());
     }
-    setCoupons(getCoupons());
     closeForm();
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm(`Delete coupon ${id}?`)) {
+  const handleDelete = async (id: string) => {
+    if (!confirm(`Delete coupon ${id}?`)) return;
+    if (configured) {
+      await fetch(`/api/coupons/${id}`, { method: 'DELETE' });
+      await load();
+    } else {
       deleteCoupon(id);
       setCoupons(getCoupons());
     }
   };
 
-  const handleToggle = (id: string) => {
-    toggleCoupon(id);
-    setCoupons(getCoupons());
+  const handleToggle = async (c: Coupon) => {
+    if (configured) {
+      await fetch(`/api/coupons/${c.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !c.active }),
+      });
+      await load();
+    } else {
+      toggleCoupon(c.id);
+      setCoupons(getCoupons());
+    }
   };
 
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(code);
-      setTimeout(() => setCopied((c) => (c === code ? null : c)), 1500);
+      setTimeout(() => setCopied((cur) => (cur === code ? null : cur)), 1500);
     } catch {
       /* clipboard blocked — ignore */
     }
@@ -103,8 +148,9 @@ export default function AdminCouponsPage() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Coupons</h1>
-          <p className="text-sm text-[#6b5d4c]">
+          <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
             {coupons.length} coupons · {coupons.filter((c) => c.active).length} active
+            <StorageBadge configured={configured} />
           </p>
         </div>
         <button
@@ -235,7 +281,7 @@ export default function AdminCouponsPage() {
                 <td className="py-3 px-4 text-xs text-[#6b5d4c]">{c.validUntil}</td>
                 <td className="py-3 px-4">
                   <button
-                    onClick={() => handleToggle(c.id)}
+                    onClick={() => handleToggle(c)}
                     className={`inline-block px-2 py-0.5 text-[10px] font-semibold ${
                       c.active ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-gray-500/10 text-gray-600'
                     }`}
@@ -262,5 +308,19 @@ export default function AdminCouponsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function StorageBadge({ configured }: { configured: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
+        configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+      }`}
+      title={configured ? 'Saved to your database' : 'Stored in this browser only — run supabase/schema.sql to sync'}
+    >
+      {configured ? <Database size={11} /> : <HardDrive size={11} />}
+      {configured ? 'Database' : 'This browser'}
+    </span>
   );
 }
