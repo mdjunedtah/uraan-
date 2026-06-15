@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetOrders, dbInsertOrder } from '@/lib/ordersDb';
+import { isAdminRequest } from '@/lib/adminApi';
 
-// GET → list orders from the database (admin).
+// GET → list orders from the database (admin only — contains customer PII).
 export async function GET() {
+  if (!(await isAdminRequest())) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized.' }, { status: 401 });
+  }
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ ok: true, configured: false, orders: [] });
   }
