@@ -1,42 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-import { getAllAdminUsers, User } from '@/lib/users';
-import { UserCog, Plus, Edit2, Trash2, Mail, Phone, Shield } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { UserCog, Plus, Edit2, Trash2, Mail, Phone, Shield, X } from 'lucide-react';
+import { type User, type TeamRole, getTeam, addMember, updateMember, deleteMember } from '@/lib/team';
+
+const emptyForm = { name: '', email: '', phone: '', role: 'staff' as TeamRole };
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState(getAllAdminUsers());
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newUser, setNewUser] = useState({
-    name: '', email: '', phone: '', role: 'staff' as 'admin' | 'staff',
-  });
+  const [users, setUsers] = useState<User[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(emptyForm);
 
-  const handleAdd = (e: React.FormEvent) => {
+  useEffect(() => {
+    setUsers(getTeam());
+  }, []);
+
+  const openAdd = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowForm(true);
+  };
+
+  const openEdit = (u: User) => {
+    setEditingId(u.id);
+    setForm({ name: u.name, email: u.email, phone: u.phone, role: u.role === 'admin' ? 'admin' : 'staff' });
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = (newUser.role === 'admin' ? 'A' : 'S') + (users.length + 1).toString().padStart(3, '0');
-    const newAdmin: User = {
-      id,
-      name: newUser.name,
-      email: newUser.email,
-      phone: newUser.phone,
-      city: 'HQ',
-      role: newUser.role,
-      orders: 0,
-      totalSpent: 0,
-      joinedOn: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-    };
-    setUsers([...users, newAdmin]);
-    setNewUser({ name: '', email: '', phone: '', role: 'staff' });
-    setShowAddForm(false);
+    if (!form.name.trim() || !form.email.trim()) return;
+    if (editingId) {
+      updateMember(editingId, {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        role: form.role,
+      });
+    } else {
+      addMember(form);
+    }
+    setUsers(getTeam());
+    closeForm();
   };
 
   const handleDelete = (id: string) => {
     if (confirm(`Delete user ${id}?`)) {
-      setUsers(users.filter((u) => u.id !== id));
+      deleteMember(id);
+      setUsers(getTeam());
     }
   };
 
-  const roleColor = {
+  const roleColor: Record<string, string> = {
     admin: 'bg-[#b8893a]/10 text-[#b8893a]',
     staff: 'bg-blue-500/10 text-blue-600',
     customer: 'bg-gray-500/10 text-gray-600',
@@ -52,32 +74,34 @@ export default function AdminUsersPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => (showForm ? closeForm() : openAdd())}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410]"
         >
-          <Plus size={14} /> Add User
+          {showForm ? <X size={14} /> : <Plus size={14} />} {showForm ? 'Close' : 'Add User'}
         </button>
       </div>
 
-      {showAddForm && (
-        <form onSubmit={handleAdd} className="bg-white border border-[rgba(184,137,58,0.18)] p-5 mb-5">
-          <h3 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-4">New Admin User</h3>
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-white border border-[rgba(184,137,58,0.18)] p-5 mb-5">
+          <h3 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-4">
+            {editingId ? 'Edit Team Member' : 'New Admin User'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="luxury-label">Name *</label>
               <input
                 type="text"
                 required
-                value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="luxury-input"
               />
             </div>
             <div>
               <label className="luxury-label">Role *</label>
               <select
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value as 'admin' | 'staff' })}
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value as TeamRole })}
                 className="luxury-input"
               >
                 <option value="staff">Staff</option>
@@ -89,8 +113,8 @@ export default function AdminUsersPage() {
               <input
                 type="email"
                 required
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="luxury-input"
               />
             </div>
@@ -98,17 +122,17 @@ export default function AdminUsersPage() {
               <label className="luxury-label">Phone</label>
               <input
                 type="tel"
-                value={newUser.phone}
-                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="luxury-input"
               />
             </div>
           </div>
           <div className="mt-4 flex gap-3">
             <button type="submit" className="px-6 py-2 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold">
-              Add User
+              {editingId ? 'Save Changes' : 'Add User'}
             </button>
-            <button type="button" onClick={() => setShowAddForm(false)} className="px-6 py-2 border border-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold">
+            <button type="button" onClick={closeForm} className="px-6 py-2 border border-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold">
               Cancel
             </button>
           </div>
@@ -156,7 +180,7 @@ export default function AdminUsersPage() {
                 <td className="py-3 px-4 text-xs text-[#6b5d4c]">{u.joinedOn}</td>
                 <td className="py-3 px-4">
                   <div className="flex justify-end gap-2">
-                    <button aria-label="Edit" className="text-[#6b5d4c] hover:text-[#b8893a]">
+                    <button onClick={() => openEdit(u)} aria-label="Edit" className="text-[#6b5d4c] hover:text-[#b8893a]">
                       <Edit2 size={14} />
                     </button>
                     <button onClick={() => handleDelete(u.id)} aria-label="Delete" className="text-[#6b5d4c] hover:text-[#7a2e2e]">

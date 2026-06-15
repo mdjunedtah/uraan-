@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import OrderTable from '@/components/admin/OrderTable';
-import { orders as demoOrders, type Order, type OrderStatus } from '@/lib/orders';
-import { Search, Database, HardDrive } from 'lucide-react';
+import { orders as demoOrders, type Order, type OrderStatus, getStatusColor } from '@/lib/orders';
+import { whatsappLink, orderUpdateMessage } from '@/lib/whatsapp';
+import { Search, Database, HardDrive, X, MessageCircle } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [data, setData] = useState<Order[]>(demoOrders);
   const [configured, setConfigured] = useState(false);
+  const [selected, setSelected] = useState<Order | null>(null);
 
   // Prefer real orders from the database; fall back to the demo data.
   useEffect(() => {
@@ -41,11 +43,12 @@ export default function AdminOrdersPage() {
   );
 
   const handleView = (id: string) => {
-    alert(`Viewing order: ${id}`);
+    setSelected(data.find((o) => o.id === id) || null);
   };
 
   const handleStatusChange = async (id: string, status: OrderStatus) => {
     setData((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    setSelected((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
     if (configured) {
       await fetch(`/api/orders/${id}`, {
         method: 'PATCH',
@@ -125,6 +128,108 @@ export default function AdminOrdersPage() {
       </div>
 
       <OrderTable orders={filtered} onView={handleView} onStatusChange={handleStatusChange} />
+
+      {selected && (
+        <OrderDetailModal
+          order={selected}
+          onClose={() => setSelected(null)}
+          onStatusChange={handleStatusChange}
+        />
+      )}
+    </div>
+  );
+}
+
+const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+
+function OrderDetailModal({
+  order,
+  onClose,
+  onStatusChange,
+}: {
+  order: Order;
+  onClose: () => void;
+  onStatusChange: (id: string, status: OrderStatus) => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto border border-[rgba(184,137,58,0.3)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between p-5 border-b border-[rgba(184,137,58,0.18)]">
+          <div>
+            <h2 className="serif text-2xl text-[#1a1410]">Order {order.id}</h2>
+            <p className="text-xs text-[#9a8c75] mt-1">Placed {order.date}</p>
+          </div>
+          <button onClick={onClose} aria-label="Close" className="text-[#6b5d4c] hover:text-[#1a1410] p-1">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <span className={`inline-block px-3 py-1 text-xs font-semibold ${getStatusColor(order.status)}`}>
+              {order.status}
+            </span>
+            <select
+              value={order.status}
+              onChange={(e) => onStatusChange(order.id, e.target.value as OrderStatus)}
+              className="border border-[rgba(184,137,58,0.32)] px-3 py-1.5 text-xs outline-none cursor-pointer"
+            >
+              {ORDER_STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Customer</h3>
+            <div className="text-sm text-[#1a1410] font-medium">{order.customer}</div>
+            <div className="text-sm text-[#6b5d4c]">{order.email}</div>
+            <div className="text-sm text-[#6b5d4c]">{order.phone}</div>
+            {order.address && <div className="text-sm text-[#6b5d4c] mt-1">{order.address}</div>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Payment</h3>
+              <div className="text-sm text-[#1a1410]">{order.payment || '—'}</div>
+              {order.paid !== undefined && (
+                <span
+                  className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold ${
+                    order.paid ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-gray-500/10 text-gray-600'
+                  }`}
+                >
+                  {order.paid ? 'PAID' : 'UNPAID'}
+                </span>
+              )}
+              {order.paymentId && (
+                <div className="text-[10px] text-[#9a8c75] mt-1 break-all">{order.paymentId}</div>
+              )}
+            </div>
+            <div>
+              <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Summary</h3>
+              <div className="text-sm text-[#6b5d4c]">{order.items} item(s)</div>
+              <div className="serif text-2xl font-bold text-[#1a1410]">
+                ₹{order.amount.toLocaleString('en-IN')}
+              </div>
+            </div>
+          </div>
+
+          <a
+            href={whatsappLink(orderUpdateMessage(order), order.phone)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full px-5 py-3 bg-[#16796F] text-white text-[11px] tracking-[2px] uppercase font-semibold hover:opacity-90 inline-flex items-center justify-center gap-2"
+          >
+            <MessageCircle size={14} /> Send update on WhatsApp
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

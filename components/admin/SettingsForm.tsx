@@ -1,63 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, Store, Mail, Phone, MapPin, Globe, CreditCard, MessageCircle } from 'lucide-react';
-import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
-
-type SettingsData = {
-  storeName: string;
-  storeEmail: string;
-  storePhone: string;
-  storeAddress: string;
-  currency: string;
-  taxRate: number;
-  shippingFlat: number;
-  freeShippingThreshold: number;
-  codCharges: number;
-  enableUPI: boolean;
-  enableCards: boolean;
-  enableNetbanking: boolean;
-  enableWallet: boolean;
-  enableCOD: boolean;
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  whatsappNumber: string;
-  whatsappOrderUpdates: boolean;
-  crmProvider: string;
-};
+import { useEffect, useState } from 'react';
+import { Save, Store, Mail, Phone, MapPin, Globe, CreditCard, MessageCircle, Check } from 'lucide-react';
+import { type SettingsData, DEFAULT_SETTINGS, getSettings, saveSettings } from '@/lib/settings';
 
 export default function SettingsForm() {
-  const [settings, setSettings] = useState<SettingsData>({
-    storeName: 'Om Gauri Pulta',
-    storeEmail: 'info@omgauripulta.com',
-    storePhone: '+91 98765 43210',
-    storeAddress: 'Main Bazaar Road, Your City, India - 123456',
-    currency: 'INR',
-    taxRate: 3,
-    shippingFlat: 99,
-    freeShippingThreshold: 1999,
-    codCharges: 50,
-    enableUPI: true,
-    enableCards: true,
-    enableNetbanking: true,
-    enableWallet: true,
-    enableCOD: true,
-    emailNotifications: true,
-    smsNotifications: true,
-    whatsappNumber: WHATSAPP_NUMBER,
-    whatsappOrderUpdates: true,
-    crmProvider: 'HubSpot',
-  });
+  const [settings, setSettings] = useState<SettingsData>(DEFAULT_SETTINGS);
+  const [saved, setSaved] = useState(false);
 
-  const [submitted, setSubmitted] = useState(false);
+  // Load any previously saved settings (localStorage) after mount, so server
+  // and first client render both use the defaults — no hydration mismatch.
+  useEffect(() => {
+    setSettings(getSettings());
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      alert('Settings saved successfully!');
-      setSubmitted(false);
-    }, 800);
+    saveSettings(settings);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
   };
 
   return (
@@ -303,13 +264,17 @@ export default function SettingsForm() {
         </p>
       </div>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-end items-center gap-3">
+        {saved && (
+          <span className="text-[11px] tracking-[1px] uppercase text-[#3d6b5a] font-semibold inline-flex items-center gap-1">
+            <Check size={14} /> Saved
+          </span>
+        )}
         <button
           type="submit"
-          disabled={submitted}
-          className="px-8 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center gap-2 disabled:opacity-50"
+          className="px-8 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center gap-2"
         >
-          <Save size={14} /> {submitted ? 'Saving...' : 'Save All Settings'}
+          <Save size={14} /> Save All Settings
         </button>
       </div>
     </form>

@@ -1,30 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BannerForm from '@/components/admin/BannerForm';
 import { Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
-
-type Banner = {
-  id: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  ctaText: string;
-  ctaLink: string;
-  position: 'hero' | 'middle' | 'footer';
-  active: boolean;
-};
-
-const initialBanners: Banner[] = [
-  { id: 'B001', title: 'Festive Collection 2026', subtitle: 'Up to 40% off on selected items', image: '/images/banner.jpg', ctaText: 'Shop Now', ctaLink: '/collections', position: 'hero', active: true },
-  { id: 'B002', title: 'Bridal Special', subtitle: 'Heirloom pieces for your sacred day', image: '/images/bridal-set.jpg', ctaText: 'Explore Bridal', ctaLink: '/collections?type=bridal', position: 'middle', active: true },
-  { id: 'B003', title: 'Sacred Rudraksh', subtitle: 'Authentic certified beads', image: '/images/luxury-bg.jpg', ctaText: 'Discover', ctaLink: '/collections?type=rudraksh', position: 'middle', active: false },
-];
+import {
+  type Banner,
+  getBanners,
+  addBanner,
+  updateBanner,
+  toggleBanner,
+  deleteBanner,
+} from '@/lib/banners';
 
 export default function AdminBannersPage() {
-  const [banners, setBanners] = useState<Banner[]>(initialBanners);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | undefined>();
+
+  useEffect(() => {
+    setBanners(getBanners());
+  }, []);
 
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
@@ -33,15 +28,23 @@ export default function AdminBannersPage() {
 
   const handleDelete = (id: string) => {
     if (confirm(`Delete banner ${id}?`)) {
-      setBanners(banners.filter((b) => b.id !== id));
+      deleteBanner(id);
+      setBanners(getBanners());
     }
   };
 
-  const toggleActive = (id: string) => {
-    setBanners(banners.map((b) => (b.id === id ? { ...b, active: !b.active } : b)));
+  const handleToggle = (id: string) => {
+    toggleBanner(id);
+    setBanners(getBanners());
   };
 
-  const handleSave = () => {
+  const handleSave = (data: Omit<Banner, 'id'>) => {
+    if (editingBanner) {
+      updateBanner(editingBanner.id, data);
+    } else {
+      addBanner(data);
+    }
+    setBanners(getBanners());
     setShowForm(false);
     setEditingBanner(undefined);
   };
@@ -74,7 +77,10 @@ export default function AdminBannersPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingBanner(undefined);
+            setShowForm(true);
+          }}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410]"
         >
           <Plus size={14} /> Add Banner
@@ -107,7 +113,7 @@ export default function AdminBannersPage() {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => toggleActive(b.id)}
+                  onClick={() => handleToggle(b.id)}
                   aria-label={b.active ? 'Hide' : 'Show'}
                   className="text-[#6b5d4c] hover:text-[#b8893a] p-1"
                 >
@@ -132,6 +138,12 @@ export default function AdminBannersPage() {
           </div>
         ))}
       </div>
+
+      {banners.length === 0 && (
+        <div className="bg-white border border-[rgba(184,137,58,0.18)] text-center py-12 text-sm text-[#6b5d4c]">
+          No banners yet. Add your first one.
+        </div>
+      )}
     </div>
   );
 }

@@ -37,16 +37,9 @@ export default function BannerForm({
     active: initialBanner?.active ?? true,
   });
 
-  const [submitted, setSubmitted] = useState(false);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
     if (onSave) onSave(form);
-    setTimeout(() => {
-      alert(`Banner ${mode === 'add' ? 'added' : 'updated'} successfully!`);
-      setSubmitted(false);
-    }, 600);
   };
 
   return (
@@ -162,10 +155,9 @@ export default function BannerForm({
         </button>
         <button
           type="submit"
-          disabled={submitted}
-          className="px-6 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2 disabled:opacity-50"
+          className="px-6 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2"
         >
-          <Save size={14} /> {submitted ? 'Saving...' : 'Save Banner'}
+          <Save size={14} /> Save Banner
         </button>
       </div>
     </form>

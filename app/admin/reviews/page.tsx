@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { reviews } from '@/data/jewelleryData';
+import { useEffect, useState } from 'react';
 import { Star, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { type Review, getReviews, setReviewVerified, deleteReview } from '@/lib/reviewsStore';
 
 export default function AdminReviewsPage() {
-  const [reviewList, setReviewList] = useState(reviews);
+  const [reviewList, setReviewList] = useState<Review[]>([]);
   const [filter, setFilter] = useState<'all' | 'verified' | 'pending'>('all');
+
+  useEffect(() => {
+    setReviewList(getReviews());
+  }, []);
 
   const filtered = filter === 'all'
     ? reviewList
@@ -14,20 +18,20 @@ export default function AdminReviewsPage() {
       ? reviewList.filter((r) => r.verified)
       : reviewList.filter((r) => !r.verified);
 
-  const avgRating = (
-    reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length
-  ).toFixed(1);
+  const avgRating = reviewList.length
+    ? (reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length).toFixed(1)
+    : '0.0';
 
   const handleDelete = (id: string) => {
     if (confirm(`Delete review ${id}?`)) {
-      setReviewList(reviewList.filter((r) => r.id !== id));
+      deleteReview(id);
+      setReviewList(getReviews());
     }
   };
 
-  const toggleVerified = (id: string) => {
-    setReviewList(
-      reviewList.map((r) => (r.id === id ? { ...r, verified: !r.verified } : r))
-    );
+  const toggleVerified = (id: string, current: boolean) => {
+    setReviewVerified(id, !current);
+    setReviewList(getReviews());
   };
 
   return (
@@ -101,7 +105,7 @@ export default function AdminReviewsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <button
-                  onClick={() => toggleVerified(r.id)}
+                  onClick={() => toggleVerified(r.id, r.verified)}
                   aria-label="Toggle verified"
                   className={`p-2 ${r.verified ? 'text-[#7a2e2e]' : 'text-[#3d6b5a]'}`}
                   title={r.verified ? 'Unverify' : 'Verify'}
@@ -120,6 +124,12 @@ export default function AdminReviewsPage() {
           </div>
         ))}
       </div>
+
+      {filtered.length === 0 && (
+        <div className="bg-white border border-[rgba(184,137,58,0.18)] text-center py-12 text-sm text-[#6b5d4c]">
+          No reviews in this view.
+        </div>
+      )}
     </div>
   );
 }
