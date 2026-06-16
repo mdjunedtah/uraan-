@@ -29,3 +29,30 @@ export function adminSessionToken(): Promise<string> {
 export function verifyAdmin(email: string, password: string): boolean {
   return email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password.trim() === ADMIN_PASSWORD;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// TEMP DEBUG (remove after diagnosing login). Returns ONLY boolean status
+// checks — never the actual email, password, secret, or any env-var VALUE —
+// so it is always safe to print to server logs. It does NOT participate in any
+// auth decision; verifyAdmin() above remains the single source of truth.
+export function debugLoginChecks(email: string, password: string) {
+  return {
+    // (1,2) The names the operator may have set in Vercel. NOTE: the code does
+    // NOT read these — it reads ADMIN_EMAIL / ADMIN_PASSWORD (below).
+    secretAdminEmailEnvSet: Boolean(process.env.SECRET_ADMIN_EMAIL),
+    secretAdminPasswordEnvSet: Boolean(process.env.SECRET_ADMIN_PASSWORD),
+    // The names the code actually reads:
+    adminEmailEnvSet: Boolean(process.env.ADMIN_EMAIL),
+    adminPasswordEnvSet: Boolean(process.env.ADMIN_PASSWORD),
+    adminSessionSecretEnvSet: Boolean(process.env.ADMIN_SESSION_SECRET),
+    // True when no real env var was found and the built-in fallback is in use:
+    usingFallbackEmail: !process.env.ADMIN_EMAIL,
+    usingFallbackPassword: !process.env.ADMIN_PASSWORD,
+    // (3) Did the request actually carry credentials?
+    incomingEmailReceived: Boolean(email && email.trim()),
+    incomingPasswordReceived: Boolean(password),
+    // (4,5) Per-field comparison against the EFFECTIVE configured credentials:
+    emailComparisonPassed: email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+    passwordComparisonPassed: password.trim() === ADMIN_PASSWORD,
+  };
+}

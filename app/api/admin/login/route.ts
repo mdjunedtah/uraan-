@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ADMIN_COOKIE, adminSessionToken, verifyAdmin } from '@/lib/adminAuth';
+import { ADMIN_COOKIE, adminSessionToken, verifyAdmin, debugLoginChecks } from '@/lib/adminAuth';
 import { getClientIp, parseUserAgent, deviceFingerprint } from '@/lib/security/request';
 import { checkLockout, recordAttempt } from '@/lib/security/rateLimit';
 import { logAudit, logSecurityEvent } from '@/lib/audit';
@@ -7,6 +7,14 @@ import { getGeo, geoLabel } from '@/lib/security/geo';
 import { upsertDevice } from '@/lib/security/devices';
 import { sendEmail, isEmailConfigured } from '@/lib/email';
 import { loginAlertEmail } from '@/lib/security/emails';
+
+// ───────────────────────── TEMP DEBUG (remove after diagnosing login) ──────
+// Module-scoped so it survives across requests within ONE warm serverless
+// instance — this lets us compare the FIRST vs a SECOND login attempt (#10).
+// Resets to 0 on a cold start, which is itself useful signal in the logs.
+let __debugAttempt = 0;
+let __debugLastOutcome: 'success' | 'fail' | null = null;
+// ────────────────────────────────────────────────────────────────────────────
 
 // This route runs on the Node.js runtime (default for route handlers) so the
 // Supabase service-role client used by the security helpers works. Every helper
@@ -25,9 +33,35 @@ export async function POST(request: Request) {
   const email = String(body.email || '').trim();
   const password = String(body.password || '');
 
+  // ───────────────────────── TEMP DEBUG (remove later) ─────────────────────
+  // Logs ONLY boolean status — never the email, password, secret, token, or any
+  // env-var VALUE. Tag "[ADMIN-LOGIN-DEBUG]" makes it greppable in Vercel logs.
+  __debugAttempt += 1;
+  const debugOutcome = (outcome: 'success' | 'fail') => {
+    console.log('[ADMIN-LOGIN-DEBUG] outcome', {
+      attemptNumberThisInstance: __debugAttempt,
+      isFirstAttemptThisInstance: __debugAttempt === 1,
+      outcome,
+      previousOutcome: __debugLastOutcome,
+      behavesDifferentlyFromPreviousAttempt:
+        __debugLastOutcome !== null && __debugLastOutcome !== outcome,
+    });
+    __debugLastOutcome = outcome;
+  };
+  console.log('[ADMIN-LOGIN-DEBUG] env+input', {
+    attemptNumberThisInstance: __debugAttempt,
+    ...debugLoginChecks(email, password),
+  });
+  // ──────────────────────────────────────────────────────────────────────────
+
   // Brute-force protection: refuse while the account is locked.
   const lock = await checkLockout(email);
+  console.log('[ADMIN-LOGIN-DEBUG] lockout', {
+    accountLocked: lock.locked,
+    permanentLock: Boolean(lock.permanent),
+  });
   if (lock.locked) {
+    debugOutcome('fail');
     await logSecurityEvent({
       type: 'login_blocked',
       severity: 'warning',
@@ -42,7 +76,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error }, { status: 429 });
   }
 
-  if (!verifyAdmin(email, password)) {
+  const verifyPassed = verifyAdmin(email, password);
+  console.log('[ADMIN-LOGIN-DEBUG] verify', { verifyAdminPassed: verifyPassed });
+  if (!verifyPassed) {
+    debugOutcome('fail');
     const { lockedNow, permanent } = await recordAttempt({
       email,
       ip,
@@ -80,12 +117,18 @@ export async function POST(request: Request) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(ADMIN_COOKIE, await adminSessionToken(), {
+  const sessionToken = await adminSessionToken();
+  res.cookies.set(ADMIN_COOKIE, sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });
+  console.log('[ADMIN-LOGIN-DEBUG] session', {
+    sessionTokenGenerated: Boolean(sessionToken),
+    sessionCookieSet: Boolean(res.cookies.get(ADMIN_COOKIE)),
+  });
+  debugOutcome('success');
   return res;
 }
