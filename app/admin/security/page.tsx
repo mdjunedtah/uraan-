@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ShieldCheck, Smartphone, Trash2, AlertCircle, Check, KeyRound, Lock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
 import { isSupabaseAuthConfigured } from '@/lib/supabase/config';
+import SecurityActivity from '@/components/admin/SecurityActivity';
 
 type Factor = { id: string; friendly_name?: string | null; factor_type: string; status: string };
 type Enrollment = { factorId: string; qr: string; secret: string; uri: string };
@@ -312,6 +313,8 @@ export default function AdminSecurityPage() {
               {pwBusy ? 'Updating…' : 'Update password'}
             </button>
           </form>
+
+          <SecurityActivity />
         </div>
       )}
     </div>
