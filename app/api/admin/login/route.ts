@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { ADMIN_COOKIE, adminSessionToken, verifyAdmin } from '@/lib/adminAuth';
-import { getClientIp } from '@/lib/security/request';
+import { getClientIp, parseUserAgent, deviceFingerprint } from '@/lib/security/request';
 import { checkLockout, recordAttempt } from '@/lib/security/rateLimit';
 import { logAudit, logSecurityEvent } from '@/lib/audit';
+import { getGeo, geoLabel } from '@/lib/security/geo';
+import { upsertDevice } from '@/lib/security/devices';
+import { sendEmail, isEmailConfigured } from '@/lib/email';
+import { loginAlertEmail } from '@/lib/security/emails';
 
 // This route runs on the Node.js runtime (default for route handlers) so the
 // Supabase service-role client used by the security helpers works. Every helper
@@ -59,7 +63,21 @@ export async function POST(request: Request) {
   }
 
   await recordAttempt({ email, ip, userAgent, success: true });
-  await logAudit({ actorEmail: email, action: 'admin_login', ip, userAgent });
+  await logAudit({ actorEmail: email, action: 'admin_login', ip, userAgent, metadata: { via: 'legacy' } });
+
+  // Recovery login is always trusted (break-glass); record the device and send
+  // a login alert when email is configured.
+  const dev = parseUserAgent(userAgent);
+  await upsertDevice({ email, fingerprint: deviceFingerprint(userAgent, ip), browser: dev.browser, os: dev.os, ip, approved: true });
+  if (isEmailConfigured()) {
+    const { subject, html } = loginAlertEmail({
+      device: `${dev.browser} · ${dev.os} · ${dev.deviceType}`,
+      location: geoLabel(getGeo(request)),
+      ip,
+      time: new Date().toLocaleString('en-IN'),
+    });
+    await sendEmail(email, subject, html);
+  }
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set(ADMIN_COOKIE, await adminSessionToken(), {

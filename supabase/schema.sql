@@ -293,3 +293,15 @@ drop policy if exists "admin_users self read" on public.admin_users;
 create policy "admin_users self read" on public.admin_users
   for select to authenticated
   using (lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+
+-- Email OTP codes (new-device approval / email verification). Hashes only.
+create table if not exists public.email_otps (
+  id         bigint generated always as identity primary key,
+  email      text not null,
+  purpose    text not null,
+  code_hash  text not null,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists email_otps_email_idx on public.email_otps (email, created_at desc);
+alter table public.email_otps enable row level security;
