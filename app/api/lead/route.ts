@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { submitLead } from '@/lib/crm';
 import { dbInsertLead } from '@/lib/leadsDb';
+import { notifyAdminNewLead } from '@/lib/whatsappServer';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -40,6 +41,24 @@ export async function POST(request: Request) {
   const result = await submitLead({ name, email, phone, message, source });
   if (!result.ok) {
     console.error('[lead] HubSpot push failed:', result.error);
+  }
+
+  // Notify the admin on WhatsApp (best-effort): a new lead just came in. This
+  // must never block or fail the visitor's submission — the lead is already
+  // saved above. Requires WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID to actually
+  // deliver; otherwise it is logged and skipped.
+  try {
+    const notify = await notifyAdminNewLead({ name, email, phone, message, source });
+    if (!notify.ok) {
+      console.error('[lead] WhatsApp admin notify failed:', notify.error);
+    } else if (!notify.configured) {
+      console.warn(
+        '[lead] WhatsApp admin notify skipped — Cloud API not configured ' +
+          '(set WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID in Vercel).'
+      );
+    }
+  } catch (err) {
+    console.error('[lead] WhatsApp admin notify error:', err);
   }
 
   return NextResponse.json({ ok: true, configured: result.configured });
