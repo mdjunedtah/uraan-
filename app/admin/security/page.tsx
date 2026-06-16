@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, Smartphone, Trash2, AlertCircle, Check, KeyRound } from 'lucide-react';
+import { ShieldCheck, Smartphone, Trash2, AlertCircle, Check, KeyRound, Lock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
 import { isSupabaseAuthConfigured } from '@/lib/supabase/config';
 
@@ -21,6 +21,14 @@ export default function AdminSecurityPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+  // Change-password state.
+  const [pwExpired, setPwExpired] = useState(false);
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwErrors, setPwErrors] = useState<string[]>([]);
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwBusy, setPwBusy] = useState(false);
+
   const load = useCallback(async () => {
     if (!supabase) {
       setLoading(false);
@@ -34,6 +42,12 @@ export default function AdminSecurityPage() {
       if (user) {
         const { data } = await supabase.auth.mfa.listFactors();
         setFactors(((data?.all as Factor[]) || []).filter((f) => f.factor_type === 'totp'));
+        try {
+          const me = await (await fetch('/api/admin/me')).json();
+          setPwExpired(Boolean(me?.admin?.passwordExpired));
+        } catch {
+          /* ignore */
+        }
       }
     } catch {
       /* ignore */
@@ -115,19 +129,49 @@ export default function AdminSecurityPage() {
     }
   };
 
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwErrors([]);
+    setPwMsg('');
+    if (newPw !== confirmPw) {
+      setPwErrors(['Passwords do not match.']);
+      return;
+    }
+    setPwBusy(true);
+    try {
+      const res = await fetch('/api/admin/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: newPw }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setPwMsg('Password updated.');
+        setNewPw('');
+        setConfirmPw('');
+        setPwExpired(false);
+      } else {
+        setPwErrors(data.errors || [data.error || 'Could not update password.']);
+      }
+    } catch {
+      setPwErrors(['Network error. Please try again.']);
+    }
+    setPwBusy(false);
+  };
+
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
         <h1 className="serif text-3xl text-[#1a1410] mb-1 flex items-center gap-2">
           <ShieldCheck className="text-[#b8893a]" size={26} /> Security
         </h1>
-        <p className="text-sm text-[#6b5d4c]">Two-factor authentication for your admin account.</p>
+        <p className="text-sm text-[#6b5d4c]">Two-factor authentication and password for your admin account.</p>
       </div>
 
       {!ready && (
         <Notice tone="warn">
           Supabase Auth isn&apos;t configured yet. Add <code>NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
-          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, then sign in with the secure login to set up 2FA.
+          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, then sign in with the secure login to manage security.
         </Notice>
       )}
 
@@ -135,25 +179,27 @@ export default function AdminSecurityPage() {
 
       {ready && !loading && !signedIn && (
         <Notice tone="warn">
-          You&apos;re signed in with the recovery (legacy) login. Two-factor authentication protects
-          Supabase Auth accounts — sign in with the secure login to manage it.
+          You&apos;re signed in with the recovery (legacy) login. Two-factor authentication and password
+          management apply to Supabase Auth accounts — sign in with the secure login to manage them.
         </Notice>
       )}
 
       {ready && !loading && signedIn && (
         <div className="space-y-5">
+          {pwExpired && (
+            <Notice tone="warn">Your password has expired. Please set a new one below.</Notice>
+          )}
           {error && <Notice tone="error">{error}</Notice>}
           {message && <Notice tone="success">{message}</Notice>}
 
+          {/* ── Two-factor authentication ── */}
           <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
                 <Smartphone className="text-[#b8893a]" size={20} />
                 <div>
                   <div className="font-semibold text-[#1a1410]">Authenticator app (TOTP)</div>
-                  <div className="text-xs text-[#6b5d4c]">
-                    Use Google Authenticator, Authy, 1Password, etc.
-                  </div>
+                  <div className="text-xs text-[#6b5d4c]">Use Google Authenticator, Authy, 1Password, etc.</div>
                 </div>
               </div>
               <span
@@ -173,11 +219,7 @@ export default function AdminSecurityPage() {
                       {f.friendly_name || 'Authenticator'}
                       <span className="ml-2 text-[10px] text-[#3d6b5a] uppercase tracking-[1px]">Verified</span>
                     </div>
-                    <button
-                      onClick={() => removeFactor(f.id)}
-                      className="text-[#6b5d4c] hover:text-[#7a2e2e]"
-                      aria-label="Remove authenticator"
-                    >
+                    <button onClick={() => removeFactor(f.id)} className="text-[#6b5d4c] hover:text-[#7a2e2e]" aria-label="Remove authenticator">
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -206,20 +248,11 @@ export default function AdminSecurityPage() {
               </ol>
 
               <div className="flex flex-col sm:flex-row gap-4 items-start">
-                {/* Supabase returns the QR as an SVG data URI. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={enrollment.qr}
-                  alt="2FA QR code"
-                  width={176}
-                  height={176}
-                  className="w-44 h-44 border border-[rgba(184,137,58,0.18)] bg-white p-2"
-                />
+                <img src={enrollment.qr} alt="2FA QR code" width={176} height={176} className="w-44 h-44 border border-[rgba(184,137,58,0.18)] bg-white p-2" />
                 <div className="flex-1 min-w-0">
                   <label className="luxury-label">Secret key</label>
-                  <div className="font-mono text-xs break-all bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] p-2 mb-4">
-                    {enrollment.secret}
-                  </div>
+                  <div className="font-mono text-xs break-all bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] p-2 mb-4">{enrollment.secret}</div>
                   <label className="luxury-label">6-digit code</label>
                   <input
                     inputMode="numeric"
@@ -234,23 +267,51 @@ export default function AdminSecurityPage() {
               </div>
 
               <div className="mt-5 flex gap-3">
-                <button
-                  type="submit"
-                  disabled={busy || code.length !== 6}
-                  className="px-6 py-2.5 bg-[#b8893a] text-white text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] disabled:opacity-60"
-                >
+                <button type="submit" disabled={busy || code.length !== 6} className="px-6 py-2.5 bg-[#b8893a] text-white text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] disabled:opacity-60">
                   {busy ? 'Verifying…' : 'Verify & enable'}
                 </button>
-                <button
-                  type="button"
-                  onClick={cancelEnroll}
-                  className="px-6 py-2.5 border border-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold"
-                >
+                <button type="button" onClick={cancelEnroll} className="px-6 py-2.5 border border-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold">
                   Cancel
                 </button>
               </div>
             </form>
           )}
+
+          {/* ── Change password ── */}
+          <form onSubmit={changePassword} className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <Lock className="text-[#b8893a]" size={20} />
+              <div>
+                <div className="font-semibold text-[#1a1410]">Change password</div>
+                <div className="text-xs text-[#6b5d4c]">
+                  At least 12 characters, with upper &amp; lower case, a number and a symbol. Can&apos;t reuse a recent password.
+                </div>
+              </div>
+            </div>
+
+            {pwErrors.length > 0 && (
+              <div className="mb-3 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3">
+                <div className="flex items-center gap-1.5 font-medium mb-1"><AlertCircle size={14} /> Please fix:</div>
+                <ul className="list-disc list-inside">{pwErrors.map((er, i) => <li key={i}>{er}</li>)}</ul>
+              </div>
+            )}
+            {pwMsg && <Notice tone="success">{pwMsg}</Notice>}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+              <div>
+                <label className="luxury-label">New password</label>
+                <input type="password" autoComplete="new-password" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="luxury-input" />
+              </div>
+              <div>
+                <label className="luxury-label">Confirm password</label>
+                <input type="password" autoComplete="new-password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} className="luxury-input" />
+              </div>
+            </div>
+
+            <button type="submit" disabled={pwBusy || !newPw} className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] disabled:opacity-60">
+              {pwBusy ? 'Updating…' : 'Update password'}
+            </button>
+          </form>
         </div>
       )}
     </div>
