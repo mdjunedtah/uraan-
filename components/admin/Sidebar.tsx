@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
   Grid3x3, Image as ImageIcon, Star, Ticket, Settings, UserCog, LogOut, Gem,
-  Contact, X, Home,
+  Contact, X, Home, ShieldCheck,
 } from 'lucide-react';
 
 const menuItems = [
@@ -20,6 +20,7 @@ const menuItems = [
   { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
   { href: '/admin/users', label: 'Admin Users', icon: UserCog },
+  { href: '/admin/security', label: 'Security', icon: ShieldCheck },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Gem, Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Gem, Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, ShieldCheck, KeyRound } from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
 import { isSupabaseAuthConfigured } from '@/lib/supabase/config';
 
@@ -18,7 +18,16 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Second-factor (TOTP) step.
+  const [mfa, setMfa] = useState<{ factorId: string } | null>(null);
+  const [code, setCode] = useState('');
+
   const useSupabase = supabaseReady && !recovery;
+
+  const finish = () => {
+    router.push('/admin');
+    router.refresh();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +39,19 @@ export default function AdminLoginPage() {
         const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
         if (authError) {
           setError(authError.message || 'Invalid email or password.');
-        } else {
-          router.push('/admin');
-          router.refresh();
+          return;
         }
+        // If a verified TOTP factor exists, step up to the 6-digit code.
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+          const { data: list } = await supabase.auth.mfa.listFactors();
+          const totp = list?.totp?.find((f) => f.status === 'verified') || list?.totp?.[0];
+          if (totp) {
+            setMfa({ factorId: totp.id });
+            return;
+          }
+        }
+        finish();
       } else {
         const res = await fetch('/api/admin/login', {
           method: 'POST',
@@ -41,15 +59,31 @@ export default function AdminLoginPage() {
           body: JSON.stringify({ email, password }),
         });
         const data = await res.json();
-        if (res.ok && data.ok) {
-          router.push('/admin');
-          router.refresh();
-        } else {
-          setError(data.error || 'Login failed. Please try again.');
-        }
+        if (res.ok && data.ok) finish();
+        else setError(data.error || 'Login failed. Please try again.');
       }
     } catch {
       setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfa) return;
+    setError('');
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({
+        factorId: mfa.factorId,
+        code: code.trim(),
+      });
+      if (vErr) setError(vErr.message || 'Invalid code. Try again.');
+      else finish();
+    } catch {
+      setError('Verification failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -66,79 +100,113 @@ export default function AdminLoginPage() {
           <p className="text-[10px] tracking-[3px] text-[#b8893a] uppercase">Admin Panel</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8">
-          <h1 className="serif text-2xl text-[#1a1410] mb-1">Sign in</h1>
-          <p className="text-sm text-[#6b5d4c] mb-6 flex items-center gap-1.5">
-            {useSupabase ? (
-              <><ShieldCheck size={14} className="text-[#3d6b5a]" /> Secure sign-in</>
-            ) : (
-              'Enter your admin credentials to continue.'
+        {mfa ? (
+          <form onSubmit={handleMfa} className="bg-white p-6 md:p-8">
+            <h1 className="serif text-2xl text-[#1a1410] mb-1 flex items-center gap-2">
+              <KeyRound size={20} className="text-[#b8893a]" /> Verify it&apos;s you
+            </h1>
+            <p className="text-sm text-[#6b5d4c] mb-6">Enter the 6-digit code from your authenticator app.</p>
+
+            {error && (
+              <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3">
+                <AlertCircle size={15} /> {error}
+              </div>
             )}
-          </p>
 
-          {error && (
-            <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3">
-              <AlertCircle size={15} /> {error}
+            <input
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              autoFocus
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              className="luxury-input tracking-[8px] text-center text-2xl mb-6"
+              placeholder="••••••"
+            />
+
+            <button
+              type="submit"
+              disabled={loading || code.length !== 6}
+              className="w-full py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2 disabled:opacity-60 transition-colors"
+            >
+              {loading ? 'Verifying…' : 'Verify'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8">
+            <h1 className="serif text-2xl text-[#1a1410] mb-1">Sign in</h1>
+            <p className="text-sm text-[#6b5d4c] mb-6 flex items-center gap-1.5">
+              {useSupabase ? (
+                <><ShieldCheck size={14} className="text-[#3d6b5a]" /> Secure sign-in</>
+              ) : (
+                'Enter your admin credentials to continue.'
+              )}
+            </p>
+
+            {error && (
+              <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3">
+                <AlertCircle size={15} /> {error}
+              </div>
+            )}
+
+            <label className="luxury-label">Email</label>
+            <div className="relative mb-4">
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="luxury-input pl-9"
+                placeholder="admin@omgauripulta.com"
+                autoComplete="username"
+              />
             </div>
-          )}
 
-          <label className="luxury-label">Email</label>
-          <div className="relative mb-4">
-            <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="luxury-input pl-9"
-              placeholder="admin@omgauripulta.com"
-              autoComplete="username"
-            />
-          </div>
+            <label className="luxury-label">Password</label>
+            <div className="relative mb-6">
+              <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="luxury-input pl-9 pr-10"
+                placeholder="Password"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a8c75] hover:text-[#b8893a]"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
 
-          <label className="luxury-label">Password</label>
-          <div className="relative mb-6">
-            <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="luxury-input pl-9 pr-10"
-              placeholder="Password"
-              autoComplete="current-password"
-            />
             <button
-              type="button"
-              onClick={() => setShowPassword((s) => !s)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a8c75] hover:text-[#b8893a]"
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2 disabled:opacity-60 transition-colors"
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              <LogIn size={15} /> {loading ? 'Signing in…' : 'Sign In'}
             </button>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2 disabled:opacity-60 transition-colors"
-          >
-            <LogIn size={15} /> {loading ? 'Signing in…' : 'Sign In'}
-          </button>
-
-          {supabaseReady && (
-            <button
-              type="button"
-              onClick={() => {
-                setRecovery((r) => !r);
-                setError('');
-              }}
-              className="w-full mt-4 text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] hover:text-[#b8893a]"
-            >
-              {recovery ? '← Back to secure sign-in' : 'Use recovery login'}
-            </button>
-          )}
-        </form>
+            {supabaseReady && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRecovery((r) => !r);
+                  setError('');
+                }}
+                className="w-full mt-4 text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] hover:text-[#b8893a]"
+              >
+                {recovery ? '← Back to secure sign-in' : 'Use recovery login'}
+              </button>
+            )}
+          </form>
+        )}
 
         <p className="text-center text-[11px] text-[#e8d49b]/50 mt-5">
           Protected area · authorised staff only
