@@ -2,15 +2,24 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { ADMIN_COOKIE, adminSessionToken } from '@/lib/adminAuth';
 import { isSupabaseAuthConfigured, createMiddlewareSupabase } from '@/lib/supabase/middleware';
+import { assertSameOrigin } from '@/lib/security/csrf';
 
-// Protects every /admin route. Two ways to be authorised, checked in order:
-//   1) Legacy admin cookie (always honoured — break-glass recovery login).
-//   2) A valid Supabase Auth session whose email is an active row in
-//      admin_users (the new, primary path once Supabase Auth is configured).
-// The login page itself is always left open.
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ── CSRF protection for API mutations (#28). External webhooks are exempt
+  //    because they legitimately arrive cross-origin. ──
+  if (pathname.startsWith('/api/')) {
+    const method = request.method.toUpperCase();
+    const isMutation = method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS';
+    const isWebhook = pathname.startsWith('/api/whatsapp/webhook');
+    if (isMutation && !isWebhook && !assertSameOrigin(request)) {
+      return NextResponse.json({ ok: false, error: 'Invalid origin.' }, { status: 403 });
+    }
+    return NextResponse.next();
+  }
+
+  // ── /admin route protection ──
   if (pathname === '/admin/login') {
     return NextResponse.next();
   }
@@ -29,7 +38,6 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (user?.email) {
-      // RLS lets an authenticated admin read only their own row.
       const { data: admin } = await supabase
         .from('admin_users')
         .select('role,status')
@@ -37,15 +45,14 @@ export async function middleware(request: NextRequest) {
         .maybeSingle();
 
       if (admin && admin.status === 'active') {
-        return response; // carries any refreshed auth cookies
+        return response;
       }
     }
   }
 
-  const loginUrl = new URL('/admin/login', request.url);
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.redirect(new URL('/admin/login', request.url));
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/:path*'],
 };

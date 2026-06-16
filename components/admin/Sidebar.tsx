@@ -1,27 +1,29 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, BarChart3,
   Grid3x3, Image as ImageIcon, Star, Ticket, Settings, UserCog, LogOut, Gem,
   Contact, X, Home, ShieldCheck,
 } from 'lucide-react';
+import { hasAtLeast, type Role } from '@/lib/rbac';
 
-const menuItems = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/products', label: 'Products', icon: Package },
-  { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
-  { href: '/admin/leads', label: 'CRM / Leads', icon: Contact },
-  { href: '/admin/customers', label: 'Customers', icon: Users },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/admin/categories', label: 'Categories', icon: Grid3x3 },
-  { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
-  { href: '/admin/reviews', label: 'Reviews', icon: Star },
-  { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
-  { href: '/admin/users', label: 'Admin Users', icon: UserCog },
-  { href: '/admin/security', label: 'Security', icon: ShieldCheck },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
+const menuItems: { href: string; label: string; icon: typeof LayoutDashboard; minRole: Role }[] = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, minRole: 'staff' },
+  { href: '/admin/products', label: 'Products', icon: Package, minRole: 'admin' },
+  { href: '/admin/orders', label: 'Orders', icon: ShoppingCart, minRole: 'staff' },
+  { href: '/admin/leads', label: 'CRM / Leads', icon: Contact, minRole: 'staff' },
+  { href: '/admin/customers', label: 'Customers', icon: Users, minRole: 'staff' },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, minRole: 'admin' },
+  { href: '/admin/categories', label: 'Categories', icon: Grid3x3, minRole: 'admin' },
+  { href: '/admin/banners', label: 'Banners', icon: ImageIcon, minRole: 'admin' },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star, minRole: 'admin' },
+  { href: '/admin/coupons', label: 'Coupons', icon: Ticket, minRole: 'admin' },
+  { href: '/admin/users', label: 'Admin Users', icon: UserCog, minRole: 'super_admin' },
+  { href: '/admin/security', label: 'Security', icon: ShieldCheck, minRole: 'staff' },
+  { href: '/admin/settings', label: 'Settings', icon: Settings, minRole: 'super_admin' },
 ];
 
 type SidebarProps = {
@@ -32,6 +34,21 @@ type SidebarProps = {
 export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Role-aware nav: hide entries the current admin can't access (#39-43).
+  // Defaults to Owner (show all) until the role loads.
+  const [role, setRole] = useState<Role>('owner');
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await (await fetch('/api/admin/me')).json();
+        if (me?.admin?.role) setRole(me.admin.role as Role);
+      } catch {
+        /* keep default */
+      }
+    })();
+  }, []);
+  const visibleItems = menuItems.filter((i) => hasAtLeast(role, i.minRole));
 
   const handleLogout = async () => {
     try {
@@ -83,7 +100,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 py-4 overflow-y-auto">
-          {menuItems.map((item) => {
+          {visibleItems.map((item) => {
             const isActive =
               item.href === '/admin'
                 ? pathname === '/admin'

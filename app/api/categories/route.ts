@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetCategories, dbInsertCategory } from '@/lib/categoriesDb';
-import { isAdminRequest } from '@/lib/adminApi';
+import { requireRole } from '@/lib/security/guard';
 
 // GET → public category list. Database when configured, else the page falls
 // back to the bundled list in the browser store.
@@ -20,9 +20,8 @@ export async function GET() {
 
 // POST → create a category (admin only).
 export async function POST(request: Request) {
-  if (!(await isAdminRequest())) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized.' }, { status: 401 });
-  }
+  const guard = await requireRole('admin');
+  if ('error' in guard) return guard.error;
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ ok: true, configured: false });
   }

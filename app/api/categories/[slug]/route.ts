@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { dbUpdateCategory, dbDeleteCategory } from '@/lib/categoriesDb';
-import { isAdminRequest } from '@/lib/adminApi';
+import { requireRole } from '@/lib/security/guard';
 import type { Category } from '@/lib/categories';
 
 // PATCH → edit a category (admin only).
 export async function PATCH(request: Request, { params }: { params: { slug: string } }) {
-  if (!(await isAdminRequest())) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized.' }, { status: 401 });
-  }
+  const guard = await requireRole('admin');
+  if ('error' in guard) return guard.error;
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -27,9 +26,8 @@ export async function PATCH(request: Request, { params }: { params: { slug: stri
 
 // DELETE → remove a category (admin only).
 export async function DELETE(_request: Request, { params }: { params: { slug: string } }) {
-  if (!(await isAdminRequest())) {
-    return NextResponse.json({ ok: false, error: 'Unauthorized.' }, { status: 401 });
-  }
+  const guard = await requireRole('admin');
+  if ('error' in guard) return guard.error;
   const ok = await dbDeleteCategory(params.slug);
   if (!ok) return NextResponse.json({ ok: false, error: 'Could not delete category.' }, { status: 502 });
   return NextResponse.json({ ok: true });
