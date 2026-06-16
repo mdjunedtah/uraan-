@@ -285,3 +285,11 @@ alter table public.auth_sessions    enable row level security;
 insert into public.admin_users (email, name, role, status)
 values ('admin@omgauripulta.com', 'Owner', 'owner', 'active')
 on conflict (email) do nothing;
+
+-- Allow a signed-in admin (Supabase Auth) to read ONLY their own admin_users
+-- row, so the middleware/server can resolve their role. All writes still go
+-- through the service-role key, which bypasses RLS.
+drop policy if exists "admin_users self read" on public.admin_users;
+create policy "admin_users self read" on public.admin_users
+  for select to authenticated
+  using (lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));

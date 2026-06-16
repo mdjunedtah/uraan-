@@ -2,32 +2,51 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Gem, Mail, Lock, LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Gem, Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { createClient } from '@/lib/supabase/browser';
+import { isSupabaseAuthConfigured } from '@/lib/supabase/config';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const supabaseReady = isSupabaseAuthConfigured();
+  // When Supabase Auth is configured it's the primary path; "recovery" falls
+  // back to the legacy credential login so an admin is never locked out.
+  const [recovery, setRecovery] = useState(!supabaseReady);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const useSupabase = supabaseReady && !recovery;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        router.push('/admin');
-        router.refresh();
+      if (useSupabase) {
+        const supabase = createClient();
+        const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+        if (authError) {
+          setError(authError.message || 'Invalid email or password.');
+        } else {
+          router.push('/admin');
+          router.refresh();
+        }
       } else {
-        setError(data.error || 'Login failed. Please try again.');
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          router.push('/admin');
+          router.refresh();
+        } else {
+          setError(data.error || 'Login failed. Please try again.');
+        }
       }
     } catch {
       setError('Network error. Please try again.');
@@ -49,7 +68,13 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8">
           <h1 className="serif text-2xl text-[#1a1410] mb-1">Sign in</h1>
-          <p className="text-sm text-[#6b5d4c] mb-6">Enter your admin credentials to continue.</p>
+          <p className="text-sm text-[#6b5d4c] mb-6 flex items-center gap-1.5">
+            {useSupabase ? (
+              <><ShieldCheck size={14} className="text-[#3d6b5a]" /> Secure sign-in</>
+            ) : (
+              'Enter your admin credentials to continue.'
+            )}
+          </p>
 
           {error && (
             <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3">
@@ -100,6 +125,19 @@ export default function AdminLoginPage() {
           >
             <LogIn size={15} /> {loading ? 'Signing in…' : 'Sign In'}
           </button>
+
+          {supabaseReady && (
+            <button
+              type="button"
+              onClick={() => {
+                setRecovery((r) => !r);
+                setError('');
+              }}
+              className="w-full mt-4 text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] hover:text-[#b8893a]"
+            >
+              {recovery ? '← Back to secure sign-in' : 'Use recovery login'}
+            </button>
+          )}
         </form>
 
         <p className="text-center text-[11px] text-[#e8d49b]/50 mt-5">
