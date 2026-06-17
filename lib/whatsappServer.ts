@@ -148,10 +148,14 @@ export async function notifyAdminNewLead(lead: LeadNotification): Promise<WhatsA
   const templateName = process.env.WHATSAPP_LEAD_TEMPLATE;
   if (templateName) {
     const lang = process.env.WHATSAPP_LEAD_TEMPLATE_LANG || 'en_US';
-    // One consolidated {{1}} param — template params cannot contain newlines and
-    // are capped well under Meta's per-parameter limit.
-    const param = summaryLines.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 900);
-    return sendWhatsAppTemplate(ADMIN_WHATSAPP_NUMBER, templateName, lang, [param]);
+    // Static templates (no variable) and Meta's built-in "hello_world" take 0
+    // params; set WHATSAPP_LEAD_TEMPLATE_VARS=0 for those. Default is one {{1}}
+    // filled with the lead summary (no newlines; capped under Meta's limit).
+    const params =
+      (process.env.WHATSAPP_LEAD_TEMPLATE_VARS ?? '1') === '0'
+        ? []
+        : [summaryLines.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 900)];
+    return sendWhatsAppTemplate(ADMIN_WHATSAPP_NUMBER, templateName, lang, params);
   }
 
   const text = `🔔 New lead — Om Gauri Pulta\n\n${summaryLines.join('\n')}`;
