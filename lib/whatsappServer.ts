@@ -8,6 +8,11 @@
 //   WHATSAPP_PHONE_NUMBER_ID  — the Cloud API phone number id (NOT the number)
 //   WHATSAPP_VERIFY_TOKEN     — any secret string; matched during webhook setup
 //
+// For proactive alerts (e.g. new-lead notifications) sent OUTSIDE WhatsApp's
+// 24-hour customer-service window, Meta requires a pre-approved *template*:
+//   WHATSAPP_LEAD_TEMPLATE       — approved template name (e.g. new_lead)
+//   WHATSAPP_LEAD_TEMPLATE_LANG  — its language code (default en_US)
+//
 // Docs: https://developers.facebook.com/docs/whatsapp/cloud-api
 
 export interface WhatsAppResult {
@@ -18,13 +23,15 @@ export interface WhatsAppResult {
 
 const GRAPH_VERSION = 'v20.0';
 
-export async function sendWhatsAppText(
-  to: string,
-  message: string
+// Low-level sender shared by text + template messages. Fails gracefully:
+// returns configured:false (without throwing) when the Cloud API keys are
+// absent, so callers can degrade to a wa.me link or just log and move on.
+async function postMessage(
+  payload: Record<string, unknown>,
+  recipient: string
 ): Promise<WhatsAppResult> {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const recipient = to.replace(/[^0-9]/g, '');
 
   if (!recipient) {
     return { ok: false, configured: !!(token && phoneNumberId), error: 'Missing recipient number.' };
@@ -46,13 +53,7 @@ export async function sendWhatsAppText(
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to: recipient,
-          type: 'text',
-          text: { preview_url: false, body: message },
-        }),
+        body: JSON.stringify(payload),
       }
     );
 
@@ -65,6 +66,51 @@ export async function sendWhatsAppText(
     console.error('[WhatsApp] request error:', err);
     return { ok: false, configured: true, error: 'Could not reach WhatsApp API.' };
   }
+}
+
+// Free-form text. NOTE: Meta only delivers this if the recipient messaged the
+// business number within the last 24 hours; otherwise use a template (below).
+export async function sendWhatsAppText(to: string, message: string): Promise<WhatsAppResult> {
+  const recipient = to.replace(/[^0-9]/g, '');
+  return postMessage(
+    {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: recipient,
+      type: 'text',
+      text: { preview_url: false, body: message },
+    },
+    recipient
+  );
+}
+
+// Pre-approved template message — the only thing that reliably delivers OUTSIDE
+// the 24-hour window. `bodyParams` fill the template's {{1}}, {{2}}, … in order
+// (their count MUST match the approved template). Params cannot contain newlines.
+export async function sendWhatsAppTemplate(
+  to: string,
+  templateName: string,
+  languageCode: string,
+  bodyParams: string[] = []
+): Promise<WhatsAppResult> {
+  const recipient = to.replace(/[^0-9]/g, '');
+  const components = bodyParams.length
+    ? [{ type: 'body', parameters: bodyParams.map((text) => ({ type: 'text', text })) }]
+    : [];
+  return postMessage(
+    {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: recipient,
+      type: 'template',
+      template: {
+        name: templateName,
+        language: { code: languageCode },
+        ...(components.length ? { components } : {}),
+      },
+    },
+    recipient
+  );
 }
 
 // ── Admin lead notifications ────────────────────────────────────────────────
@@ -87,17 +133,27 @@ export interface LeadNotification {
 }
 
 // Sends the admin a WhatsApp alert for a newly captured lead. Best-effort and
-// fail-safe: returns the underlying WhatsAppResult (configured:false when the
-// Cloud API keys are absent) so callers can log without ever failing the form.
+// fail-safe (returns configured:false when keys are absent) so callers never
+// fail the form. Uses an approved template when WHATSAPP_LEAD_TEMPLATE is set
+// (delivers outside the 24h window); otherwise falls back to plain text.
 export async function notifyAdminNewLead(lead: LeadNotification): Promise<WhatsAppResult> {
-  const lines = [
-    '🔔 New lead — Om Gauri Pulta',
-    '',
+  const summaryLines = [
     `Name: ${lead.name}`,
     `Email: ${lead.email}`,
     ...(lead.phone ? [`Phone: ${lead.phone}`] : []),
     `Source: ${lead.source || 'Website'}`,
-    ...(lead.message ? ['', 'Message:', lead.message] : []),
+    ...(lead.message ? [`Message: ${lead.message}`] : []),
   ];
-  return sendWhatsAppText(ADMIN_WHATSAPP_NUMBER, lines.join('\n'));
+
+  const templateName = process.env.WHATSAPP_LEAD_TEMPLATE;
+  if (templateName) {
+    const lang = process.env.WHATSAPP_LEAD_TEMPLATE_LANG || 'en_US';
+    // One consolidated {{1}} param — template params cannot contain newlines and
+    // are capped well under Meta's per-parameter limit.
+    const param = summaryLines.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 900);
+    return sendWhatsAppTemplate(ADMIN_WHATSAPP_NUMBER, templateName, lang, [param]);
+  }
+
+  const text = `🔔 New lead — Om Gauri Pulta\n\n${summaryLines.join('\n')}`;
+  return sendWhatsAppText(ADMIN_WHATSAPP_NUMBER, text);
 }

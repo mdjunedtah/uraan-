@@ -56,6 +56,8 @@ export async function POST(request: Request) {
         '[lead] WhatsApp admin notify skipped — Cloud API not configured ' +
           '(set WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID in Vercel).'
       );
+    } else {
+      console.log('[lead] WhatsApp admin notify sent OK');
     }
   } catch (err) {
     console.error('[lead] WhatsApp admin notify error:', err);
