@@ -80,22 +80,22 @@ export default function AdminReviewsPage() {
           onClick={() => setFilter('all')}
           className={`bg-white border p-4 text-center ${filter === 'all' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
         >
-          <div className="serif text-2xl font-bold text-[#1a1410]">{reviewList.length}</div>
-          <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">All Reviews</div>
+          <div className="stat-value text-[#1a1410]">{reviewList.length}</div>
+          <div className="stat-label mt-1">All Reviews</div>
         </button>
         <button
           onClick={() => setFilter('verified')}
           className={`bg-white border p-4 text-center ${filter === 'verified' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
         >
-          <div className="serif text-2xl font-bold text-[#3d6b5a]">{reviewList.filter((r) => r.verified).length}</div>
-          <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">Verified</div>
+          <div className="stat-value text-[#3d6b5a]">{reviewList.filter((r) => r.verified).length}</div>
+          <div className="stat-label mt-1">Verified</div>
         </button>
         <button
           onClick={() => setFilter('pending')}
           className={`bg-white border p-4 text-center ${filter === 'pending' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
         >
-          <div className="serif text-2xl font-bold text-[#7a2e2e]">{reviewList.filter((r) => !r.verified).length}</div>
-          <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">Pending</div>
+          <div className="stat-value text-[#7a2e2e]">{reviewList.filter((r) => !r.verified).length}</div>
+          <div className="stat-label mt-1">Pending</div>
         </button>
       </div>
 

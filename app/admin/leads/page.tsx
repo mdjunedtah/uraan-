@@ -143,10 +143,10 @@ export default function AdminLeadsPage() {
         {cards.map((c) => (
           <div key={c.label} className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-[10px] tracking-[2px] uppercase text-[#9a8c75]">{c.label}</div>
+              <div className="stat-label">{c.label}</div>
               <c.icon size={15} className={c.color} />
             </div>
-            <div className={`serif text-3xl font-bold ${c.color}`}>{c.value}</div>
+            <div className={`stat-value ${c.color}`}>{c.value}</div>
           </div>
         ))}
       </div>

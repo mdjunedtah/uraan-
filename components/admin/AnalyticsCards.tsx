@@ -27,10 +27,8 @@ export default function AnalyticsCard({
     <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5 hover:shadow-[0_12px_40px_rgba(122,90,31,0.12)] transition-all">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <div className="text-[10px] tracking-[2px] uppercase text-[#9a8c75] mb-1 font-medium">
-            {title}
-          </div>
-          <div className="serif text-3xl font-semibold text-[#1a1410]">{value}</div>
+          <div className="stat-label mb-1.5">{title}</div>
+          <div className="stat-value text-[#1a1410]">{value}</div>
         </div>
         <div className={`w-11 h-11 rounded-full grid place-items-center ${colorClass}`}>
           <Icon size={20} />

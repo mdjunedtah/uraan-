@@ -92,8 +92,8 @@ export default function AdminOrdersPage() {
               onClick={() => setStatusFilter(s.value)}
               className="bg-white border border-[rgba(184,137,58,0.18)] p-3 text-center hover:border-[#b8893a]"
             >
-              <div className={`serif text-2xl font-bold ${s.color}`}>{count}</div>
-              <div className="text-[10px] tracking-[1px] uppercase text-[#9a8c75] mt-1">
+              <div className={`stat-value ${s.color}`}>{count}</div>
+              <div className="stat-label mt-1">
                 {s.label}
               </div>
             </button>

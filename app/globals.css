@@ -161,3 +161,49 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Admin panel — premium typography
+   Scoped to .admin-ui (the admin <main>) so the storefront is untouched.
+   The headline change is tabular, lining figures everywhere, so every number
+   and column of numbers lines up perfectly — the hallmark of a premium dashboard.
+   ───────────────────────────────────────────────────────────────────────── */
+.admin-ui {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Page titles — elegant, controlled height */
+.admin-ui h1 {
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+}
+
+/* KPI / stat numbers — large, tight, perfectly aligned figures */
+.admin-ui .stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: clamp(1.85rem, 1.5rem + 0.9vw, 2.35rem);
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* KPI / stat caption */
+.admin-ui .stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* Data tables — aligned figures + comfortable, even row height */
+.admin-ui table { font-variant-numeric: tabular-nums lining-nums; }
+.admin-ui thead th { letter-spacing: 0.14em; line-height: 1.5; }
+.admin-ui tbody td { line-height: 1.55; }
+
+/* Inline numeric helper for any stray number/amount */
+.admin-ui .num { font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
