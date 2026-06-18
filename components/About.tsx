@@ -56,7 +56,7 @@ export default function About() {
                 <s.icon className="text-[#b8893a]" size={26} />
                 <Sparkles size={11} className="absolute -top-1.5 -right-3 text-[#d4a857]" />
               </span>
-              <div className="serif tabular-nums lining-nums text-[2.5rem] md:text-5xl leading-none tracking-[-0.01em] text-[#b08430] font-semibold">
+              <div className="serif tabular-nums lining-nums text-4xl md:text-[2.5rem] leading-[1.15] tracking-tight text-[#b08430] font-semibold">
                 {s.num}
               </div>
               <div className="text-[10px] md:text-xs tracking-[2px] uppercase text-[#5f5546] font-medium mt-2.5">
