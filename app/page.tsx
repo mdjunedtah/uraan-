@@ -261,6 +261,7 @@ export default function HomePage() {
             poster="/videos/signature-collection-poster.jpg"
             className="absolute inset-0 w-full h-full object-cover"
           >
+            <source src="/videos/signature-collection.webm" type="video/webm" />
             <source src="/videos/signature-collection.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/30 to-black/75" />
