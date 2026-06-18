@@ -16,11 +16,11 @@ export default function About() {
             <circle cx="12" cy="11" r="1.1" />
             <rect x="7.5" y="12.6" width="9" height="0.8" rx="0.4" />
           </svg>
-          <h2 className="serif text-3xl md:text-4xl text-[#8e1f2f] font-semibold mb-2">Our Heritage</h2>
-          <p className="text-[13px] md:text-base text-[#3a2f24] mb-8">
+          <h2 className="serif text-3xl md:text-4xl leading-[1.15] tracking-tight text-[#8e1f2f] font-semibold mb-2">Our Heritage</h2>
+          <p className="text-sm md:text-base leading-relaxed text-[#3a2f24] mb-8">
             Timeless craftsmanship inspired by tradition, designed for today&apos;s woman.
           </p>
-          <h3 className="serif text-2xl md:text-3xl text-[#1a1410] mb-4 leading-tight">
+          <h3 className="serif text-2xl md:text-3xl text-[#1a1410] mb-4 leading-[1.2] tracking-tight">
             A Legacy of <em className="gold-text">Trust</em> Since Generations
           </h3>
           <p className="text-sm text-[#6b5d4c] leading-relaxed mb-4 max-w-xl mx-auto">
@@ -56,10 +56,10 @@ export default function About() {
                 <s.icon className="text-[#b8893a]" size={26} />
                 <Sparkles size={11} className="absolute -top-1.5 -right-3 text-[#d4a857]" />
               </span>
-              <div className="serif lining-nums text-4xl md:text-[40px] text-[#b08430] font-semibold">
+              <div className="serif tabular-nums lining-nums text-[2.5rem] md:text-5xl leading-none tracking-[-0.01em] text-[#b08430] font-semibold">
                 {s.num}
               </div>
-              <div className="text-[10px] md:text-xs tracking-[1.5px] uppercase text-[#5f5546] mt-2">
+              <div className="text-[10px] md:text-xs tracking-[2px] uppercase text-[#5f5546] font-medium mt-2.5">
                 {s.label}
               </div>
               <div className="flex items-center justify-center gap-1.5 mt-3 text-[#c9a24a]">

@@ -21,20 +21,7 @@ export const LEAD_STATUSES: LeadStatus[] = ['New', 'Contacted', 'Qualified', 'Wo
 
 const KEY = 'ogp_leads';
 
-const seedLeads: Lead[] = [
-  { id: 'L0006', name: 'Kavya Nair', email: 'kavya.nair@example.com', phone: '+91 99887 21001', message: 'Do you have temple jewellery sets for a wedding?', source: 'WhatsApp', status: 'New', createdAt: daysAgo(0) },
-  { id: 'L0005', name: 'Rohan Gupta', email: 'rohan.g@example.com', phone: '+91 99887 21002', message: 'Price for the Kundan choker in the homepage banner?', source: 'Contact Page', status: 'New', createdAt: daysAgo(1) },
-  { id: 'L0004', name: 'Newsletter Subscriber', email: 'isha.reddy@example.com', message: 'Newsletter signup from homepage', source: 'Newsletter Signup', status: 'Contacted', createdAt: daysAgo(2) },
-  { id: 'L0003', name: 'Aman Khurana', email: 'aman.k@example.com', phone: '+91 99887 21004', message: 'Looking for a Rudraksh mala, certified.', source: 'WhatsApp', status: 'Qualified', createdAt: daysAgo(4) },
-  { id: 'L0002', name: 'Sneha Patil', email: 'sneha.patil@example.com', phone: '+91 99887 21005', message: 'Bulk order for return gifts — 50 pieces.', source: 'Instagram', status: 'Won', createdAt: daysAgo(7) },
-  { id: 'L0001', name: 'Deepak Sharma', email: 'deepak.s@example.com', phone: '+91 99887 21006', message: 'Asked about COD availability in Pune.', source: 'Contact Page', status: 'Lost', createdAt: daysAgo(12) },
-];
-
-function daysAgo(n: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString();
-}
+const seedLeads: Lead[] = [];
 
 function read(): Lead[] | null {
   if (typeof window === 'undefined') return null;
