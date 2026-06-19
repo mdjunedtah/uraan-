@@ -127,7 +127,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           stopPropagation
           label="Add to Cart"
           soldOutLabel="Sold Out"
-          className="md:hidden w-full mt-3 py-2 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5"
+          className="md:hidden w-full mt-3 py-2.5 bg-[#b8893a] text-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5"
         />
       </div>
     </Link>
