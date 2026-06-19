@@ -7,6 +7,7 @@ import { argon2id, argon2Verify } from 'hash-wasm';
 
 export const PASSWORD_POLICY = {
   minLength: 12,
+  maxLength: 128,
   requireLower: true,
   requireUpper: true,
   requireNumber: true,
@@ -23,6 +24,7 @@ const COMMON = new Set([
 export function validatePassword(pw: string, opts?: { email?: string }): { ok: boolean; errors: string[] } {
   const errors: string[] = [];
   if (pw.length < PASSWORD_POLICY.minLength) errors.push(`At least ${PASSWORD_POLICY.minLength} characters.`);
+  if (pw.length > PASSWORD_POLICY.maxLength) errors.push(`At most ${PASSWORD_POLICY.maxLength} characters.`);
   if (PASSWORD_POLICY.requireLower && !/[a-z]/.test(pw)) errors.push('A lowercase letter.');
   if (PASSWORD_POLICY.requireUpper && !/[A-Z]/.test(pw)) errors.push('An uppercase letter.');
   if (PASSWORD_POLICY.requireNumber && !/[0-9]/.test(pw)) errors.push('A number.');
