@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetCategories, dbInsertCategory } from '@/lib/categoriesDb';
 import { requireRole } from '@/lib/security/guard';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 // GET → public category list. Database when configured, else the page falls
 // back to the bundled list in the browser store.
@@ -34,10 +35,19 @@ export async function POST(request: Request) {
   const name = String(body.name || '').trim();
   if (!name) return NextResponse.json({ ok: false, error: 'Name is required.' }, { status: 400 });
 
+  const description = String(body.description || '').trim();
+  const image = String(body.image || '').trim();
+  const lengthError = checkLengths({
+    Name: { value: name, max: MAX_LEN.short },
+    Description: { value: description, max: MAX_LEN.text },
+    Image: { value: image, max: MAX_LEN.url },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
+
   const category = await dbInsertCategory({
     name,
-    description: String(body.description || '').trim() || undefined,
-    image: String(body.image || '').trim() || undefined,
+    description: description || undefined,
+    image: image || undefined,
   });
   if (!category) return NextResponse.json({ ok: false, error: 'Could not save category.' }, { status: 502 });
   return NextResponse.json({ ok: true, configured: true, category });

@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetBanners, dbInsertBanner } from '@/lib/bannersDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import type { BannerInput, BannerPosition } from '@/lib/banners';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 // GET → public banner list. Database when configured, else the page falls back
 // to its bundled browser store.
@@ -34,13 +35,26 @@ export async function POST(request: Request) {
   const title = String(body.title || '').trim();
   if (!title) return NextResponse.json({ ok: false, error: 'Title is required.' }, { status: 400 });
 
+  const subtitle = String(body.subtitle || '').trim();
+  const image = String(body.image || '').trim();
+  const ctaText = String(body.ctaText || '').trim();
+  const ctaLink = String(body.ctaLink || '').trim();
+  const lengthError = checkLengths({
+    Title: { value: title, max: MAX_LEN.short },
+    Subtitle: { value: subtitle, max: MAX_LEN.text },
+    Image: { value: image, max: MAX_LEN.url },
+    'CTA text': { value: ctaText, max: MAX_LEN.short },
+    'CTA link': { value: ctaLink, max: MAX_LEN.url },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
+
   const pos = String(body.position || 'hero');
   const input: BannerInput = {
     title,
-    subtitle: String(body.subtitle || '').trim(),
-    image: String(body.image || '').trim(),
-    ctaText: String(body.ctaText || '').trim(),
-    ctaLink: String(body.ctaLink || '').trim(),
+    subtitle,
+    image,
+    ctaText,
+    ctaLink,
     position: (['hero', 'middle', 'footer'].includes(pos) ? pos : 'hero') as BannerPosition,
     active: body.active === undefined ? true : Boolean(body.active),
   };

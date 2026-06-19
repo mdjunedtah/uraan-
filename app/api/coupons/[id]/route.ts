@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbUpdateCoupon, dbDeleteCoupon } from '@/lib/couponsDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import type { Coupon, CouponType } from '@/lib/coupons';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 // PATCH → edit a coupon or toggle its active flag (admin only).
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
@@ -23,6 +24,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (body.used !== undefined) patch.used = Number(body.used);
   if (body.validUntil !== undefined) patch.validUntil = String(body.validUntil);
   if (body.active !== undefined) patch.active = Boolean(body.active);
+
+  const lengthError = checkLengths({
+    Code: { value: patch.code ?? '', max: MAX_LEN.short },
+    'Valid until': { value: patch.validUntil ?? '', max: MAX_LEN.short },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
   const ok = await dbUpdateCoupon(params.id, patch);
   if (!ok) return NextResponse.json({ ok: false, error: 'Could not update coupon.' }, { status: 502 });

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbUpdateBanner, dbDeleteBanner } from '@/lib/bannersDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import type { Banner, BannerPosition } from '@/lib/banners';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 // PATCH → edit a banner or toggle its active flag (admin only).
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
@@ -20,6 +21,16 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (body.image !== undefined) patch.image = String(body.image);
   if (body.ctaText !== undefined) patch.ctaText = String(body.ctaText);
   if (body.ctaLink !== undefined) patch.ctaLink = String(body.ctaLink);
+
+  const lengthError = checkLengths({
+    Title: { value: patch.title ?? '', max: MAX_LEN.short },
+    Subtitle: { value: patch.subtitle ?? '', max: MAX_LEN.text },
+    Image: { value: patch.image ?? '', max: MAX_LEN.url },
+    'CTA text': { value: patch.ctaText ?? '', max: MAX_LEN.short },
+    'CTA link': { value: patch.ctaLink ?? '', max: MAX_LEN.url },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
+
   if (body.position !== undefined) {
     const pos = String(body.position);
     patch.position = (['hero', 'middle', 'footer'].includes(pos) ? pos : 'hero') as BannerPosition;

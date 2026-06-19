@@ -24,6 +24,9 @@ export async function POST(request: Request) {
   if (!message) {
     return NextResponse.json({ ok: false, error: 'Message cannot be empty.' }, { status: 400 });
   }
+  if (message.length > 4096) {
+    return NextResponse.json({ ok: false, error: 'Message is too long (max 4096 characters).' }, { status: 400 });
+  }
 
   const result = await sendWhatsAppText(to, message);
 
