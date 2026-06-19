@@ -32,12 +32,17 @@ export default function PromoBanners() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 max-w-lg">
-              <div className="serif text-2xl md:text-4xl text-white leading-tight">{b.title}</div>
+              <span className="block h-px w-10 bg-[#e8d49b]/70 mb-3" aria-hidden="true" />
+              <h3 className="serif lining-nums text-[1.7rem] md:text-4xl leading-[1.12] tracking-[0.01em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
+                {b.title}
+              </h3>
               {b.subtitle && (
-                <div className="text-sm md:text-base text-white/85 mt-2">{b.subtitle}</div>
+                <p className="text-[13px] md:text-[15px] leading-relaxed tracking-[0.02em] text-white/90 mt-2.5 max-w-sm drop-shadow-[0_1px_6px_rgba(0,0,0,0.4)]">
+                  {b.subtitle}
+                </p>
               )}
               {b.ctaText && (
-                <span className="mt-4 w-fit inline-flex items-center gap-2 px-6 py-2.5 bg-[#b8893a] text-[#1a1410] text-[11px] tracking-[3px] uppercase font-medium group-hover:bg-[#e8d49b] transition-all">
+                <span className="mt-5 w-fit inline-flex items-center gap-2 px-6 py-2.5 bg-[#b8893a] text-[#1a1410] text-[11px] tracking-[2.5px] uppercase font-semibold group-hover:bg-[#e8d49b] transition-all">
                   {b.ctaText} <ChevronRight size={14} />
                 </span>
               )}
