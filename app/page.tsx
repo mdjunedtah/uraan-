@@ -311,7 +311,7 @@ export default function HomePage() {
       <Trending />
 
       {/* 6. SHOP BY BUDGET */}
-      <section className="relative overflow-hidden py-12 px-4 bg-gradient-to-br from-[#fdf6ea] via-[#fbf3e3] to-[#f5e8d3]">
+      <section className="gpu-layer relative overflow-hidden py-12 px-4 bg-gradient-to-br from-[#fdf6ea] via-[#fbf3e3] to-[#f5e8d3]">
         <LeafBranch className="pointer-events-none select-none absolute top-0 left-0 w-24 md:w-40 opacity-50" />
         <LeafBranch className="pointer-events-none select-none absolute top-0 right-0 w-24 md:w-40 opacity-50 -scale-x-100" />
 
@@ -336,7 +336,7 @@ export default function HomePage() {
                 className="luxury-card rounded-2xl p-4 md:p-7 text-center flex flex-col items-center"
               >
                 <div
-                  className="w-16 h-16 md:w-[72px] md:h-[72px] rounded-full flex items-center justify-center mb-3 md:mb-4"
+                  className="budget-icon w-16 h-16 md:w-[72px] md:h-[72px] rounded-full flex items-center justify-center mb-3 md:mb-4"
                   style={{
                     background: `radial-gradient(circle at 34% 28%, ${b.light} 0%, ${b.deep} 100%)`,
                     boxShadow: `inset 0 1px 2px rgba(255,255,255,0.7), inset 0 0 0 1px ${b.accent}33, 0 6px 14px ${b.accent}26`,
@@ -375,7 +375,7 @@ export default function HomePage() {
 
       {/* 8. RUDRAKSH FEATURE BLOCK (dark) */}
       <section className="px-4 md:px-8">
-        <div className="max-w-7xl mx-auto rounded-2xl bg-gradient-to-br from-[#3b2a17] via-[#2c1f11] to-[#1d140a] text-[#e8d49b] py-8 md:py-12 px-6 md:px-12 text-center relative overflow-hidden shadow-[0_14px_30px_rgba(43,31,18,0.28)]">
+        <div className="gpu-layer max-w-7xl mx-auto rounded-2xl bg-gradient-to-br from-[#3b2a17] via-[#2c1f11] to-[#1d140a] text-[#e8d49b] py-8 md:py-12 px-6 md:px-12 text-center relative overflow-hidden shadow-[0_14px_30px_rgba(43,31,18,0.28)]">
           <div
             className="absolute top-1/2 -translate-y-1/2 -right-6 md:right-6 text-[240px] md:text-[360px] text-[#c89043] opacity-[0.15] font-serif leading-none"
             aria-hidden="true"

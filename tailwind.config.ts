@@ -5,6 +5,13 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // Hover effects (lift / zoom / shadow) only apply on devices that truly
+  // support hover. On touch screens a tap otherwise triggers sticky :hover,
+  // promoting elements to GPU layers that smear on weak mobile GPUs — the
+  // "glitch" seen while scrolling card sections.
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       colors: {

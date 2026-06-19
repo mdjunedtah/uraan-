@@ -12,6 +12,15 @@
   border-color: rgba(184, 137, 58, 0.32);
 }
 
+/* Forces a single, clean GPU-backed layer for a heavily-decorated section so the
+   compositor paints it once instead of tiling. Prevents the garbled "static
+   band"/smear glitch some weak Android GPUs produce while scrolling. */
+.gpu-layer {
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 /* On touch devices a tap briefly triggers :hover, which promotes the card to a
    GPU layer and paints a large blurred shadow. On weak mobile GPUs that smears
    into static/noise bands while scrolling (see the note in globals.css). Keep
@@ -22,6 +31,12 @@
     transform: none;
     box-shadow: none;
     border-color: rgba(184, 137, 58, 0.18);
+    transition: none;
+  }
+  /* The glossy budget icons use a blurred outer shadow that is expensive to
+     repaint and can smear on weak GPUs — flatten it to the inner highlight. */
+  .budget-icon {
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
   }
 }
 
