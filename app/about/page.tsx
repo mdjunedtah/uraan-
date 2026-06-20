@@ -111,10 +111,19 @@ export default function AboutPage() {
             { num: '500+', label: 'Unique Designs', icon: Gem },
             { num: '100%', label: 'Hallmarked', icon: ShieldCheck },
           ].map((s, i) => (
-            <div key={i} className="text-center bg-white border border-[rgba(184,137,58,0.18)] p-6">
-              <s.icon className="text-[#b8893a] mx-auto mb-3" size={24} />
-              <div className="serif text-4xl md:text-5xl leading-[1.1] text-[#1a1410] font-semibold">{s.num}</div>
-              <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mt-2">
+            <div
+              key={i}
+              className="flex flex-col items-center justify-start text-center bg-white border border-[rgba(184,137,58,0.18)] px-4 py-7"
+            >
+              <s.icon className="text-[#b8893a] mb-3" size={24} />
+              {/* tabular + lining figures force every digit to one cap-height and
+                  one width, so "25+", "10K+", "500+" and "100%" read at an
+                  identical size and baseline (Cormorant defaults to old-style
+                  figures, which made some numbers look taller/larger). */}
+              <div className="serif tabular-nums lining-nums text-4xl md:text-5xl leading-none text-[#1a1410] font-semibold">
+                {s.num}
+              </div>
+              <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mt-2.5 leading-tight">
                 {s.label}
               </div>
             </div>

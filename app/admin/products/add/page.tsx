@@ -15,7 +15,7 @@ export default function AddProductPage() {
           <ChevronRight size={12} />
           <span>Add New</span>
         </div>
-        <h1 className="serif text-3xl text-[#1a1410]">Add New Product</h1>
+        <h1 className="serif text-3xl text-[#1a1410] mb-1">Add New Product</h1>
         <p className="text-sm text-[#6b5d4c]">Fill in details to add a new product to your catalog.</p>
       </div>
 

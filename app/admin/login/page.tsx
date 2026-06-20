@@ -134,42 +134,42 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1410] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#1a1410] bg-[radial-gradient(ellipse_at_top,_rgba(184,137,58,0.16),_transparent_55%)]">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-3">
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center gap-2.5 mb-3">
             <Gem className="text-[#b8893a]" size={26} />
-            <span className="display text-xl tracking-[3px] font-semibold text-white">OM GAURI</span>
+            <span className="display text-xl md:text-2xl tracking-[4px] font-semibold text-white">OM GAURI</span>
           </div>
-          <p className="text-[10px] tracking-[3px] text-[#b8893a] uppercase">Admin Panel</p>
+          <p className="text-[10px] tracking-[4px] text-[#b8893a] uppercase">Admin Panel</p>
         </div>
 
         {deviceApproval ? (
-          <form onSubmit={handleDeviceApprove} className="bg-white p-6 md:p-8">
+          <form onSubmit={handleDeviceApprove} className="bg-white border border-[#b8893a]/15 shadow-[0_22px_60px_-20px_rgba(0,0,0,0.55)] p-7 md:p-8">
             <h1 className="serif text-2xl text-[#1a1410] mb-1 flex items-center gap-2">
               <MailCheck size={20} className="text-[#b8893a]" /> Approve this device
             </h1>
             <p className="text-sm text-[#6b5d4c] mb-6">We emailed a 6-digit code to approve this new device.</p>
             {error && <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3"><AlertCircle size={15} /> {error}</div>}
-            <input {...codeInputProps} value={dcode} onChange={(e) => setDcode(e.target.value.replace(/\D/g, ''))} className="luxury-input tracking-[8px] text-center text-2xl mb-6" placeholder="••••••" />
-            <button type="submit" disabled={loading || dcode.length !== 6} className="w-full py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] disabled:opacity-60">
+            <input {...codeInputProps} value={dcode} onChange={(e) => setDcode(e.target.value.replace(/\D/g, ''))} className="luxury-input h-14 tracking-[8px] text-center text-2xl mb-6" placeholder="••••••" />
+            <button type="submit" disabled={loading || dcode.length !== 6} className="w-full h-12 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] disabled:opacity-60 transition-colors">
               {loading ? 'Verifying…' : 'Approve device'}
             </button>
           </form>
         ) : mfa ? (
-          <form onSubmit={handleMfa} className="bg-white p-6 md:p-8">
+          <form onSubmit={handleMfa} className="bg-white border border-[#b8893a]/15 shadow-[0_22px_60px_-20px_rgba(0,0,0,0.55)] p-7 md:p-8">
             <h1 className="serif text-2xl text-[#1a1410] mb-1 flex items-center gap-2">
               <KeyRound size={20} className="text-[#b8893a]" /> Verify it&apos;s you
             </h1>
             <p className="text-sm text-[#6b5d4c] mb-6">Enter the 6-digit code from your authenticator app.</p>
             {error && <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3"><AlertCircle size={15} /> {error}</div>}
-            <input {...codeInputProps} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} className="luxury-input tracking-[8px] text-center text-2xl mb-6" placeholder="••••••" />
-            <button type="submit" disabled={loading || code.length !== 6} className="w-full py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] disabled:opacity-60">
+            <input {...codeInputProps} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} className="luxury-input h-14 tracking-[8px] text-center text-2xl mb-6" placeholder="••••••" />
+            <button type="submit" disabled={loading || code.length !== 6} className="w-full h-12 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] disabled:opacity-60 transition-colors">
               {loading ? 'Verifying…' : 'Verify'}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="bg-white border border-[#b8893a]/15 shadow-[0_22px_60px_-20px_rgba(0,0,0,0.55)] p-7 md:p-8">
             <h1 className="serif text-2xl text-[#1a1410] mb-1">Sign in</h1>
             <p className="text-sm text-[#6b5d4c] mb-6 flex items-center gap-1.5">
               {useSupabase ? <><ShieldCheck size={14} className="text-[#3d6b5a]" /> Secure sign-in</> : 'Enter your admin credentials to continue.'}
@@ -177,22 +177,26 @@ export default function AdminLoginPage() {
 
             {error && <div className="mb-4 flex items-center gap-2 bg-[#7a2e2e]/10 text-[#7a2e2e] text-sm p-3"><AlertCircle size={15} /> {error}</div>}
 
-            <label className="luxury-label">Email</label>
-            <div className="relative mb-4">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="luxury-input pl-9" placeholder="admin@omgauripulta.com" autoComplete="username" />
+            <div className="mb-4">
+              <label htmlFor="admin-email" className="luxury-label">Email</label>
+              <div className="relative">
+                <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b8893a]" />
+                <input id="admin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="luxury-input h-12 pl-11" placeholder="admin@omgauripulta.com" autoComplete="username" />
+              </div>
             </div>
 
-            <label className="luxury-label">Password</label>
-            <div className="relative mb-6">
-              <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="luxury-input pl-9 pr-10" placeholder="Password" autoComplete="current-password" />
-              <button type="button" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a8c75] hover:text-[#b8893a]">
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+            <div className="mb-6">
+              <label htmlFor="admin-password" className="luxury-label">Password</label>
+              <div className="relative">
+                <Lock size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b8893a]" />
+                <input id="admin-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="luxury-input h-12 pl-11 pr-11" placeholder="Password" autoComplete="current-password" />
+                <button type="button" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9a8c75] hover:text-[#b8893a] transition-colors">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2 disabled:opacity-60 transition-colors">
+            <button type="submit" disabled={loading} className="w-full h-12 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] inline-flex items-center justify-center gap-2 disabled:opacity-60 transition-colors">
               <LogIn size={15} /> {loading ? 'Signing in…' : 'Sign In'}
             </button>
 
@@ -204,7 +208,9 @@ export default function AdminLoginPage() {
           </form>
         )}
 
-        <p className="text-center text-[11px] text-[#e8d49b]/50 mt-5">Protected area · authorised staff only</p>
+        <p className="text-center text-[10px] tracking-[1.5px] uppercase text-[#e8d49b]/45 mt-6">
+          Protected area · authorised staff only
+        </p>
       </div>
     </div>
   );

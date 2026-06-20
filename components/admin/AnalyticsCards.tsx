@@ -18,7 +18,9 @@ export default function AnalyticsCard({
     gold: 'bg-[#b8893a]/10 text-[#b8893a]',
     green: 'bg-[#3d6b5a]/10 text-[#3d6b5a]',
     red: 'bg-[#7a2e2e]/10 text-[#7a2e2e]',
-    blue: 'bg-blue-500/10 text-blue-600',
+    // Sapphire — keeps the fourth accent inside the jewel-tone palette instead
+    // of a generic Tailwind blue that clashed with the warm luxury scheme.
+    blue: 'bg-[#3a5a7a]/10 text-[#3a5a7a]',
   }[color];
 
   const isPositive = change !== undefined && change >= 0;

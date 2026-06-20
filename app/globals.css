@@ -207,3 +207,30 @@ textarea {
 
 /* Inline numeric helper for any stray number/amount */
 .admin-ui .num { font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
+
+/* ── Uniform section text ──────────────────────────────────────────────────
+   Every page title, section title and sub-heading shares the same height,
+   tracking and rhythm so the panel reads as one consistent system. */
+.admin-ui h1 { font-weight: 500; color: var(--ink); }
+.admin-ui h2 { line-height: 1.18; letter-spacing: 0.005em; color: var(--ink); }
+.admin-ui h3 { line-height: 1.35; }
+/* The recurring uppercase "card eyebrow" title (display text-sm tracking-[2px]) */
+.admin-ui .display { line-height: 1.4; }
+/* Muted supporting copy under a heading keeps one tone everywhere. */
+.admin-ui p { line-height: 1.55; }
+
+/* ── Consistent form controls + colours ───────────────────────────────────
+   One gold focus ring and one muted placeholder tone for every input across
+   the admin, so forms feel finished rather than browser-default. */
+.admin-ui label { line-height: 1.45; }
+.admin-ui input,
+.admin-ui select,
+.admin-ui textarea { color: var(--ink); }
+.admin-ui input:focus,
+.admin-ui select:focus,
+.admin-ui textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 137, 58, 0.14);
+}
+.admin-ui ::placeholder { color: var(--text-mute); opacity: 1; }

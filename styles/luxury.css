@@ -60,10 +60,14 @@
   display: block;
   font-size: 11px;
   letter-spacing: 2px;
-  color: #6b5d4c;
+  /* line-height guarantees the upper edge of the uppercase glyphs is never
+     clipped by a tight container, and reserves even vertical rhythm above
+     every field. */
+  line-height: 1.45;
+  color: #5b4d3c;
   text-transform: uppercase;
-  margin-bottom: 6px;
-  font-weight: 500;
+  margin-bottom: 7px;
+  font-weight: 600;
 }
 
 .luxury-btn {

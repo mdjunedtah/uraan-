@@ -37,7 +37,7 @@ export default function EditProductPage({
           <ChevronRight size={12} />
           <span>Edit</span>
         </div>
-        <h1 className="serif text-3xl text-[#1a1410]">Edit Product</h1>
+        <h1 className="serif text-3xl text-[#1a1410] mb-1">Edit Product</h1>
         <p className="text-sm text-[#6b5d4c]">Update product details for ID: <span className="font-semibold text-[#1a1410]">{product.id}</span></p>
       </div>
 
