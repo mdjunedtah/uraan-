@@ -243,10 +243,10 @@ export default function ContactPage() {
             <div className="border-t border-[rgba(184,137,58,0.18)] pt-4 mb-4">
               <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-2">How to Reach Us</div>
               <ul className="text-xs text-[#6b5d4c] space-y-1.5 leading-relaxed">
-                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Rithala (Red Line) is the nearest station — a short auto or cab ride to the store</li>
-                <li><span className="text-[#b8893a] font-semibold">By Road:</span> Veer Singh Colony, Budh Vihar Phase-2, off Kanjhawala Road, Rohini</li>
-                <li><span className="text-[#b8893a] font-semibold">Landmark:</span> Budh Vihar Phase-2, North West Delhi</li>
-                <li><span className="text-[#b8893a] font-semibold">Parking:</span> Street parking available nearby</li>
+                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Rithala (Red Line) is the nearest Metro station — a short auto or e-rickshaw ride to Budh Vihar Phase-2</li>
+                <li><span className="text-[#b8893a] font-semibold">By Bus:</span> DTC &amp; cluster buses stop at Budh Vihar / Veer Singh Colony</li>
+                <li><span className="text-[#b8893a] font-semibold">By Road:</span> On Kanjhawala Road, Budh Vihar Phase-2 — well connected to Rohini &amp; the Outer Ring Road</li>
+                <li><span className="text-[#b8893a] font-semibold">Parking:</span> Street parking available near the store</li>
               </ul>
             </div>
             <a
