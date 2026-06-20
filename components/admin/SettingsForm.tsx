@@ -48,7 +48,7 @@ export default function SettingsForm() {
                 type="email"
                 value={settings.storeEmail}
                 onChange={(e) => setSettings({ ...settings, storeEmail: e.target.value })}
-                className="luxury-input pl-9"
+                className="luxury-input !pl-9"
               />
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function SettingsForm() {
                 type="tel"
                 value={settings.storePhone}
                 onChange={(e) => setSettings({ ...settings, storePhone: e.target.value })}
-                className="luxury-input pl-9"
+                className="luxury-input !pl-9"
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function SettingsForm() {
                 rows={2}
                 value={settings.storeAddress}
                 onChange={(e) => setSettings({ ...settings, storeAddress: e.target.value })}
-                className="luxury-input pl-9"
+                className="luxury-input !pl-9"
               />
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function SettingsForm() {
                 type="tel"
                 value={settings.whatsappNumber}
                 onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
-                className="luxury-input pl-9"
+                className="luxury-input !pl-9"
                 placeholder="9188519XXXXX"
               />
             </div>

@@ -181,7 +181,7 @@ export default function AdminLoginPage() {
               <label htmlFor="admin-email" className="luxury-label">Email</label>
               <div className="relative">
                 <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b8893a]" />
-                <input id="admin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="luxury-input h-12 pl-11" placeholder="admin@omgauripulta.com" autoComplete="username" />
+                <input id="admin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="luxury-input h-12 !pl-11" placeholder="admin@omgauripulta.com" autoComplete="username" />
               </div>
             </div>
 
@@ -189,7 +189,7 @@ export default function AdminLoginPage() {
               <label htmlFor="admin-password" className="luxury-label">Password</label>
               <div className="relative">
                 <Lock size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b8893a]" />
-                <input id="admin-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="luxury-input h-12 pl-11 pr-11" placeholder="Password" autoComplete="current-password" />
+                <input id="admin-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="luxury-input h-12 !pl-11 !pr-11" placeholder="Password" autoComplete="current-password" />
                 <button type="button" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9a8c75] hover:text-[#b8893a] transition-colors">
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
