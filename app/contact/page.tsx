@@ -234,23 +234,23 @@ export default function ContactPage() {
               <div>
                 <div className="text-sm font-semibold text-[#1a1410] mb-1">Om Gauri Pulta Jewellery</div>
                 <div className="text-sm text-[#6b5d4c] leading-relaxed">
-                  12, Jewellers Lane, Near Mumbadevi Temple<br />
-                  Zaveri Bazaar, Mumbai - 400003<br />
-                  Maharashtra, India
+                  Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
+                  Veer Singh Colony, Budh Vihar Phase-2,<br />
+                  Rohini, North West Delhi, New Delhi – 110086
                 </div>
               </div>
             </div>
             <div className="border-t border-[rgba(184,137,58,0.18)] pt-4 mb-4">
               <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-2">How to Reach Us</div>
               <ul className="text-xs text-[#6b5d4c] space-y-1.5 leading-relaxed">
-                <li><span className="text-[#b8893a] font-semibold">By Train:</span> Nearest station — Charni Road (Western Line), 5 min walk</li>
-                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Marine Lines Metro Station, 7 min walk</li>
-                <li><span className="text-[#b8893a] font-semibold">By Road:</span> Off P. D&apos;Mello Road, behind Zaveri Bazaar main street</li>
-                <li><span className="text-[#b8893a] font-semibold">Parking:</span> Available at Zaveri Bazaar Municipal Parking</li>
+                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Rithala (Red Line) is the nearest station — a short auto or cab ride to the store</li>
+                <li><span className="text-[#b8893a] font-semibold">By Road:</span> Veer Singh Colony, Budh Vihar Phase-2, off Kanjhawala Road, Rohini</li>
+                <li><span className="text-[#b8893a] font-semibold">Landmark:</span> Budh Vihar Phase-2, North West Delhi</li>
+                <li><span className="text-[#b8893a] font-semibold">Parking:</span> Street parking available nearby</li>
               </ul>
             </div>
             <a
-              href="https://maps.google.com/?q=Zaveri+Bazaar+Mumbai"
+              href="https://maps.google.com/?q=Veer+Singh+Colony+Budh+Vihar+Phase-2+Rohini+New+Delhi+110086"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
