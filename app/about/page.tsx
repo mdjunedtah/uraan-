@@ -111,10 +111,10 @@ export default function AboutPage() {
             { num: '500+', label: 'Unique Designs', icon: Gem },
             { num: '100%', label: 'Hallmarked', icon: ShieldCheck },
           ].map((s, i) => (
-            <div key={i} className="text-center bg-white border border-[rgba(184,137,58,0.18)] p-5">
-              <s.icon className="text-[#b8893a] mx-auto mb-2" size={22} />
-              <div className="serif text-3xl text-[#1a1410] font-semibold">{s.num}</div>
-              <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mt-1">
+            <div key={i} className="text-center bg-white border border-[rgba(184,137,58,0.18)] p-6">
+              <s.icon className="text-[#b8893a] mx-auto mb-3" size={24} />
+              <div className="serif text-4xl md:text-5xl leading-[1.1] text-[#1a1410] font-semibold">{s.num}</div>
+              <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mt-2">
                 {s.label}
               </div>
             </div>
