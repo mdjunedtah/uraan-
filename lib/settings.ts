@@ -29,9 +29,9 @@ export type SettingsData = {
 
 export const DEFAULT_SETTINGS: SettingsData = {
   storeName: 'Om Gauri Pulta',
-  storeEmail: 'info@omgpgems.com',
-  storePhone: '+91 88519 11653',
-  storeAddress: 'Ground Floor, Plot No. G-6, KH No. 69/17/1, Veer Singh Colony, Budh Vihar Phase-2, Rohini, North West Delhi, New Delhi – 110086',
+  storeEmail: 'info@omgauripulta.com',
+  storePhone: '+91 98765 43210',
+  storeAddress: 'Main Bazaar Road, Your City, India - 123456',
   currency: 'INR',
   taxRate: 3,
   shippingFlat: 99,
