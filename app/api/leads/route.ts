@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetLeads, dbInsertLead } from '@/lib/leadsDb';
 import { isAdminRequest } from '@/lib/adminApi';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -38,6 +39,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Valid email is required.' }, { status: 400 });
   }
 
+  const phone = String(body.phone || '').trim();
+  const message = String(body.message || '').trim();
+  const source = String(body.source || 'Website').trim();
+  const lengthError = checkLengths({
+    Name: { value: name, max: MAX_LEN.short },
+    Email: { value: email, max: MAX_LEN.short },
+    Message: { value: message, max: MAX_LEN.text },
+    Source: { value: source, max: MAX_LEN.short },
+  });
+  if (lengthError) {
+    return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ ok: true, configured: false });
   }
@@ -45,9 +59,9 @@ export async function POST(request: Request) {
   const lead = await dbInsertLead({
     name,
     email,
-    phone: String(body.phone || '').trim() || undefined,
-    message: String(body.message || '').trim() || undefined,
-    source: String(body.source || 'Website').trim(),
+    phone: phone || undefined,
+    message: message || undefined,
+    source,
   });
 
   if (!lead) {

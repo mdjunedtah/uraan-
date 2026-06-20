@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
 import { dbInsertOrder } from '@/lib/ordersDb';
+import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
+
+const MAX_ITEMS = 100;
 
 type NewItem = { name?: unknown; quantity?: unknown; price?: unknown; image?: unknown };
 
@@ -9,6 +12,9 @@ type NewItem = { name?: unknown; quantity?: unknown; price?: unknown; image?: un
 // the server marked as paid — so a paid order can never be forged from the
 // browser.
 export async function POST(request: Request) {
+  if (isBodyTooLarge(request)) {
+    return NextResponse.json({ ok: false, error: 'Request too large.' }, { status: 413 });
+  }
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -31,24 +37,34 @@ export async function POST(request: Request) {
 
   const id = 'OGP' + Date.now().toString().slice(-8);
   const o = (body.order || {}) as Record<string, unknown>;
+  const items = Array.isArray(o.items) ? (o.items as NewItem[]).slice(0, MAX_ITEMS) : [];
+  const customer = String(o.customer || '');
+  const address = o.address ? String(o.address) : '';
+  const lengthError =
+    checkLengths({
+      Customer: { value: customer, max: MAX_LEN.short },
+      Address: { value: address, max: MAX_LEN.text },
+    }) || items.map((i) => checkLengths({ 'Item name': { value: String(i.name || ''), max: MAX_LEN.short } })).find(Boolean);
+  if (lengthError) {
+    return NextResponse.json({ ok: false, valid: false, error: lengthError }, { status: 400 });
+  }
+
   try {
     await dbInsertOrder({
       id,
-      customer: String(o.customer || ''),
+      customer,
       email: o.email ? String(o.email) : undefined,
       phone: o.phone ? String(o.phone) : undefined,
       amount: Number(o.amount || 0),
-      items: Array.isArray(o.items)
-        ? (o.items as NewItem[]).map((i) => ({
-            name: String(i.name || ''),
-            quantity: Number(i.quantity || 1),
-            price: Number(i.price || 0),
-            image: i.image ? String(i.image) : undefined,
-          }))
-        : [],
+      items: items.map((i) => ({
+        name: String(i.name || ''),
+        quantity: Number(i.quantity || 1),
+        price: Number(i.price || 0),
+        image: i.image ? String(i.image) : undefined,
+      })),
       payment: o.payment ? `${String(o.payment)} · Paid` : 'Paid',
       status: 'Processing',
-      address: o.address ? String(o.address) : undefined,
+      address: address || undefined,
       paid: true,
       paymentId,
     });

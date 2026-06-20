@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetProducts, dbInsertProduct } from '@/lib/productsDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { products as seed, type Product } from '@/data/jewelleryData';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 function slugify(s: string): string {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -40,6 +41,14 @@ export async function POST(request: Request) {
   if (!body.name || !body.price) {
     return NextResponse.json({ ok: false, error: 'Name and price are required.' }, { status: 400 });
   }
+  const lengthError = checkLengths({
+    Name: { value: String(body.name), max: MAX_LEN.short },
+    Slug: { value: String(body.slug ?? ''), max: MAX_LEN.short },
+    Category: { value: String(body.category ?? ''), max: MAX_LEN.short },
+    Description: { value: String(body.description ?? ''), max: MAX_LEN.text },
+    Material: { value: String(body.material ?? ''), max: MAX_LEN.short },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
   const product: Product = {
     id: body.id || 'P' + Date.now().toString(36).toUpperCase(),

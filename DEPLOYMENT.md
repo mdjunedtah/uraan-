@@ -97,6 +97,10 @@ taking an online payment (handy for testing and Cash-on-Delivery).
   `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`. Point
   the webhook to `https://<your-site>/api/whatsapp/webhook` using the same
   verify token. Inbound chats then appear automatically in the CRM.
+- **Recommended:** also set `WHATSAPP_APP_SECRET` (your app's secret, under
+  **App Settings → Basic**). Without it, anyone who finds the webhook URL
+  could POST fake messages that become CRM leads; with it, every inbound
+  message's signature is verified before it's trusted.
 
 ---
 

@@ -6,7 +6,13 @@ export async function POST() {
   const res = NextResponse.json({ ok: true });
 
   // Clear the legacy break-glass cookie.
-  res.cookies.set(ADMIN_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
+  res.cookies.set(ADMIN_COOKIE, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
   const legacyCookieCleared = res.cookies.get(ADMIN_COOKIE)?.value === '';
 
   // End the Supabase Auth session too (clears its auth cookies), if configured.

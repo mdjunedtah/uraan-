@@ -3,6 +3,7 @@ import { dbUpdateProduct, dbDeleteProduct } from '@/lib/productsDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type { Product } from '@/data/jewelleryData';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 // PATCH → update a product (admin only).
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
@@ -22,6 +23,15 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   } catch {
     return NextResponse.json({ ok: false, error: 'Invalid request.' }, { status: 400 });
   }
+
+  const lengthError = checkLengths({
+    Name: { value: body.name ?? '', max: MAX_LEN.short },
+    Slug: { value: body.slug ?? '', max: MAX_LEN.short },
+    Category: { value: body.category ?? '', max: MAX_LEN.short },
+    Description: { value: body.description ?? '', max: MAX_LEN.text },
+    Material: { value: body.material ?? '', max: MAX_LEN.short },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
   const ok = await dbUpdateProduct(params.id, body);
   if (!ok) {

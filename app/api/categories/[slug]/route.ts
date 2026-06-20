@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbUpdateCategory, dbDeleteCategory } from '@/lib/categoriesDb';
 import { requireRole } from '@/lib/security/guard';
 import type { Category } from '@/lib/categories';
+import { checkLengths, MAX_LEN } from '@/lib/security/validate';
 
 // PATCH → edit a category (admin only).
 export async function PATCH(request: Request, { params }: { params: { slug: string } }) {
@@ -18,6 +19,13 @@ export async function PATCH(request: Request, { params }: { params: { slug: stri
   if (body.description !== undefined) patch.description = String(body.description).trim();
   if (body.image !== undefined) patch.image = String(body.image).trim();
   if (body.count !== undefined) patch.count = Number(body.count);
+
+  const lengthError = checkLengths({
+    Name: { value: patch.name ?? '', max: MAX_LEN.short },
+    Description: { value: patch.description ?? '', max: MAX_LEN.text },
+    Image: { value: patch.image ?? '', max: MAX_LEN.url },
+  });
+  if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
   const ok = await dbUpdateCategory(params.slug, patch);
   if (!ok) return NextResponse.json({ ok: false, error: 'Could not update category.' }, { status: 502 });

@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server';
 import { submitLead } from '@/lib/crm';
 import { dbInsertLead } from '@/lib/leadsDb';
 import { notifyAdminNewLead } from '@/lib/whatsappServer';
+import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
+  if (isBodyTooLarge(request)) {
+    return NextResponse.json({ ok: false, error: 'Request too large.' }, { status: 413 });
+  }
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -27,6 +31,15 @@ export async function POST(request: Request) {
   }
   if (phone && !/^[0-9+\-\s]{7,15}$/.test(phone)) {
     return NextResponse.json({ ok: false, error: 'Please enter a valid phone number.' }, { status: 400 });
+  }
+  const lengthError = checkLengths({
+    Name: { value: name, max: MAX_LEN.short },
+    Email: { value: email, max: MAX_LEN.short },
+    Message: { value: message, max: MAX_LEN.text },
+    Source: { value: source, max: MAX_LEN.short },
+  });
+  if (lengthError) {
+    return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
   }
 
   // Save to our own database first (primary store, so nothing is ever lost).

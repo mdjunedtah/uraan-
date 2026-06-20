@@ -56,6 +56,11 @@ email/2FA steps.
 | 48 | Env var protection | secrets server-only; never in the client bundle |
 | 49 | Secret key rotation | see below |
 | 50 | Production-grade config | headers, `poweredByHeader:false`, fail-safe defaults |
+| 51 | Input length limits | `lib/security/validate.ts` — caps every text field (name, message, address, description…) on all write routes so the DB/regex/hashing layer never sees unbounded input |
+| 52 | Request size limits | `isBodyTooLarge()` rejects oversized JSON bodies by `Content-Length` on public endpoints (lead, orders, payment, WhatsApp webhook) before parsing |
+| 53 | Upload validation | `/api/upload` — 5MB max file size + server-side MIME allowlist (JPEG/PNG/WebP/GIF), never trusts the client's declared type |
+| 54 | Webhook signature verification | `/api/whatsapp/webhook` verifies Meta's `X-Hub-Signature-256` HMAC (`WHATSAPP_APP_SECRET`) before turning a POST into a CRM lead |
+| 55 | Password length cap | `lib/security/password.ts` — 128-char max stops an oversized password from being hashed with Argon2id (memory-hard KDF) |
 
 ## Operational
 
@@ -69,6 +74,16 @@ email/2FA steps.
 - **Lost authenticator / lockout:** sign in via **“Use recovery login”** with
   `ADMIN_EMAIL` / `ADMIN_PASSWORD`. To clear a permanent lock, delete the row
   from `account_locks` for that email.
+
+## Single-threaded runtime note
+
+This app deploys to **Vercel** (`DEPLOYMENT.md` step 1), where each API route
+runs as an isolated serverless function invocation rather than one long-lived
+Node.js process. An unhandled error in one request does not take down other
+visitors' requests, so a PM2/cluster-manager-style guardrail (relevant for a
+traditional always-on Node server) is not needed here. If this app is ever
+self-hosted on a persistent Node process instead, run it under PM2 or an
+auto-restarting process manager.
 
 ## Reporting
 

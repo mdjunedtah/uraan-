@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { isRazorpayConfigured, createRazorpayOrder, razorpayKeyId } from '@/lib/razorpay';
+import { isBodyTooLarge } from '@/lib/security/validate';
 
 // POST { amount } (rupees) → creates a Razorpay order to pay against.
 export async function POST(request: Request) {
+  if (isBodyTooLarge(request)) {
+    return NextResponse.json({ ok: false, error: 'Request too large.' }, { status: 413 });
+  }
   let body: Record<string, unknown>;
   try {
     body = await request.json();
