@@ -37,6 +37,7 @@ import {
   User,
   Gem,
   Shirt,
+  BadgeCheck,
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaYoutube, } from "react-icons/fa";
 
@@ -488,10 +489,28 @@ export default function HomePage() {
 
       {/* 13. PAYMENT OPTIONS */}
       <section className="py-14 px-4 max-w-7xl mx-auto">
-        <p className="section-tag-italic">Safe · Secure · Seamless</p>
-        <h2 className="section-heading">Payment Options</h2>
-        <div className="luxury-divider">
-          <CreditCard size={10} />
+        {/* Dark gold-on-ink banner header */}
+        <div
+          className="relative overflow-hidden rounded-2xl px-6 py-10 text-center"
+          style={{
+            background:
+              'radial-gradient(ellipse at 25% 0%, rgba(212,168,87,0.28), transparent 55%), radial-gradient(ellipse at 85% 100%, rgba(184,137,58,0.22), transparent 60%), linear-gradient(160deg, #1a1410 0%, #2a1f13 55%, #1a1410 100%)',
+          }}
+        >
+          <p className="section-tag-italic" style={{ color: '#e8d49b' }}>Safe · Secure · Seamless</p>
+          <h2 className="display text-2xl md:text-3xl tracking-[5px] uppercase font-medium mt-1" style={{ color: '#d4a857' }}>
+            Payment Options
+          </h2>
+          <div className="flex items-center justify-center gap-3 mt-5">
+            <span className="h-px w-14" style={{ background: '#b8893a', opacity: 0.5 }} />
+            <span
+              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg, #d4a857, #8c6726)' }}
+            >
+              <ShieldCheck size={16} className="text-[#1a1410]" />
+            </span>
+            <span className="h-px w-14" style={{ background: '#b8893a', opacity: 0.5 }} />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6">
@@ -519,9 +538,13 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Payment Logos Strip */}
-        <div className="mt-8 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] rounded-xl py-5 px-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+        {/* We Accept — payment logo grid */}
+        <div className="mt-8 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] rounded-xl py-6 px-4">
+          <div className="luxury-divider !mt-0">
+            <span className="text-[11px] tracking-[3px] uppercase" style={{ color: '#b8893a' }}>We Accept</span>
+          </div>
+
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 mt-2">
             {[
               ['VISA', '#1A1F71'],
               ['Mastercard', '#EB001B'],
@@ -531,23 +554,43 @@ export default function HomePage() {
               ['GPay', '#4285F4'],
               ['PhonePe', '#5F259F'],
               ['Paytm', '#00BAF2'],
+              ['BHIM', '#F5821F'],
+              ['Amazon Pay', '#FF9900'],
+              ['MobiKwik', '#1C75BC'],
               ['Razorpay', '#3395FF'],
             ].map(([name, color], i) => (
               <div
                 key={i}
-                className="display text-xs md:text-sm tracking-[2px] font-semibold"
-                style={{ color }}
+                className="bg-white border border-[rgba(184,137,58,0.15)] rounded-lg py-3 px-2 flex items-center justify-center shadow-sm"
               >
-                {name}
+                <span className="display text-[11px] md:text-xs tracking-[1px] font-semibold text-center" style={{ color }}>
+                  {name}
+                </span>
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-center gap-2 mt-4 text-[10px] text-[#9a8c75]">
-            <Lock size={11} className="text-[#3d6b5a]" />
-            <span className="tracking-[1.5px] uppercase">
-              256-bit SSL Encrypted · 100% Secure Checkout
-            </span>
+        </div>
+
+        {/* Security badges — dark bar */}
+        <div className="mt-4 rounded-xl py-4 px-4" style={{ background: '#1a1410' }}>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            {[
+              { icon: Lock, label: '256-bit SSL Encrypted' },
+              { icon: ShieldCheck, label: 'PCI DSS Compliant' },
+              { icon: BadgeCheck, label: '100% Secure Checkout' },
+            ].map(({ icon: Icon, label }, i) => (
+              <div key={i} className="flex items-center gap-2 text-[10px] md:text-[11px] tracking-[1px] uppercase" style={{ color: '#e8d49b' }}>
+                <Icon size={13} style={{ color: '#d4a857' }} />
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* Trust strip */}
+        <div className="mt-4 flex items-center justify-center gap-2 bg-[#fbf3df] border border-[rgba(184,137,58,0.2)] rounded-full py-3 px-5">
+          <Lock size={13} style={{ color: '#b8893a' }} />
+          <span className="text-xs text-[#6b5d4c]">Your transactions are safe with us.</span>
         </div>
       </section>
 
