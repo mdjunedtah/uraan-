@@ -37,6 +37,15 @@ export type Review = {
   product?: string;
   date: string;
   verified: boolean;
+  // Product-page review system (optional so legacy testimonial rows keep working).
+  productId?: string;
+  title?: string;
+  variant?: string;
+  images?: string[];
+  videos?: string[];
+  status?: 'pending' | 'approved' | 'rejected' | 'hidden';
+  helpfulCount?: number;
+  reportCount?: number;
 };
 
 export const categories: Category[] = [
@@ -81,15 +90,15 @@ export const products: Product[] = [
 ];
 
 export const reviews: Review[] = [
-  { id: 'r1', name: 'Priya Sharma', city: 'Mumbai', avatar: '/images/model.jpg', rating: 5, date: '2024-11-15', verified: true, product: 'Diamond Floral Necklace', text: 'I wore this necklace at my daughter\'s wedding and received more compliments than the bride! The craftsmanship is extraordinary — it looks even more beautiful in person. Worth every rupee.' },
-  { id: 'r2', name: 'Anjali Mehta', city: 'Delhi', avatar: '/images/model.jpg', rating: 5, date: '2024-12-02', verified: true, product: 'Gold Temple Necklace', text: 'Three generations of my family shop only at Om Gauri Putra. The quality never wavers. This temple necklace is exactly what heirloom jewellery should feel like — heavy, impeccable, timeless.' },
-  { id: 'r3', name: 'Sunita Reddy', city: 'Hyderabad', avatar: '/images/model.jpg', rating: 5, date: '2024-10-20', verified: true, product: 'Kundan Bridal Necklace', text: 'My bridal set was custom-designed here. The team was patient, professional and the final piece brought me to tears. Every bride deserves jewellery this special.' },
-  { id: 'r4', name: 'Kavitha Nair', city: 'Chennai', avatar: '/images/model.jpg', rating: 5, date: '2024-09-18', verified: true, product: 'Gold Jhumka Earrings', text: 'I have bought jhumkas from many shops but these are in a different league. The weight is perfect, the sound when they move is music, and the 22K gold colour is stunning.' },
-  { id: 'r5', name: 'Meera Patel', city: 'Ahmedabad', avatar: '/images/model.jpg', rating: 5, date: '2024-11-30', verified: true, product: 'Solitaire Diamond Ring', text: 'My husband proposed with this ring and I said yes before he finished the sentence. The diamond is breathtaking. Every time I look at it I fall in love again.' },
-  { id: 'r6', name: 'Rekha Iyer', city: 'Bangalore', avatar: '/images/model.jpg', rating: 4, date: '2024-08-14', verified: true, product: 'Silver Pendant Set', text: 'Beautiful silver work at a very fair price. The anti-tarnish coating is excellent — I have worn it daily for three months without any dulling. Great value for money.' },
-  { id: 'r7', name: 'Fatima Shaikh', city: 'Pune', avatar: '/images/model.jpg', rating: 5, date: '2024-12-10', verified: true, product: 'Diamond Tennis Bracelet', text: 'I treated myself to this bracelet for my 40th birthday and it is the most beautiful thing I own. The diamonds are exceptional and the clasp is very secure. Pure luxury.' },
-  { id: 'r8', name: 'Deepa Krishnan', city: 'Kochi', avatar: '/images/model.jpg', rating: 5, date: '2024-07-22', verified: true, product: '1 Mukhi Rudraksh Pendant', text: 'The Rudraksh pendant came with a certificate of authenticity and a beautiful explanation of its significance. I can feel the positive energy. Highly recommend to anyone seeking both beauty and spirituality.' },
-  { id: 'r9', name: 'Rashmi Gupta', city: 'Kolkata', avatar: '/images/model.jpg', rating: 5, date: '2024-10-05', verified: true, product: 'Polki Diamond Necklace', text: 'I was nervous ordering a piece this expensive online but the experience was flawless. Packaging was exquisite, the necklace arrived exactly as shown, and customer care was exceptional.' },
+  { id: 'r1', productId: 'p001', name: 'Priya Sharma', city: 'Mumbai', avatar: '/images/model.jpg', rating: 5, date: '2024-11-15', verified: true, status: 'approved', helpfulCount: 34, product: 'Diamond Floral Necklace', title: 'More compliments than the bride', text: 'I wore this necklace at my daughter\'s wedding and received more compliments than the bride! The craftsmanship is extraordinary — it looks even more beautiful in person. Worth every rupee.' },
+  { id: 'r2', productId: 'p002', name: 'Anjali Mehta', city: 'Delhi', avatar: '/images/model.jpg', rating: 5, date: '2024-12-02', verified: true, status: 'approved', helpfulCount: 51, product: 'Gold Temple Necklace', title: 'Three generations, one shop', text: 'Three generations of my family shop only at Om Gauri Putra. The quality never wavers. This temple necklace is exactly what heirloom jewellery should feel like — heavy, impeccable, timeless.' },
+  { id: 'r3', productId: 'p004', name: 'Sunita Reddy', city: 'Hyderabad', avatar: '/images/model.jpg', rating: 5, date: '2024-10-20', verified: true, status: 'approved', helpfulCount: 67, product: 'Kundan Bridal Necklace', title: 'Brought me to tears', text: 'My bridal set was custom-designed here. The team was patient, professional and the final piece brought me to tears. Every bride deserves jewellery this special.' },
+  { id: 'r4', productId: 'p101', name: 'Kavitha Nair', city: 'Chennai', avatar: '/images/model.jpg', rating: 5, date: '2024-09-18', verified: true, status: 'approved', helpfulCount: 29, product: 'Gold Jhumka Earrings', title: 'A different league', text: 'I have bought jhumkas from many shops but these are in a different league. The weight is perfect, the sound when they move is music, and the 22K gold colour is stunning.' },
+  { id: 'r5', productId: 'p201', name: 'Meera Patel', city: 'Ahmedabad', avatar: '/images/model.jpg', rating: 5, date: '2024-11-30', verified: true, status: 'approved', helpfulCount: 88, product: 'Solitaire Diamond Ring', title: 'Said yes before he finished', text: 'My husband proposed with this ring and I said yes before he finished the sentence. The diamond is breathtaking. Every time I look at it I fall in love again.' },
+  { id: 'r6', productId: 'p303', name: 'Rekha Iyer', city: 'Bangalore', avatar: '/images/model.jpg', rating: 4, date: '2024-08-14', verified: true, status: 'approved', helpfulCount: 18, product: 'Silver Pendant Set', title: 'Great value for money', text: 'Beautiful silver work at a very fair price. The anti-tarnish coating is excellent — I have worn it daily for three months without any dulling. Great value for money.' },
+  { id: 'r7', productId: 'p502', name: 'Fatima Shaikh', city: 'Pune', avatar: '/images/model.jpg', rating: 5, date: '2024-12-10', verified: true, status: 'approved', helpfulCount: 22, product: 'Diamond Tennis Bracelet', title: 'Pure luxury', text: 'I treated myself to this bracelet for my 40th birthday and it is the most beautiful thing I own. The diamonds are exceptional and the clasp is very secure. Pure luxury.' },
+  { id: 'r8', productId: 'p402', name: 'Deepa Krishnan', city: 'Kochi', avatar: '/images/model.jpg', rating: 5, date: '2024-07-22', verified: true, status: 'approved', helpfulCount: 15, product: '1 Mukhi Rudraksh Pendant', title: 'Beauty and spirituality', text: 'The Rudraksh pendant came with a certificate of authenticity and a beautiful explanation of its significance. I can feel the positive energy. Highly recommend to anyone seeking both beauty and spirituality.' },
+  { id: 'r9', productId: 'p006', name: 'Rashmi Gupta', city: 'Kolkata', avatar: '/images/model.jpg', rating: 5, date: '2024-10-05', verified: true, status: 'approved', helpfulCount: 41, product: 'Polki Diamond Necklace', title: 'Flawless from click to doorstep', text: 'I was nervous ordering a piece this expensive online but the experience was flawless. Packaging was exquisite, the necklace arrived exactly as shown, and customer care was exceptional.' },
 ];
 
 export const instagramImages = [

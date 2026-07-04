@@ -132,36 +132,107 @@ insert into public.banners (id, title, subtitle, image, cta_text, cta_link, posi
 on conflict (id) do nothing;
 
 -- ── Reviews ────────────────────────────────────────────────────────────
+-- `verified` = Verified Purchase (the reviewer actually bought this product).
+-- `status`   = moderation state, independent of purchase verification.
 create table if not exists public.reviews (
-  id         text primary key,
-  name       text not null,
-  city       text,
-  avatar     text,
-  rating     integer not null default 5,
-  "text"     text,
-  product    text,
-  "date"     text,
-  verified   boolean not null default false,
-  created_at timestamptz not null default now()
+  id            text primary key,
+  product_id    text,                                  -- references products.id (no FK: seed data may predate a row)
+  name          text not null,
+  city          text,
+  avatar        text,
+  anonymous     boolean not null default false,
+  rating        integer not null default 5,
+  title         text,
+  "text"        text,
+  variant       text,                                   -- product variant purchased (size/colour/metal etc.)
+  images        jsonb not null default '[]'::jsonb,
+  videos        jsonb not null default '[]'::jsonb,
+  product       text,                                    -- legacy free-text product name (testimonials)
+  "date"        text,
+  verified      boolean not null default false,          -- Verified Purchase
+  status        text not null default 'approved',        -- pending | approved | rejected | hidden
+  helpful_count integer not null default 0,
+  report_count  integer not null default 0,
+  order_id      text,                                    -- order that proves the purchase (dedup + verification)
+  email         text,                                    -- submitter's email (not shown publicly)
+  spam_score    integer not null default 0,
+  moderation_note text,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
 );
 
+-- If you ran an earlier version of this file, add the new columns with:
+--   alter table public.reviews add column if not exists product_id text;
+--   alter table public.reviews add column if not exists anonymous boolean not null default false;
+--   alter table public.reviews add column if not exists title text;
+--   alter table public.reviews add column if not exists variant text;
+--   alter table public.reviews add column if not exists images jsonb not null default '[]'::jsonb;
+--   alter table public.reviews add column if not exists videos jsonb not null default '[]'::jsonb;
+--   alter table public.reviews add column if not exists status text not null default 'approved';
+--   alter table public.reviews add column if not exists helpful_count integer not null default 0;
+--   alter table public.reviews add column if not exists report_count integer not null default 0;
+--   alter table public.reviews add column if not exists order_id text;
+--   alter table public.reviews add column if not exists email text;
+--   alter table public.reviews add column if not exists spam_score integer not null default 0;
+--   alter table public.reviews add column if not exists moderation_note text;
+--   alter table public.reviews add column if not exists updated_at timestamptz not null default now();
+
+create index if not exists reviews_product_status_idx on public.reviews (product_id, status);
+create index if not exists reviews_status_created_idx on public.reviews (status, created_at desc);
+-- Defense-in-depth against duplicate reviews for the same purchased item —
+-- the app also checks this before insert (lib/reviewsDb.ts).
+create unique index if not exists reviews_order_product_uk
+  on public.reviews (order_id, product_id)
+  where order_id is not null and product_id is not null;
+
 -- $$...$$ dollar-quoting lets the review text contain apostrophes safely.
-insert into public.reviews (id, name, city, avatar, rating, "text", product, "date", verified) values
-  ('r1','Priya Sharma','Mumbai','/images/model.jpg',5,$$I wore this necklace at my daughter's wedding and received more compliments than the bride! The craftsmanship is extraordinary — it looks even more beautiful in person. Worth every rupee.$$,'Diamond Floral Necklace','2024-11-15',true),
-  ('r2','Anjali Mehta','Delhi','/images/model.jpg',5,$$Three generations of my family shop only at Om Gauri Putra. The quality never wavers. This temple necklace is exactly what heirloom jewellery should feel like — heavy, impeccable, timeless.$$,'Gold Temple Necklace','2024-12-02',true),
-  ('r3','Sunita Reddy','Hyderabad','/images/model.jpg',5,$$My bridal set was custom-designed here. The team was patient, professional and the final piece brought me to tears. Every bride deserves jewellery this special.$$,'Kundan Bridal Necklace','2024-10-20',true),
-  ('r4','Kavitha Nair','Chennai','/images/model.jpg',5,$$I have bought jhumkas from many shops but these are in a different league. The weight is perfect, the sound when they move is music, and the 22K gold colour is stunning.$$,'Gold Jhumka Earrings','2024-09-18',true),
-  ('r5','Meera Patel','Ahmedabad','/images/model.jpg',5,$$My husband proposed with this ring and I said yes before he finished the sentence. The diamond is breathtaking. Every time I look at it I fall in love again.$$,'Solitaire Diamond Ring','2024-11-30',true),
-  ('r6','Rekha Iyer','Bangalore','/images/model.jpg',4,$$Beautiful silver work at a very fair price. The anti-tarnish coating is excellent — I have worn it daily for three months without any dulling. Great value for money.$$,'Silver Pendant Set','2024-08-14',true),
-  ('r7','Fatima Shaikh','Pune','/images/model.jpg',5,$$I treated myself to this bracelet for my 40th birthday and it is the most beautiful thing I own. The diamonds are exceptional and the clasp is very secure. Pure luxury.$$,'Diamond Tennis Bracelet','2024-12-10',true),
-  ('r8','Deepa Krishnan','Kochi','/images/model.jpg',5,$$The Rudraksh pendant came with a certificate of authenticity and a beautiful explanation of its significance. I can feel the positive energy. Highly recommend to anyone seeking both beauty and spirituality.$$,'1 Mukhi Rudraksh Pendant','2024-07-22',true),
-  ('r9','Rashmi Gupta','Kolkata','/images/model.jpg',5,$$I was nervous ordering a piece this expensive online but the experience was flawless. Packaging was exquisite, the necklace arrived exactly as shown, and customer care was exceptional.$$,'Polki Diamond Necklace','2024-10-05',true)
+insert into public.reviews (id, product_id, name, city, avatar, rating, title, "text", product, "date", verified, status, helpful_count) values
+  ('r1','p001','Priya Sharma','Mumbai','/images/model.jpg',5,'More compliments than the bride',$$I wore this necklace at my daughter's wedding and received more compliments than the bride! The craftsmanship is extraordinary — it looks even more beautiful in person. Worth every rupee.$$,'Diamond Floral Necklace','2024-11-15',true,'approved',34),
+  ('r2','p002','Anjali Mehta','Delhi','/images/model.jpg',5,'Three generations, one shop',$$Three generations of my family shop only at Om Gauri Putra. The quality never wavers. This temple necklace is exactly what heirloom jewellery should feel like — heavy, impeccable, timeless.$$,'Gold Temple Necklace','2024-12-02',true,'approved',51),
+  ('r3','p004','Sunita Reddy','Hyderabad','/images/model.jpg',5,'Brought me to tears',$$My bridal set was custom-designed here. The team was patient, professional and the final piece brought me to tears. Every bride deserves jewellery this special.$$,'Kundan Bridal Necklace','2024-10-20',true,'approved',67),
+  ('r4','p101','Kavitha Nair','Chennai','/images/model.jpg',5,'A different league',$$I have bought jhumkas from many shops but these are in a different league. The weight is perfect, the sound when they move is music, and the 22K gold colour is stunning.$$,'Gold Jhumka Earrings','2024-09-18',true,'approved',29),
+  ('r5','p201','Meera Patel','Ahmedabad','/images/model.jpg',5,'Said yes before he finished',$$My husband proposed with this ring and I said yes before he finished the sentence. The diamond is breathtaking. Every time I look at it I fall in love again.$$,'Solitaire Diamond Ring','2024-11-30',true,'approved',88),
+  ('r6','p303','Rekha Iyer','Bangalore','/images/model.jpg',4,'Great value for money',$$Beautiful silver work at a very fair price. The anti-tarnish coating is excellent — I have worn it daily for three months without any dulling. Great value for money.$$,'Silver Pendant Set','2024-08-14',true,'approved',18),
+  ('r7','p502','Fatima Shaikh','Pune','/images/model.jpg',5,'Pure luxury',$$I treated myself to this bracelet for my 40th birthday and it is the most beautiful thing I own. The diamonds are exceptional and the clasp is very secure. Pure luxury.$$,'Diamond Tennis Bracelet','2024-12-10',true,'approved',22),
+  ('r8','p402','Deepa Krishnan','Kochi','/images/model.jpg',5,'Beauty and spirituality',$$The Rudraksh pendant came with a certificate of authenticity and a beautiful explanation of its significance. I can feel the positive energy. Highly recommend to anyone seeking both beauty and spirituality.$$,'1 Mukhi Rudraksh Pendant','2024-07-22',true,'approved',15),
+  ('r9','p006','Rashmi Gupta','Kolkata','/images/model.jpg',5,'Flawless from click to doorstep',$$I was nervous ordering a piece this expensive online but the experience was flawless. Packaging was exquisite, the necklace arrived exactly as shown, and customer care was exceptional.$$,'Polki Diamond Necklace','2024-10-05',true,'approved',41)
 on conflict (id) do nothing;
 
-alter table public.categories enable row level security;
-alter table public.coupons    enable row level security;
-alter table public.banners    enable row level security;
-alter table public.reviews    enable row level security;
+-- Helpful-vote dedup — one vote per review per visitor (voter_key is a hash of
+-- the signed-in email, or of IP+User-Agent for anonymous visitors).
+create table if not exists public.review_votes (
+  id          bigint generated always as identity primary key,
+  review_id   text not null references public.reviews(id) on delete cascade,
+  voter_key   text not null,
+  created_at  timestamptz not null default now(),
+  unique (review_id, voter_key)
+);
+
+-- Reported reviews, for the admin moderation queue.
+create table if not exists public.review_reports (
+  id            bigint generated always as identity primary key,
+  review_id     text not null references public.reviews(id) on delete cascade,
+  reporter_key  text not null,
+  reason        text,
+  created_at    timestamptz not null default now(),
+  unique (review_id, reporter_key)
+);
+
+alter table public.categories    enable row level security;
+alter table public.coupons       enable row level security;
+alter table public.banners       enable row level security;
+alter table public.reviews       enable row level security;
+alter table public.review_votes  enable row level security;
+alter table public.review_reports enable row level security;
+
+-- Atomic "helpful" counter bump — avoids a read-modify-write race when two
+-- visitors mark a review helpful at the same moment.
+create or replace function public.increment_review_helpful(review_id_in text)
+returns void
+language sql
+as $$
+  update public.reviews set helpful_count = helpful_count + 1 where id = review_id_in;
+$$;
 
 -- ════════════════════════════════════════════════════════════════════════
 --  SECURITY / ADMIN HARDENING (Phase 1)
