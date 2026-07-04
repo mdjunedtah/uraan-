@@ -1,7 +1,7 @@
 // HTML templates for security email (login alerts, new-device approval).
 function wrap(title: string, body: string): string {
   return `<div style="font-family:system-ui,-apple-system,sans-serif;max-width:480px;margin:0 auto;color:#1a1410;line-height:1.6">
-    <p style="color:#b8893a;letter-spacing:2px;text-transform:uppercase;font-size:12px;font-weight:700">Om Gauri Pulta · Security</p>
+    <p style="color:#b8893a;letter-spacing:2px;text-transform:uppercase;font-size:12px;font-weight:700">Om Gauri Putra · Security</p>
     <h2 style="margin:8px 0 16px">${title}</h2>
     ${body}
     <p style="color:#9a8c75;font-size:12px;margin-top:24px;border-top:1px solid #eee;padding-top:12px">
@@ -22,7 +22,7 @@ export function loginAlertEmail(d: { device: string; location: string; ip: strin
 
 export function newDeviceEmail(d: { code: string; device: string; location: string }) {
   return {
-    subject: 'Approve a new device — Om Gauri Pulta',
+    subject: 'Approve a new device — Om Gauri Putra',
     html: wrap(
       'Approve a new device',
       `<p>A sign-in from a new device needs approval:</p>

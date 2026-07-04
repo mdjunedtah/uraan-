@@ -26,7 +26,7 @@ export function orderUpdateMessage(order: {
   status: string;
 }): string {
   return (
-    `Namaste ${order.customer}, this is Om Gauri Pulta. ` +
+    `Namaste ${order.customer}, this is Om Gauri Putra. ` +
     `Your order ${order.id} is now "${order.status}". ` +
     `Thank you for shopping with us!`
   );
@@ -36,7 +36,7 @@ export function orderUpdateMessage(order: {
 export function leadReplyMessage(name: string): string {
   const first = (name || '').trim().split(/\s+/)[0] || 'there';
   return (
-    `Namaste ${first}, thank you for reaching out to Om Gauri Pulta. ` +
+    `Namaste ${first}, thank you for reaching out to Om Gauri Putra. ` +
     `How may we help you today?`
   );
 }

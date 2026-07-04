@@ -158,6 +158,6 @@ export async function notifyAdminNewLead(lead: LeadNotification): Promise<WhatsA
     return sendWhatsAppTemplate(ADMIN_WHATSAPP_NUMBER, templateName, lang, params);
   }
 
-  const text = `🔔 New lead — Om Gauri Pulta\n\n${summaryLines.join('\n')}`;
+  const text = `🔔 New lead — Om Gauri Putra\n\n${summaryLines.join('\n')}`;
   return sendWhatsAppText(ADMIN_WHATSAPP_NUMBER, text);
 }

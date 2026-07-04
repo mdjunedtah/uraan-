@@ -36,7 +36,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
           </div>
           <div className="hidden md:block">
             <div className="text-xs font-semibold text-[#1a1410]">Admin</div>
-            <div className="text-[10px] text-[#9a8c75]">admin@omgauripulta.com</div>
+            <div className="text-[10px] text-[#9a8c75]">admin@omgauriputra.com</div>
           </div>
         </div>
       </div>

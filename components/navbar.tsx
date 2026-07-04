@@ -25,7 +25,7 @@ export default function Navbar() {
             <Phone size={11} className="text-[#b8893a]" />
             <span>+91 98765 43210</span>
             <span className="mx-2 opacity-30">|</span>
-            <span>info@omgauripulta.com</span>
+            <span>info@omgauriputra.com</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/about" className="hover:text-[#b8893a]">About</Link>
@@ -60,7 +60,7 @@ export default function Navbar() {
               <Star size={10} className="text-[#b8893a] fill-[#b8893a]" />
             </div>
             <div className="text-[7px] md:text-[8px] tracking-[3px] text-[#9a8c75] mt-1 uppercase font-medium">
-              Pulta · Gems · Rudraksh
+              Putra · Gems · Rudraksh
             </div>
           </Link>
 

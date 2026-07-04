@@ -28,8 +28,8 @@ export type SettingsData = {
 };
 
 export const DEFAULT_SETTINGS: SettingsData = {
-  storeName: 'Om Gauri Pulta',
-  storeEmail: 'info@omgauripulta.com',
+  storeName: 'Om Gauri Putra',
+  storeEmail: 'info@omgauriputra.com',
   storePhone: '+91 98765 43210',
   storeAddress: 'Main Bazaar Road, Your City, India - 123456',
   currency: 'INR',

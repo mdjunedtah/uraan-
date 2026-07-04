@@ -232,7 +232,7 @@ export default function ContactPage() {
             <div className="flex items-start gap-3 mb-4">
               <MapPin className="text-[#b8893a] flex-shrink-0 mt-1" size={20} />
               <div>
-                <div className="text-sm font-semibold text-[#1a1410] mb-1">Om Gauri Pulta Jewellery</div>
+                <div className="text-sm font-semibold text-[#1a1410] mb-1">Om Gauri Putra Jewellery</div>
                 <div className="text-sm text-[#6b5d4c] leading-relaxed">
                   Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
                   Veer Singh Colony, Budh Vihar Phase-2,<br />

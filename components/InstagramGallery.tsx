@@ -5,7 +5,7 @@ import { FaInstagram } from 'react-icons/fa';
 import { instagramImages } from '@/data/jewelleryData';
 
 const PROFILE_URL =
-  process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/omgauripulta';
+  process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/omgauriputra';
 
 type Post = { id: string; image: string; permalink: string; caption?: string };
 
@@ -37,7 +37,7 @@ export default function InstagramGallery() {
   return (
     <section className="py-14 px-4 max-w-7xl mx-auto">
       <p className="section-tag-italic">Follow Our Journey</p>
-      <h2 className="section-heading">@omgauripulta</h2>
+      <h2 className="section-heading">@omgauriputra</h2>
       <div className="luxury-divider">
         <FaInstagram size={10} />
       </div>

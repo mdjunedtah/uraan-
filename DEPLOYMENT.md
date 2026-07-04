@@ -1,6 +1,6 @@
 # Deployment & Setup Guide
 
-This is the step-by-step guide to put the **Om Gauri Pulta** store live and
+This is the step-by-step guide to put the **Om Gauri Putra** store live and
 turn on the admin panel, CRM, WhatsApp and database. No prior DevOps knowledge
 needed — follow the steps in order.
 
@@ -35,7 +35,7 @@ credentials:
 | `ADMIN_PASSWORD` | a strong password |
 | `ADMIN_SESSION_SECRET` | any long random string (e.g. mash the keyboard) |
 
-> If you skip this, the defaults are `admin@omgauripulta.com` / `omgauri2024`.
+> If you skip this, the defaults are `admin@omgauriputra.com` / `omgauri2024`.
 > **Change them** before sharing the site.
 
 Log in at `https://<your-site>/admin/login`.

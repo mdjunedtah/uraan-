@@ -23,7 +23,7 @@ export default function Footer() {
           <div className="flex items-center gap-2 mb-3">
             <span className="w-1.5 h-1.5 bg-[#b8893a] rotate-45" />
             <span className="display text-base font-semibold tracking-[3px] text-white">
-              OM GAURI PULTA
+              OM GAURI PUTRA
             </span>
           </div>
           <div className="text-[9px] tracking-[3px] text-[#b8893a] mb-4 uppercase">
@@ -152,7 +152,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="bg-black/30 border-t border-[#b8893a]/20 py-4 px-4 text-center text-[10px] tracking-[1px] text-[#e8d49b]/50">
-        © {new Date().getFullYear()} Om Gauri Pulta Jewellery. All rights reserved. ·
+        © {new Date().getFullYear()} Om Gauri Putra Jewellery. All rights reserved. ·
         Crafted with care in India 🇮🇳
       </div>
     </footer>

@@ -181,7 +181,7 @@ export default function AdminLoginPage() {
               <label htmlFor="admin-email" className="luxury-label">Email</label>
               <div className="relative">
                 <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b8893a]" />
-                <input id="admin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="luxury-input h-12 !pl-11" placeholder="admin@omgauripulta.com" autoComplete="username" />
+                <input id="admin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="luxury-input h-12 !pl-11" placeholder="admin@omgauriputra.com" autoComplete="username" />
               </div>
             </div>
 

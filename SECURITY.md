@@ -1,6 +1,6 @@
 # Admin Security
 
-Defense-in-depth for the Om Gauri Pulta admin panel, aligned with the OWASP
+Defense-in-depth for the Om Gauri Putra admin panel, aligned with the OWASP
 Top 10. The current credential login is preserved as **break-glass recovery**,
 and every database-backed control **fails open / stays dormant** until its keys
 are set — so nothing can lock you out or break the live store.

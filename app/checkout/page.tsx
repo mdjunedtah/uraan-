@@ -137,7 +137,7 @@ export default function CheckoutPage() {
         key: data.keyId,
         amount: data.amount,
         currency: data.currency || 'INR',
-        name: 'Om Gauri Pulta',
+        name: 'Om Gauri Putra',
         description: 'Jewellery order',
         order_id: data.orderId,
         prefill: { name: form.name, email: form.email, contact: form.phone },
