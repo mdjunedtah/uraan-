@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Save, Store, Mail, Phone, MapPin, Globe, CreditCard, MessageCircle, Check } from 'lucide-react';
 import { type SettingsData, DEFAULT_SETTINGS, getSettings, saveSettings } from '@/lib/settings';
+import { MAPS_VIEW_URL } from '@/lib/business';
 
 export default function SettingsForm() {
   const [settings, setSettings] = useState<SettingsData>(DEFAULT_SETTINGS);
@@ -77,6 +78,14 @@ export default function SettingsForm() {
                 className="luxury-input !pl-9"
               />
             </div>
+            <a
+              href={MAPS_VIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-1.5 text-[11px] font-semibold text-[#b8893a] hover:underline"
+            >
+              Preview default address on Google Maps
+            </a>
           </div>
         </div>
       </div>

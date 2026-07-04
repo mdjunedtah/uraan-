@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { whatsappLink } from '@/lib/whatsapp';
+import { BUSINESS_ADDRESS_LINES, MAPS_DIRECTIONS_URL } from '@/lib/business';
+import CopyAddressButton from '@/components/CopyAddressButton';
 import {
   Phone,
   Mail,
@@ -11,6 +13,7 @@ import {
   Smartphone,
   Wallet,
   ShieldCheck,
+  Navigation,
 } from 'lucide-react';
 
 import { FaFacebook, FaInstagram, FaYoutube,  } from "react-icons/fa";
@@ -88,29 +91,46 @@ export default function Footer() {
           <div className="display text-xs tracking-[3px] uppercase text-white mb-4">Get in Touch</div>
           <ul className="space-y-3 text-xs text-[#e8d49b]/70">
             <li className="flex items-start gap-2">
-              <MapPin size={13} className="text-[#b8893a] flex-shrink-0 mt-0.5" />
-              <span>
-                Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
-                Veer Singh Colony, Budh Vihar Phase-2,<br />
-                Rohini, North West Delhi, New Delhi – 110086
-              </span>
+              <MapPin size={13} className="text-[#b8893a] flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <address className="not-italic">
+                {BUSINESS_ADDRESS_LINES.map((line, i) => (
+                  <span key={i}>
+                    {line}
+                    {i < BUSINESS_ADDRESS_LINES.length - 1 && <br />}
+                  </span>
+                ))}
+              </address>
+            </li>
+            <li className="flex flex-wrap items-center gap-3 pl-5">
+              <a
+                href={MAPS_DIRECTIONS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[10px] tracking-[1px] uppercase font-semibold text-[#b8893a] hover:text-white"
+              >
+                <Navigation size={11} aria-hidden="true" /> Get Directions
+              </a>
+              <CopyAddressButton
+                text={BUSINESS_ADDRESS_LINES.join(', ')}
+                className="inline-flex items-center gap-1.5 text-[10px] tracking-[1px] uppercase font-semibold text-[#b8893a] hover:text-white"
+              />
             </li>
             <li className="flex items-center gap-2">
-              <Phone size={13} className="text-[#b8893a] flex-shrink-0" />
+              <Phone size={13} className="text-[#b8893a] flex-shrink-0" aria-hidden="true" />
               <a href="tel:+918851911653" className="hover:text-[#b8893a]">+91 88519 11653</a>
             </li>
             <li className="flex items-center gap-2">
-              <Phone size={13} className="text-[#b8893a] flex-shrink-0" />
+              <Phone size={13} className="text-[#b8893a] flex-shrink-0" aria-hidden="true" />
               <a href="tel:+919811810235" className="hover:text-[#b8893a]">+91 98118 10235</a>
             </li>
             <li className="flex items-center gap-2">
-              <Mail size={13} className="text-[#b8893a] flex-shrink-0" />
+              <Mail size={13} className="text-[#b8893a] flex-shrink-0" aria-hidden="true" />
               <a href="mailto:info@omgpgems.com" className="hover:text-[#b8893a] break-all">
                 info@omgpgems.com
               </a>
             </li>
             <li className="flex items-center gap-2">
-              <Mail size={13} className="text-[#b8893a] flex-shrink-0" />
+              <Mail size={13} className="text-[#b8893a] flex-shrink-0" aria-hidden="true" />
               <a href="mailto:jitendarsoni1975@gmail.com" className="hover:text-[#b8893a] break-all">
                 jitendarsoni1975@gmail.com
               </a>

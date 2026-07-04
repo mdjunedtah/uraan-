@@ -4,6 +4,7 @@
 // payment processing (that still requires Razorpay keys; checkout stays in
 // demo mode until then).
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import { BUSINESS_NAME, BUSINESS_ADDRESS_INLINE } from '@/lib/business';
 
 export type SettingsData = {
   storeName: string;
@@ -28,10 +29,10 @@ export type SettingsData = {
 };
 
 export const DEFAULT_SETTINGS: SettingsData = {
-  storeName: 'Om Gauri Putra',
+  storeName: BUSINESS_NAME,
   storeEmail: 'info@omgauriputra.com',
   storePhone: '+91 98765 43210',
-  storeAddress: 'Main Bazaar Road, Your City, India - 123456',
+  storeAddress: BUSINESS_ADDRESS_INLINE,
   currency: 'INR',
   taxRate: 3,
   shippingFlat: 99,

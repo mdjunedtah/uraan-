@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, Gem, Award, Heart, Star, Sparkles } from 'lucide-react';
+import { ChevronRight, Gem, Award, Heart, Star, Sparkles, MapPin, Navigation } from 'lucide-react';
+import { BUSINESS_NAME, BUSINESS_ADDRESS_LINES, MAPS_DIRECTIONS_URL } from '@/lib/business';
 
 export default function About() {
   return (
@@ -69,6 +70,31 @@ export default function About() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Visit Our Store */}
+      <section className="bg-white py-10 px-4 border-b border-[rgba(184,137,58,0.18)]">
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+          <div className="w-12 h-12 rounded-full bg-[#f8f2e6] grid place-items-center flex-shrink-0">
+            <MapPin className="text-[#b8893a]" size={20} aria-hidden="true" />
+          </div>
+          <div>
+            <h3 className="display text-sm tracking-[2px] uppercase text-[#1a1410] mb-1">
+              Visit Our Store
+            </h3>
+            <address className="not-italic text-sm text-[#6b5d4c] leading-relaxed mb-2">
+              {BUSINESS_ADDRESS_LINES.join(', ')}
+            </address>
+            <a
+              href={MAPS_DIRECTIONS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] tracking-[1.5px] uppercase font-semibold text-[#b8893a] hover:underline"
+            >
+              <Navigation size={12} aria-hidden="true" /> Get Directions to {BUSINESS_NAME}
+            </a>
+          </div>
         </div>
       </section>
     </>

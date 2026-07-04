@@ -6,8 +6,45 @@ import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/wishlistContext';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import { SITE_URL } from '@/lib/site';
+import { BUSINESS_NAME, BUSINESS_ADDRESS } from '@/lib/business';
 
 const siteUrl = SITE_URL;
+
+// LocalBusiness structured data (JSON-LD) — powers the Google Maps /
+// local-pack knowledge panel and rich search results. Rendered once, site
+// -wide, so every crawled page carries the same store identity + address.
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'JewelryStore',
+  name: BUSINESS_NAME,
+  image: `${siteUrl}/images/hero.jpg`,
+  url: siteUrl,
+  telephone: '+91-88519-11653',
+  priceRange: '₹₹',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: `${BUSINESS_ADDRESS.line1}, ${BUSINESS_ADDRESS.line2}`,
+    addressLocality: BUSINESS_ADDRESS.locality,
+    addressRegion: BUSINESS_ADDRESS.region,
+    postalCode: BUSINESS_ADDRESS.postalCode,
+    addressCountry: BUSINESS_ADDRESS.countryCode,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '10:00',
+      closes: '20:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Sunday'],
+      opens: '11:00',
+      closes: '18:00',
+    },
+  ],
+  sameAs: [process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/omgauriputra'],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -36,6 +73,8 @@ export const metadata: Metadata = {
     'jhumka earrings',
     'gold rings india',
     'jewellery shop Rohini Delhi',
+    'jewellery shop Budh Vihar',
+    'jewellery shop Sector 24 Delhi',
     'Om Gauri Putra',
     'OMGP gems',
   ],
@@ -94,6 +133,11 @@ export default function RootLayout({
         />
       </head>
       <body className="pb-14 md:pb-0">
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
         <CartProvider>
           <WishlistProvider>
             {children}

@@ -10,8 +10,9 @@ import { getCurrentUser } from '@/lib/auth';
 import { saveOrder } from '@/lib/userOrders';
 import {
   CreditCard, Smartphone, Wallet, Building2, Banknote,
-  Lock, CheckCircle2, ShieldCheck, Truck, ChevronRight,
+  Lock, CheckCircle2, ShieldCheck, Truck, ChevronRight, MapPin,
 } from 'lucide-react';
+import { BUSINESS_ADDRESS_INLINE, MAPS_DIRECTIONS_URL } from '@/lib/business';
 
 type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
 
@@ -240,6 +241,17 @@ export default function CheckoutPage() {
           <p className="text-xs text-[#6b5d4c] mb-6">
             Confirmation sent to <strong>{form.email}</strong>.
           </p>
+
+          <div className="flex items-start gap-2 justify-center mb-6 text-left max-w-sm mx-auto">
+            <MapPin className="text-[#b8893a] flex-shrink-0 mt-0.5" size={14} aria-hidden="true" />
+            <p className="text-xs text-[#6b5d4c] leading-relaxed">
+              Prefer to shop in person? Visit our flagship store —{' '}
+              <address className="not-italic inline">{BUSINESS_ADDRESS_INLINE}</address>.{' '}
+              <a href={MAPS_DIRECTIONS_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#b8893a] hover:underline">
+                Get Directions
+              </a>
+            </p>
+          </div>
 
           <div className="flex gap-3 justify-center flex-wrap">
             <Link href="/profile" className="px-7 py-3 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410]">

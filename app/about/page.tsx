@@ -4,7 +4,9 @@ import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
-import { Gem, Award, Heart, ShieldCheck, Users, Sparkles, ChevronRight } from 'lucide-react';
+import { Gem, Award, Heart, ShieldCheck, Users, Sparkles, ChevronRight, MapPin, Navigation } from 'lucide-react';
+import { BUSINESS_NAME, BUSINESS_ADDRESS_LINES, MAPS_DIRECTIONS_URL } from '@/lib/business';
+import CopyAddressButton from '@/components/CopyAddressButton';
 
 export default function AboutPage() {
   return (
@@ -142,12 +144,35 @@ export default function AboutPage() {
           <p className="text-sm text-[#e8d49b]/70 mb-6 leading-relaxed">
             Step into our flagship store and witness the artistry up close.
           </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 px-8 py-3 border border-[#b8893a] text-[#d4a857] text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
-          >
-            Visit Us <ChevronRight size={12} />
-          </Link>
+
+          <div className="flex items-start gap-2 justify-center mb-6 text-left">
+            <MapPin className="text-[#d4a857] flex-shrink-0 mt-0.5" size={16} aria-hidden="true" />
+            <address className="not-italic text-sm text-[#e8d49b]/80 leading-relaxed">
+              {BUSINESS_NAME}<br />
+              {BUSINESS_ADDRESS_LINES.join(', ')}
+            </address>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={MAPS_DIRECTIONS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-3 border border-[#b8893a] text-[#d4a857] text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+            >
+              <Navigation size={12} aria-hidden="true" /> Get Directions
+            </a>
+            <CopyAddressButton
+              text={BUSINESS_ADDRESS_LINES.join(', ')}
+              className="inline-flex items-center gap-2 px-8 py-3 border border-[#b8893a]/40 text-[#e8d49b]/80 text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+            />
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-8 py-3 border border-[#b8893a] text-[#d4a857] text-[11px] tracking-[3px] uppercase font-medium hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+            >
+              Contact Us <ChevronRight size={12} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </section>
 

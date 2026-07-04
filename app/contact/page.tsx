@@ -13,6 +13,15 @@ import {
 import { FaFacebook, FaInstagram, FaYoutube, FaWhatsapp } from "react-icons/fa";
 import { addLead } from '@/lib/leads';
 import { whatsappLink } from '@/lib/whatsapp';
+import {
+  BUSINESS_NAME,
+  BUSINESS_ADDRESS_LINES,
+  BUSINESS_ADDRESS_INLINE,
+  MAPS_VIEW_URL,
+  MAPS_DIRECTIONS_URL,
+  MAPS_EMBED_URL,
+} from '@/lib/business';
+import CopyAddressButton from '@/components/CopyAddressButton';
 export default function ContactPage() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', subject: '', message: '',
@@ -84,7 +93,7 @@ export default function ContactPage() {
         {[
           { icon: Phone, title: 'Call Us', primary: '+91 88519 11653', secondary: '+91 98118 10235', href: 'tel:+918851911653' },
           { icon: Mail, title: 'Email Us', primary: 'info@omgpgems.com', secondary: 'jitendarsoni1975@gmail.com', href: 'mailto:info@omgpgems.com' },
-          { icon: MapPin, title: 'Visit Us', primary: 'Plot No. G-6, Veer Singh Colony', secondary: 'Budh Vihar Phase-2, Rohini, New Delhi – 110086', href: '#find-us' },
+          { icon: MapPin, title: 'Visit Us', primary: BUSINESS_ADDRESS_LINES[0], secondary: `${BUSINESS_ADDRESS_LINES[1]}, ${BUSINESS_ADDRESS_LINES[2]}`, href: '#find-us' },
         ].map((c, i) => (
           <a key={i} href={c.href} className="luxury-card p-5 text-center group">
             <div className="w-14 h-14 rounded-full bg-[#f8f2e6] mx-auto mb-3 grid place-items-center group-hover:bg-[#b8893a] transition-colors">
@@ -173,13 +182,30 @@ export default function ContactPage() {
             </h2>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin className="text-[#b8893a] flex-shrink-0 mt-0.5" size={18} />
+                <MapPin className="text-[#b8893a] flex-shrink-0 mt-0.5" size={18} aria-hidden="true" />
                 <div>
                   <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-1">Address</div>
-                  <div className="text-sm text-[#1a1410] leading-relaxed">
-                    Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
-                    Veer Singh Colony, Budh Vihar Phase-2,<br />
-                    Rohini, North West Delhi, New Delhi – 110086
+                  <address className="not-italic text-sm text-[#1a1410] leading-relaxed">
+                    {BUSINESS_ADDRESS_LINES.map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        {i < BUSINESS_ADDRESS_LINES.length - 1 && <br />}
+                      </span>
+                    ))}
+                  </address>
+                  <div className="flex flex-wrap items-center gap-3 mt-2">
+                    <a
+                      href={MAPS_VIEW_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-semibold text-[#b8893a] hover:underline"
+                    >
+                      View on Map
+                    </a>
+                    <CopyAddressButton
+                      text={BUSINESS_ADDRESS_INLINE}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#b8893a] hover:underline"
+                    />
                   </div>
                 </div>
               </div>
@@ -230,33 +256,57 @@ export default function ContactPage() {
               Find Us
             </h2>
             <div className="flex items-start gap-3 mb-4">
-              <MapPin className="text-[#b8893a] flex-shrink-0 mt-1" size={20} />
+              <MapPin className="text-[#b8893a] flex-shrink-0 mt-1" size={20} aria-hidden="true" />
               <div>
-                <div className="text-sm font-semibold text-[#1a1410] mb-1">Om Gauri Putra Jewellery</div>
-                <div className="text-sm text-[#6b5d4c] leading-relaxed">
-                  Ground Floor, Plot No. G-6, KH No. 69/17/1,<br />
-                  Veer Singh Colony, Budh Vihar Phase-2,<br />
-                  Rohini, North West Delhi, New Delhi – 110086
-                </div>
+                <div className="text-sm font-semibold text-[#1a1410] mb-1">{BUSINESS_NAME} Jewellery</div>
+                <address className="not-italic text-sm text-[#6b5d4c] leading-relaxed">
+                  {BUSINESS_ADDRESS_LINES.map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < BUSINESS_ADDRESS_LINES.length - 1 && <br />}
+                    </span>
+                  ))}
+                </address>
               </div>
             </div>
+
+            {/* Interactive map — keyless embed, no API key required */}
+            <div className="rounded-lg overflow-hidden border border-[rgba(184,137,58,0.18)] mb-4">
+              <iframe
+                title={`${BUSINESS_NAME} store location map`}
+                src={MAPS_EMBED_URL}
+                width="100%"
+                height="220"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="block w-full aspect-[4/3] sm:aspect-video"
+              />
+            </div>
+
             <div className="border-t border-[rgba(184,137,58,0.18)] pt-4 mb-4">
               <div className="text-[10px] tracking-[1.5px] uppercase text-[#9a8c75] mb-2">How to Reach Us</div>
               <ul className="text-xs text-[#6b5d4c] space-y-1.5 leading-relaxed">
-                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Rithala (Red Line) is the nearest Metro station — a short auto or e-rickshaw ride to Budh Vihar Phase-2</li>
-                <li><span className="text-[#b8893a] font-semibold">By Bus:</span> DTC &amp; cluster buses stop at Budh Vihar / Veer Singh Colony</li>
+                <li><span className="text-[#b8893a] font-semibold">By Metro:</span> Rithala (Red Line) is the nearest Metro station — a short auto or e-rickshaw ride to Budh Vihar, Phase 2</li>
+                <li><span className="text-[#b8893a] font-semibold">By Bus:</span> DTC &amp; cluster buses stop at Budh Vihar / Sector 24</li>
                 <li><span className="text-[#b8893a] font-semibold">By Road:</span> On Kanjhawala Road, Budh Vihar Phase-2 — well connected to Rohini &amp; the Outer Ring Road</li>
                 <li><span className="text-[#b8893a] font-semibold">Parking:</span> Street parking available near the store</li>
               </ul>
             </div>
-            <a
-              href="https://maps.google.com/?q=Veer+Singh+Colony+Budh+Vihar+Phase-2+Rohini+New+Delhi+110086"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
-            >
-              <MapPin size={12} /> Get Directions
-            </a>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href={MAPS_DIRECTIONS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2 bg-[#1a1410] text-[#e8d49b] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] transition-all"
+              >
+                <MapPin size={12} aria-hidden="true" /> Get Directions
+              </a>
+              <CopyAddressButton
+                text={BUSINESS_ADDRESS_INLINE}
+                className="inline-flex items-center gap-2 px-5 py-2 border border-[#1a1410] text-[#1a1410] text-[10px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-all"
+              />
+            </div>
           </div>
         </div>
       </section>
