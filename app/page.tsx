@@ -488,109 +488,387 @@ export default function HomePage() {
       <Testimonials />
 
       {/* 13. PAYMENT OPTIONS */}
-      <section className="py-14 px-4 max-w-7xl mx-auto">
-        {/* Dark gold-on-ink banner header */}
+      <section className="py-14 md:py-20 px-4 md:px-6 max-w-7xl mx-auto">
+        {/* ─── Premium hero banner ─────────────────────────────────────── */}
         <div
-          className="relative overflow-hidden rounded-2xl px-6 py-10 text-center"
+          className="gpu-layer relative overflow-hidden text-center"
           style={{
+            height: 'clamp(220px, 42vw, 380px)',
+            borderRadius: 24,
             background:
-              'radial-gradient(ellipse at 25% 0%, rgba(212,168,87,0.28), transparent 55%), radial-gradient(ellipse at 85% 100%, rgba(184,137,58,0.22), transparent 60%), linear-gradient(160deg, #1a1410 0%, #2a1f13 55%, #1a1410 100%)',
+              'radial-gradient(ellipse at 18% 0%, rgba(201,162,39,0.42), transparent 55%),' +
+              'radial-gradient(ellipse at 82% 20%, rgba(201,162,39,0.28), transparent 55%),' +
+              'radial-gradient(ellipse at 50% 110%, rgba(156,123,46,0.35), transparent 60%),' +
+              'linear-gradient(160deg, #0b0806 0%, #17110a 45%, #0b0806 100%)',
+            boxShadow:
+              '0 24px 60px rgba(11, 8, 6, 0.35), 0 2px 0 rgba(201,162,39,0.35) inset, 0 0 0 1px rgba(201,162,39,0.18)',
           }}
         >
-          <p className="section-tag-italic" style={{ color: '#e8d49b' }}>Safe · Secure · Seamless</p>
-          <h2 className="display text-2xl md:text-3xl tracking-[5px] uppercase font-medium mt-1" style={{ color: '#d4a857' }}>
-            Payment Options
-          </h2>
-          <div className="flex items-center justify-center gap-3 mt-5">
-            <span className="h-px w-14" style={{ background: '#b8893a', opacity: 0.5 }} />
-            <span
-              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg, #d4a857, #8c6726)' }}
-            >
-              <ShieldCheck size={16} className="text-[#1a1410]" />
-            </span>
-            <span className="h-px w-14" style={{ background: '#b8893a', opacity: 0.5 }} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6">
+          {/* Soft glowing particles */}
           {[
-            { icon: CreditCard, title: 'Cards', desc: 'Visa, Mastercard, Rupay, Amex', accent: '#1F5F8B', tint: '#DDEAFB' },
-            { icon: Smartphone, title: 'UPI', desc: 'GPay, PhonePe, Paytm, BHIM', accent: '#3E9C73', tint: '#DCEFE2' },
-            { icon: Wallet, title: 'Wallets', desc: 'Paytm, Amazon Pay, Mobikwik', accent: '#8856D6', tint: '#EAE0FA' },
-            { icon: Banknote, title: 'Net Banking & EMI', desc: 'All major banks + No-cost EMI', accent: '#A6790C', tint: '#F8EDCB' },
+            { top: '12%', left: '14%', size: 5, delay: '0s' },
+            { top: '22%', left: '78%', size: 3, delay: '0.6s' },
+            { top: '40%', left: '9%', size: 2, delay: '1.2s' },
+            { top: '18%', left: '52%', size: 2, delay: '2.1s' },
+            { top: '60%', left: '86%', size: 4, delay: '1.6s' },
+            { top: '70%', left: '20%', size: 3, delay: '2.8s' },
+            { top: '30%', left: '38%', size: 2, delay: '3.4s' },
+            { top: '50%', left: '68%', size: 3, delay: '0.9s' },
           ].map((p, i) => (
-            <div key={i} className="luxury-card rounded-2xl p-5 text-center">
-              <div
-                className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+            <span
+              key={i}
+              aria-hidden="true"
+              className="pay-particle absolute rounded-full pointer-events-none"
+              style={{
+                top: p.top,
+                left: p.left,
+                width: p.size,
+                height: p.size,
+                background: '#F1D07A',
+                boxShadow: '0 0 10px 2px rgba(241,208,122,0.65)',
+                animationDelay: p.delay,
+              }}
+            />
+          ))}
+
+          {/* Centered content */}
+          <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
+            <p
+              className="serif italic tracking-[3px] md:tracking-[4px]"
+              style={{
+                color: '#E9D7A8',
+                fontSize: 'clamp(12px, 1.6vw, 16px)',
+                marginBottom: 'clamp(8px, 1.4vw, 14px)',
+              }}
+            >
+              Safe · Secure · Seamless
+            </p>
+            <h2
+              className="display uppercase font-medium"
+              style={{
+                background: 'linear-gradient(180deg, #F4DE9B 0%, #C9A227 55%, #9C7B2E 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontSize: 'clamp(28px, 5.2vw, 42px)',
+                letterSpacing: 'clamp(2px, 0.5vw, 6px)',
+                lineHeight: 1.1,
+                textShadow: '0 2px 22px rgba(201,162,39,0.35)',
+              }}
+            >
+              Payment Options
+            </h2>
+
+            {/* Shield + ornate divider */}
+            <div className="flex items-center justify-center gap-3 md:gap-4 mt-4 md:mt-6">
+              <svg viewBox="0 0 80 8" className="w-16 md:w-24 h-2 opacity-90" aria-hidden="true">
+                <line x1="0" y1="4" x2="60" y2="4" stroke="#C9A227" strokeWidth="1" />
+                <path d="M60 4 L70 1 L78 4 L70 7 Z" fill="#C9A227" />
+              </svg>
+              <span
+                className="rounded-full flex items-center justify-center shrink-0"
                 style={{
-                  background: `radial-gradient(circle at 34% 28%, #ffffff 0%, ${p.tint} 100%)`,
-                  boxShadow: `inset 0 0 0 1px ${p.accent}33, 0 4px 10px ${p.accent}22`,
+                  width: 'clamp(36px, 5vw, 52px)',
+                  height: 'clamp(36px, 5vw, 52px)',
+                  background:
+                    'radial-gradient(circle at 32% 28%, #F4DE9B 0%, #C9A227 55%, #7A5A1F 100%)',
+                  boxShadow:
+                    '0 8px 20px rgba(201,162,39,0.45), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -1px 2px rgba(0,0,0,0.35)',
                 }}
               >
-                <p.icon size={22} style={{ color: p.accent }} />
-              </div>
-              <div className="display text-sm tracking-[2px] uppercase mb-2" style={{ color: p.accent }}>
-                {p.title}
-              </div>
-              <div className="text-[11px] text-[#6b5d4c] leading-relaxed">{p.desc}</div>
+                <Lock size={18} className="text-[#111]" strokeWidth={2.4} />
+              </span>
+              <svg viewBox="0 0 80 8" className="w-16 md:w-24 h-2 opacity-90" aria-hidden="true">
+                <path d="M20 4 L10 1 L2 4 L10 7 Z" fill="#C9A227" />
+                <line x1="20" y1="4" x2="80" y2="4" stroke="#C9A227" strokeWidth="1" />
+              </svg>
             </div>
+          </div>
+
+          {/* Golden wave at bottom */}
+          <svg
+            className="absolute inset-x-0 bottom-0 w-full h-8 md:h-12 pointer-events-none"
+            viewBox="0 0 1440 60"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="payWaveGold" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="#7A5A1F" />
+                <stop offset="45%" stopColor="#F4DE9B" />
+                <stop offset="100%" stopColor="#9C7B2E" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0 42 C 240 12, 480 62, 720 32 C 960 6, 1200 58, 1440 28 L 1440 60 L 0 60 Z"
+              fill="url(#payWaveGold)"
+              opacity="0.9"
+            />
+            <path
+              d="M0 46 C 240 18, 480 66, 720 36 C 960 12, 1200 62, 1440 34"
+              fill="none"
+              stroke="#F4DE9B"
+              strokeWidth="1"
+              opacity="0.55"
+            />
+          </svg>
+        </div>
+
+        {/* ─── Payment method cards ─────────────────────────────────────── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-12">
+          {[
+            {
+              icon: CreditCard,
+              title: 'Cards',
+              desc: 'Visa, Mastercard, RuPay, Amex',
+              gradient: 'linear-gradient(140deg, #4B8BE0 0%, #1F5F8B 100%)',
+              glow: 'rgba(31,95,139,0.35)',
+            },
+            {
+              icon: Smartphone,
+              title: 'UPI',
+              desc: 'GPay, PhonePe, Paytm, BHIM',
+              gradient: 'linear-gradient(140deg, #4FC38A 0%, #2C7A50 100%)',
+              glow: 'rgba(44,122,80,0.35)',
+            },
+            {
+              icon: Wallet,
+              title: 'Wallets',
+              desc: 'Paytm, Amazon Pay, MobiKwik',
+              gradient: 'linear-gradient(140deg, #A67BEA 0%, #6B3CBD 100%)',
+              glow: 'rgba(107,60,189,0.35)',
+            },
+            {
+              icon: Banknote,
+              title: 'Net Banking & EMI',
+              desc: 'All major banks + No-cost EMI',
+              gradient: 'linear-gradient(140deg, #F1D07A 0%, #9C7B2E 100%)',
+              glow: 'rgba(156,123,46,0.4)',
+            },
+          ].map((p, i) => (
+            <article
+              key={i}
+              className="pay-card flex flex-col items-center text-center px-5 md:px-6 pt-10 md:pt-12 pb-7 md:pb-8 h-full"
+              aria-label={`Pay with ${p.title}`}
+            >
+              <div
+                className="pay-medallion rounded-full flex items-center justify-center mb-4 md:mb-5"
+                style={{
+                  width: 'clamp(60px, 6.5vw, 72px)',
+                  height: 'clamp(60px, 6.5vw, 72px)',
+                  background: p.gradient,
+                  boxShadow: `0 10px 22px ${p.glow}, inset 0 1px 1px rgba(255,255,255,0.35), inset 0 -2px 3px rgba(0,0,0,0.18)`,
+                }}
+                aria-hidden="true"
+              >
+                <p.icon
+                  className="text-white"
+                  strokeWidth={2}
+                  style={{ width: 'clamp(26px, 2.6vw, 32px)', height: 'clamp(26px, 2.6vw, 32px)' }}
+                />
+              </div>
+              <h3
+                className="display uppercase font-medium"
+                style={{
+                  color: '#9C7B2E',
+                  fontSize: 'clamp(15px, 1.4vw, 18px)',
+                  letterSpacing: '2px',
+                  lineHeight: 1.2,
+                  marginBottom: 10,
+                }}
+              >
+                {p.title}
+              </h3>
+              <p
+                className="serif"
+                style={{
+                  color: '#4a4238',
+                  fontSize: 'clamp(14px, 1.15vw, 17px)',
+                  lineHeight: 1.5,
+                }}
+              >
+                {p.desc}
+              </p>
+            </article>
           ))}
         </div>
 
-        {/* We Accept — payment logo grid */}
-        <div className="mt-8 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] rounded-xl py-6 px-4">
-          <div className="luxury-divider !mt-0">
-            <span className="text-[11px] tracking-[3px] uppercase" style={{ color: '#b8893a' }}>We Accept</span>
+        {/* ─── We Accept — premium logo grid ────────────────────────────── */}
+        <div
+          className="mt-8 md:mt-12 px-5 md:px-10 py-8 md:py-10"
+          style={{
+            background: '#FFFDF8',
+            border: '1px solid #E9D7A8',
+            borderRadius: 24,
+            boxShadow: '0 12px 30px rgba(17,17,17,0.06)',
+          }}
+        >
+          {/* Title with gold decorative dividers */}
+          <div className="flex items-center justify-center gap-3 md:gap-4 mb-6 md:mb-8">
+            <svg viewBox="0 0 60 8" className="w-14 md:w-20 h-2" aria-hidden="true">
+              <line x1="0" y1="4" x2="46" y2="4" stroke="#C9A227" strokeWidth="1" />
+              <path d="M46 4 L54 1 L60 4 L54 7 Z" fill="#C9A227" />
+            </svg>
+            <h3
+              className="display uppercase font-medium whitespace-nowrap"
+              style={{
+                color: '#9C7B2E',
+                fontSize: 'clamp(15px, 1.5vw, 18px)',
+                letterSpacing: '4px',
+              }}
+            >
+              We Accept
+            </h3>
+            <svg viewBox="0 0 60 8" className="w-14 md:w-20 h-2" aria-hidden="true">
+              <path d="M14 4 L6 1 L0 4 L6 7 Z" fill="#C9A227" />
+              <line x1="14" y1="4" x2="60" y2="4" stroke="#C9A227" strokeWidth="1" />
+            </svg>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 mt-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
             {[
-              ['VISA', '#1A1F71'],
-              ['Mastercard', '#EB001B'],
-              ['RuPay', '#2E7D32'],
-              ['Amex', '#006FCF'],
-              ['UPI', '#3D8B37'],
-              ['GPay', '#4285F4'],
-              ['PhonePe', '#5F259F'],
-              ['Paytm', '#00BAF2'],
-              ['BHIM', '#F5821F'],
-              ['Amazon Pay', '#FF9900'],
-              ['MobiKwik', '#1C75BC'],
-              ['Razorpay', '#3395FF'],
-            ].map(([name, color], i) => (
+              { name: 'VISA', font: 'display', color: '#1A1F71', style: 'italic', weight: 900, size: 'clamp(15px, 1.6vw, 20px)' },
+              { name: 'Mastercard', font: 'sans', color: '#EB001B', style: 'normal', weight: 700, size: 'clamp(11px, 1.1vw, 14px)' },
+              { name: 'RuPay»', font: 'display', color: '#00457C', style: 'italic', weight: 800, size: 'clamp(13px, 1.35vw, 17px)' },
+              { name: 'AMEX', font: 'display', color: '#006FCF', style: 'normal', weight: 900, size: 'clamp(14px, 1.5vw, 19px)' },
+              { name: 'UPI', font: 'display', color: '#097939', style: 'italic', weight: 900, size: 'clamp(14px, 1.55vw, 19px)' },
+              { name: 'G Pay', font: 'sans', color: '#4285F4', style: 'normal', weight: 500, size: 'clamp(13px, 1.35vw, 17px)' },
+              { name: 'PhonePe', font: 'sans', color: '#5F259F', style: 'normal', weight: 700, size: 'clamp(12px, 1.25vw, 15px)' },
+              { name: 'Paytm', font: 'sans', color: '#00BAF2', style: 'normal', weight: 800, size: 'clamp(13px, 1.4vw, 17px)' },
+              { name: 'BHIM', font: 'display', color: '#414042', style: 'italic', weight: 800, size: 'clamp(13px, 1.4vw, 17px)' },
+              { name: 'amazon pay', font: 'sans', color: '#111111', style: 'normal', weight: 500, size: 'clamp(11px, 1.15vw, 14px)' },
+              { name: 'MobiKwik', font: 'sans', color: '#003D7A', style: 'italic', weight: 800, size: 'clamp(12px, 1.25vw, 15px)' },
+              { name: 'Razorpay', font: 'sans', color: '#0F52BA', style: 'normal', weight: 700, size: 'clamp(12px, 1.25vw, 15px)' },
+            ].map((logo, i) => (
               <div
                 key={i}
-                className="bg-white border border-[rgba(184,137,58,0.15)] rounded-lg py-3 px-2 flex items-center justify-center shadow-sm"
+                className="pay-logo flex items-center justify-center py-4 md:py-5 px-2"
+                style={{ minHeight: 64 }}
+                aria-label={logo.name}
               >
-                <span className="display text-[11px] md:text-xs tracking-[1px] font-semibold text-center" style={{ color }}>
-                  {name}
+                <span
+                  className={logo.font === 'display' ? 'display' : 'serif'}
+                  style={{
+                    color: logo.color,
+                    fontStyle: logo.style,
+                    fontWeight: logo.weight,
+                    fontSize: logo.size,
+                    letterSpacing: logo.font === 'display' ? '1px' : '0',
+                    lineHeight: 1,
+                    fontFamily:
+                      logo.font === 'sans'
+                        ? "'Jost', sans-serif"
+                        : "'Cinzel', 'Cormorant Garamond', serif",
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {logo.name}
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Security badges — dark bar */}
-        <div className="mt-4 rounded-xl py-4 px-4" style={{ background: '#1a1410' }}>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        {/* ─── Security strip (3 equal blocks) ──────────────────────────── */}
+        <div
+          className="mt-6 md:mt-8 overflow-hidden"
+          style={{
+            background: '#111111',
+            border: '1px solid rgba(201,162,39,0.55)',
+            borderRadius: 24,
+            boxShadow: '0 16px 36px rgba(17,17,17,0.28)',
+          }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3">
             {[
-              { icon: Lock, label: '256-bit SSL Encrypted' },
-              { icon: ShieldCheck, label: 'PCI DSS Compliant' },
-              { icon: BadgeCheck, label: '100% Secure Checkout' },
-            ].map(({ icon: Icon, label }, i) => (
-              <div key={i} className="flex items-center gap-2 text-[10px] md:text-[11px] tracking-[1px] uppercase" style={{ color: '#e8d49b' }}>
-                <Icon size={13} style={{ color: '#d4a857' }} />
-                <span>{label}</span>
+              { icon: Lock, title: '256-BIT SSL', sub: 'ENCRYPTED' },
+              { icon: ShieldCheck, title: 'PCI DSS', sub: 'COMPLIANT' },
+              { icon: BadgeCheck, title: '100% SECURE', sub: 'CHECKOUT' },
+            ].map(({ icon: Icon, title, sub }, i) => (
+              <div
+                key={i}
+                className={
+                  'flex items-center justify-center gap-3 md:gap-4 py-5 md:py-6 px-4 text-center ' +
+                  (i > 0 ? 'sm:border-l border-t sm:border-t-0' : '')
+                }
+                style={{ borderColor: 'rgba(201,162,39,0.32)' }}
+              >
+                <span
+                  className="shrink-0 rounded-full flex items-center justify-center"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    background:
+                      'radial-gradient(circle at 32% 28%, rgba(244,222,155,0.18) 0%, rgba(201,162,39,0.15) 100%)',
+                    border: '1px solid rgba(201,162,39,0.6)',
+                  }}
+                >
+                  <Icon size={18} style={{ color: '#C9A227' }} strokeWidth={2.2} />
+                </span>
+                <div className="text-left">
+                  <div
+                    className="display uppercase"
+                    style={{
+                      color: '#FFFDF8',
+                      fontSize: 'clamp(11px, 1vw, 13px)',
+                      letterSpacing: '2px',
+                      fontWeight: 600,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {title}
+                  </div>
+                  <div
+                    className="uppercase"
+                    style={{
+                      color: '#C9A227',
+                      fontSize: 'clamp(9px, 0.8vw, 11px)',
+                      letterSpacing: '2px',
+                      marginTop: 2,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {sub}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Trust strip */}
-        <div className="mt-4 flex items-center justify-center gap-2 bg-[#fbf3df] border border-[rgba(184,137,58,0.2)] rounded-full py-3 px-5">
-          <Lock size={13} style={{ color: '#b8893a' }} />
-          <span className="text-xs text-[#6b5d4c]">Your transactions are safe with us.</span>
+        {/* ─── Trust notice ─────────────────────────────────────────────── */}
+        <div
+          className="mt-5 md:mt-6 flex items-center justify-center gap-3 py-4 px-5 md:px-8 text-center"
+          style={{
+            background: '#FFFDF8',
+            border: '1px solid #E9D7A8',
+            borderRadius: 999,
+            boxShadow: '0 8px 20px rgba(156,123,46,0.08)',
+          }}
+        >
+          <span
+            className="shrink-0 rounded-full flex items-center justify-center"
+            style={{
+              width: 28,
+              height: 28,
+              background:
+                'radial-gradient(circle at 32% 28%, #F4DE9B 0%, #C9A227 100%)',
+              boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.55), 0 3px 8px rgba(201,162,39,0.28)',
+            }}
+            aria-hidden="true"
+          >
+            <Lock size={13} className="text-[#111]" strokeWidth={2.4} />
+          </span>
+          <span
+            className="serif"
+            style={{
+              color: '#4a4238',
+              fontSize: 'clamp(13px, 1.15vw, 16px)',
+              letterSpacing: '0.5px',
+            }}
+          >
+            Your transactions are protected with industry-standard encryption.
+          </span>
         </div>
       </section>
 

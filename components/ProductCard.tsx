@@ -48,10 +48,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.id}`}
-      className="group block bg-white border border-[rgba(184,137,58,0.18)] overflow-hidden hover:shadow-[0_12px_40px_rgba(122,90,31,0.12)] hover:-translate-y-1 hover:border-[rgba(184,137,58,0.32)] transition-all duration-300"
+      className="t-card-frame group bg-white border border-[rgba(184,137,58,0.18)] overflow-hidden hover:shadow-[0_12px_40px_rgba(122,90,31,0.12)] hover:-translate-y-1 hover:border-[rgba(184,137,58,0.32)] transition-all duration-300"
     >
       {/* Image */}
-      <div className="aspect-square relative bg-[#f8f2e6] overflow-hidden">
+      <div className="aspect-square relative bg-[#f8f2e6] overflow-hidden shrink-0">
         <div
           className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
           style={{ backgroundImage: `url(${product.image})` }}
@@ -69,7 +69,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           onClick={handleWishlist}
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           aria-pressed={inWishlist}
-          className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/95 grid place-items-center hover:bg-white hover:scale-110 active:scale-90 transition-all duration-200"
+          className="absolute top-2 right-2 z-10 w-9 h-9 rounded-full bg-white/95 grid place-items-center hover:bg-white hover:scale-110 active:scale-90 transition-all duration-200"
         >
           <Heart
             size={14}
@@ -95,40 +95,43 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      {/* Info */}
-      <div className="p-3 md:p-4">
-        <h3 className="serif text-sm md:text-base text-[#1a1410] font-medium leading-tight mb-1 truncate">
+      {/* Info — stretches to match the tallest card in the row */}
+      <div className="t-card-body p-3 md:p-4">
+        <h3 className="t-product-title mb-1">
           {product.name}
         </h3>
-        {product.material && (
-          <p className="text-[10px] text-[#9a8c75] tracking-[0.5px] mb-2 uppercase">
-            {product.material}
-          </p>
-        )}
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-sm md:text-base text-[#1a1410] font-semibold">
+        {/* Reserved 1-line material row so every card lines up, even when
+            the material is missing. */}
+        <p className="t-subtitle mb-2 min-h-[1.4em] truncate">
+          {product.material || ' '}
+        </p>
+        <div className="t-price-row">
+          <span className="t-price">
             ₹{product.price.toLocaleString('en-IN')}
           </span>
           {product.oldPrice && (
-            <span className="text-[11px] text-[#9a8c75] line-through">
+            <span className="t-price-old">
               ₹{product.oldPrice.toLocaleString('en-IN')}
             </span>
           )}
           {discount > 0 && (
-            <span className="text-[10px] text-[#7a2e2e] font-semibold">
-              ({discount}% OFF)
+            <span className="t-discount">
+              {discount}% OFF
             </span>
           )}
         </div>
-        {/* Mobile add to cart */}
-        <AddToCartButton
-          product={product}
-          inStock={product.inStock}
-          stopPropagation
-          label="Add to Cart"
-          soldOutLabel="Sold Out"
-          className="md:hidden w-full mt-3 py-2.5 bg-[#b8893a] text-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5"
-        />
+        {/* Mobile add to cart pinned to the bottom edge — mt-auto lives on
+            the wrapper so the button keeps a fixed 44px touch target. */}
+        <div className="md:hidden mt-auto pt-3">
+          <AddToCartButton
+            product={product}
+            inStock={product.inStock}
+            stopPropagation
+            label="Add to Cart"
+            soldOutLabel="Sold Out"
+            className="w-full py-2.5 bg-[#b8893a] text-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5"
+          />
+        </div>
       </div>
     </Link>
   );

@@ -61,47 +61,46 @@ export default function CartDrawer() {
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-3 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] p-3"
+                    className="flex items-center gap-4 bg-[#fbf8f1] border border-[rgba(184,137,58,0.18)] p-3 rounded-md"
                   >
                     <div
-                      className="w-16 h-16 bg-[#f8f2e6] bg-cover bg-center flex-shrink-0"
+                      className="w-[72px] h-[72px] bg-[#f8f2e6] bg-cover bg-center rounded flex-shrink-0"
                       style={{ backgroundImage: `url(${item.image})` }}
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="serif text-xs text-[#1a1410] font-medium truncate">
+                    <div className="flex-1 min-w-0 flex flex-col gap-2">
+                      <div className="t-product-title-sm">
                         {item.name}
                       </div>
-                      <div className="text-[10px] text-[#b8893a] font-semibold mt-1">
+                      <div className="t-price-sm">
                         ₹{item.price.toLocaleString('en-IN')}
                       </div>
 
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="inline-flex items-center border border-[rgba(184,137,58,0.32)]">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="qty-selector">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            aria-label="Decrease"
-                            className="w-6 h-6 grid place-items-center hover:bg-[#f8f2e6]"
+                            aria-label="Decrease quantity"
+                            className="qty-btn"
+                            disabled={item.quantity <= 1}
                           >
-                            <Minus size={10} />
+                            <Minus size={13} />
                           </button>
-                          <span className="text-xs font-medium min-w-[24px] text-center">
-                            {item.quantity}
-                          </span>
+                          <span className="qty-value">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            aria-label="Increase"
-                            className="w-6 h-6 grid place-items-center hover:bg-[#f8f2e6]"
+                            aria-label="Increase quantity"
+                            className="qty-btn"
                           >
-                            <Plus size={10} />
+                            <Plus size={13} />
                           </button>
                         </div>
 
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          aria-label="Remove"
-                          className="text-[#9a8c75] hover:text-[#7a2e2e]"
+                          aria-label={`Remove ${item.name}`}
+                          className="w-9 h-9 grid place-items-center text-[#9a8c75] hover:text-[#7a2e2e]"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
@@ -116,7 +115,7 @@ export default function CartDrawer() {
                 <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">
                   Subtotal
                 </span>
-                <span className="serif text-2xl text-[#1a1410] font-bold">
+                <span className="t-price-lg" style={{ fontSize: 'clamp(26px, 5vw, 32px)' }}>
                   ₹{totalPrice.toLocaleString('en-IN')}
                 </span>
               </div>

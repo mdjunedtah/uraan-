@@ -477,14 +477,14 @@ export default function CheckoutPage() {
                 Order Summary
               </h3>
 
-              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto pr-1">
+              <div className="space-y-4 mb-4 max-h-64 overflow-y-auto pr-1">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="w-14 h-14 bg-white bg-cover bg-center flex-shrink-0" style={{ backgroundImage: `url(${item.image})` }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="serif text-xs text-[#1a1410] font-medium truncate">{item.name}</div>
-                      <div className="text-[10px] text-[#9a8c75]">Qty: {item.quantity}</div>
-                      <div className="text-xs text-[#b8893a] font-semibold mt-1">
+                  <div key={item.id} className="flex gap-4 items-center">
+                    <div className="w-16 h-16 bg-white bg-cover bg-center flex-shrink-0 rounded" style={{ backgroundImage: `url(${item.image})` }} />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="t-product-title-sm">{item.name}</div>
+                      <div className="t-caption">Qty: {item.quantity}</div>
+                      <div className="t-price-sm">
                         ₹{(item.price * item.quantity).toLocaleString('en-IN')}
                       </div>
                     </div>
@@ -505,7 +505,7 @@ export default function CheckoutPage() {
 
               <div className="flex justify-between items-baseline pt-3 mt-3 border-t border-[rgba(184,137,58,0.18)]">
                 <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
-                <span className="serif lining-nums text-2xl text-[#1a1410] font-bold">₹{finalTotal.toLocaleString('en-IN')}</span>
+                <span className="t-price-lg" style={{ fontSize: 'clamp(28px, 5.5vw, 36px)' }}>₹{finalTotal.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="mt-5 pt-4 border-t border-[rgba(184,137,58,0.18)] space-y-2 text-[10px] text-[#6b5d4c]">

@@ -62,17 +62,17 @@ export default function WishlistPage() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="group relative bg-white border border-[rgba(184,137,58,0.18)] overflow-hidden hover:shadow-luxury hover:-translate-y-1 hover:border-[rgba(184,137,58,0.32)] transition-all duration-300"
+                className="t-card-frame group relative bg-white border border-[rgba(184,137,58,0.18)] overflow-hidden hover:shadow-luxury hover:-translate-y-1 hover:border-[rgba(184,137,58,0.32)] transition-all duration-300"
               >
                 <button
                   onClick={() => removeFromWishlist(item.id)}
                   aria-label={`Remove ${item.name} from wishlist`}
-                  className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/95 grid place-items-center text-[#6b5d4c] hover:bg-white hover:text-[#7a2e2e] hover:scale-110 active:scale-90 transition-all duration-200"
+                  className="absolute top-2 right-2 z-10 w-9 h-9 rounded-full bg-white/95 grid place-items-center text-[#6b5d4c] hover:bg-white hover:text-[#7a2e2e] hover:scale-110 active:scale-90 transition-all duration-200"
                 >
                   <X size={14} />
                 </button>
 
-                <Link href={`/product/${item.id}`} className="block aspect-square relative bg-[#f8f2e6] overflow-hidden">
+                <Link href={`/product/${item.id}`} className="block aspect-square relative bg-[#f8f2e6] overflow-hidden shrink-0">
                   <Image
                     src={item.image}
                     alt={item.name}
@@ -82,20 +82,24 @@ export default function WishlistPage() {
                   />
                 </Link>
 
-                <div className="p-3 md:p-4">
-                  <Link href={`/product/${item.id}`}>
-                    <h3 className="serif text-sm md:text-base text-[#1a1410] font-medium leading-tight mb-1 truncate hover:text-[#b8893a] transition-colors">
+                <div className="t-card-body p-3 md:p-4">
+                  <Link href={`/product/${item.id}`} className="hover:text-[#b8893a] transition-colors">
+                    <h3 className="t-product-title mb-2">
                       {item.name}
                     </h3>
                   </Link>
-                  <div className="text-sm md:text-base text-[#1a1410] font-semibold mb-3">
-                    ₹{item.price.toLocaleString('en-IN')}
+                  <div className="t-price-row mb-3">
+                    <span className="t-price">
+                      ₹{item.price.toLocaleString('en-IN')}
+                    </span>
                   </div>
-                  <AddToCartButton
-                    product={item}
-                    label="Move to Cart"
-                    className="w-full py-2 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors duration-200 flex items-center justify-center gap-1.5"
-                  />
+                  <div className="mt-auto pt-1">
+                    <AddToCartButton
+                      product={item}
+                      label="Move to Cart"
+                      className="w-full py-2.5 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] transition-colors duration-200 flex items-center justify-center gap-1.5"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
