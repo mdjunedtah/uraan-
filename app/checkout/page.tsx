@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import { getCurrentUser } from '@/lib/auth';
 import { saveOrder } from '@/lib/userOrders';
 import {
@@ -484,9 +485,7 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="t-product-title-sm">{item.name}</div>
                       <div className="t-caption">Qty: {item.quantity}</div>
-                      <div className="t-price-sm">
-                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
-                      </div>
+                      <PriceDisplay currentPrice={item.price * item.quantity} size="sm" />
                     </div>
                   </div>
                 ))}
@@ -505,7 +504,11 @@ export default function CheckoutPage() {
 
               <div className="flex justify-between items-baseline pt-3 mt-3 border-t border-[rgba(184,137,58,0.18)]">
                 <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
-                <span className="t-price-lg" style={{ fontSize: 'clamp(28px, 5.5vw, 36px)' }}>₹{finalTotal.toLocaleString('en-IN')}</span>
+                <PriceDisplay
+                  currentPrice={finalTotal}
+                  size="lg"
+                  priceStyle={{ fontSize: 'clamp(28px, 5.5vw, 36px)' }}
+                />
               </div>
 
               <div className="mt-5 pt-4 border-t border-[rgba(184,137,58,0.18)] space-y-2 text-[10px] text-[#6b5d4c]">

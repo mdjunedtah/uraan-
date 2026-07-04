@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { X, ShoppingBag, Plus, Minus, Trash2, ChevronRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, totalItems, totalPrice, updateQuantity, removeFromCart } = useCart();
@@ -71,9 +72,7 @@ export default function CartDrawer() {
                       <div className="t-product-title-sm">
                         {item.name}
                       </div>
-                      <div className="t-price-sm">
-                        ₹{item.price.toLocaleString('en-IN')}
-                      </div>
+                      <PriceDisplay currentPrice={item.price} size="sm" />
 
                       <div className="flex items-center justify-between gap-3">
                         <div className="qty-selector">
@@ -115,9 +114,11 @@ export default function CartDrawer() {
                 <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">
                   Subtotal
                 </span>
-                <span className="t-price-lg" style={{ fontSize: 'clamp(26px, 5vw, 32px)' }}>
-                  ₹{totalPrice.toLocaleString('en-IN')}
-                </span>
+                <PriceDisplay
+                  currentPrice={totalPrice}
+                  size="lg"
+                  priceStyle={{ fontSize: 'clamp(26px, 5vw, 32px)' }}
+                />
               </div>
               <p className="text-[10px] text-[#6b5d4c] mb-4 italic">
                 Taxes & shipping calculated at checkout

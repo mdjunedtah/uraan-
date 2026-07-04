@@ -5,6 +5,7 @@ import { Heart, Eye } from 'lucide-react';
 import { Product } from '@/data/jewelleryData';
 import { useWishlist } from '@/context/wishlistContext';
 import AddToCartButton from '@/components/AddToCartButton';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 
 type ProductCardProps = {
   product: Product;
@@ -13,11 +14,6 @@ type ProductCardProps = {
 export default function ProductCard({ product }: ProductCardProps) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
-
-  const discount =
-    product.oldPrice && product.oldPrice > product.price
-      ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-      : 0;
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -105,21 +101,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <p className="t-subtitle mb-2 min-h-[1.4em] truncate">
           {product.material || ' '}
         </p>
-        <div className="t-price-row">
-          <span className="t-price">
-            ₹{product.price.toLocaleString('en-IN')}
-          </span>
-          {product.oldPrice && (
-            <span className="t-price-old">
-              ₹{product.oldPrice.toLocaleString('en-IN')}
-            </span>
-          )}
-          {discount > 0 && (
-            <span className="t-discount">
-              {discount}% OFF
-            </span>
-          )}
-        </div>
+        <PriceDisplay currentPrice={product.price} originalPrice={product.oldPrice} size="md" />
         {/* Mobile add to cart pinned to the bottom edge — mt-auto lives on
             the wrapper so the button keeps a fixed 44px touch target. */}
         <div className="md:hidden mt-auto pt-3">

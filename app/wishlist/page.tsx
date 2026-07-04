@@ -6,6 +6,7 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import AddToCartButton from '@/components/AddToCartButton';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import { useWishlist } from '@/context/wishlistContext';
 import { Heart, ChevronRight, Trash2, X } from 'lucide-react';
 
@@ -88,11 +89,7 @@ export default function WishlistPage() {
                       {item.name}
                     </h3>
                   </Link>
-                  <div className="t-price-row mb-3">
-                    <span className="t-price">
-                      ₹{item.price.toLocaleString('en-IN')}
-                    </span>
-                  </div>
+                  <PriceDisplay currentPrice={item.price} size="md" className="mb-3" />
                   <div className="mt-auto pt-1">
                     <AddToCartButton
                       product={item}

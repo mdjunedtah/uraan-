@@ -10,6 +10,7 @@ import CartDrawer from '@/components/CartDrawer';
 import ProductGallery from '@/components/ProductGallery';
 import ShareButton from '@/components/ShareButton';
 import AddToCartButton from '@/components/AddToCartButton';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import { getProductById, getRelatedProducts } from '@/lib/products';
 import { useProducts } from '@/hooks/useProducts';
 import { getGalleryImages } from '@/lib/gallery';
@@ -51,10 +52,6 @@ export default function ProductDetailPage({
   }
 
   const inWishlist = isInWishlist(product.id);
-  const discount =
-    product.oldPrice && product.oldPrice > product.price
-      ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-      : 0;
   const related = getRelatedProducts(product.id, 4, list);
 
   const handleAddToCart = () => {
@@ -128,19 +125,12 @@ export default function ProductDetailPage({
               </span>
             </div>
 
-            <div className="t-price-row mb-5 pb-5 border-b border-[rgba(184,137,58,0.18)]">
-              <span className="t-price-lg">
-                ₹{product.price.toLocaleString('en-IN')}
-              </span>
-              {product.oldPrice && (
-                <span className="t-price-old-lg">
-                  ₹{product.oldPrice.toLocaleString('en-IN')}
-                </span>
-              )}
-              {discount > 0 && (
-                <span className="t-discount-lg">{discount}% OFF</span>
-              )}
-            </div>
+            <PriceDisplay
+              currentPrice={product.price}
+              originalPrice={product.oldPrice}
+              size="lg"
+              className="mb-5 pb-5 border-b border-[rgba(184,137,58,0.18)]"
+            />
 
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div className="bg-[#f8f2e6] p-3 border border-[rgba(184,137,58,0.18)]">

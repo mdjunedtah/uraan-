@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
+import PriceDisplay from '@/components/ui/PriceDisplay';
 import { useCart } from '@/context/CartContext';
 import { ShoppingBag, ChevronRight, Tag, Truck, ShieldCheck, Plus, Minus, Trash2 } from 'lucide-react';
 
@@ -74,9 +75,7 @@ export default function CartPage() {
                     <div className="t-product-title">
                       {item.name}
                     </div>
-                    <div className="t-price">
-                      ₹{item.price.toLocaleString('en-IN')}
-                    </div>
+                    <PriceDisplay currentPrice={item.price} size="md" />
                     <div className="flex items-center gap-4 flex-wrap mt-1">
                       <div className="qty-selector qty-selector-lg">
                         <button
@@ -97,7 +96,7 @@ export default function CartPage() {
                         </button>
                       </div>
                       <div className="t-caption hidden md:block">
-                        Line total: <span className="t-price-sm">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                        Line total: <PriceDisplay currentPrice={item.price * item.quantity} size="sm" />
                       </div>
                     </div>
                   </div>
@@ -183,9 +182,11 @@ export default function CartPage() {
 
                 <div className="flex justify-between items-baseline mb-5">
                   <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
-                  <span className="t-price-lg" style={{ fontSize: 'clamp(28px, 5.5vw, 36px)' }}>
-                    ₹{finalTotal.toLocaleString('en-IN')}
-                  </span>
+                  <PriceDisplay
+                    currentPrice={finalTotal}
+                    size="lg"
+                    priceStyle={{ fontSize: 'clamp(28px, 5.5vw, 36px)' }}
+                  />
                 </div>
 
                 <Link
