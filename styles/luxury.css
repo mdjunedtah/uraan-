@@ -1,5 +1,221 @@
 /* Luxury reusable styles */
 
+/* ── Global product typography tokens ─────────────────────────────────────
+   ONE system used across product listing, PDP, cart drawer, cart page,
+   checkout order summary, wishlist and every related grid. Do NOT hard-code
+   product title / price sizes elsewhere — always use these classes.
+   ---------------------------------------------------------------------- */
+
+/* ► Product titles */
+/* Large (PDP) — 30px desktop / 22px mobile, weight 500, line-height 1.35/1.4 */
+.t-product-title-lg {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: #1a1410;
+}
+@media (min-width: 768px) {
+  .t-product-title-lg { font-size: 30px; line-height: 1.35; }
+}
+
+/* Standard (cards, wishlist, related, search, bestseller, trending) */
+.t-product-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: #1a1410;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em; /* 2 lines reserved so cards stay equal */
+  word-break: break-word;
+}
+@media (min-width: 768px) {
+  .t-product-title { font-size: 16px; }
+}
+
+/* Compact (cart drawer, checkout summary, order rows) */
+.t-product-title-sm {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: #1a1410;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+@media (min-width: 768px) {
+  .t-product-title-sm { font-size: 15px; }
+}
+
+/* ► Prices — current */
+/* Large (PDP) — 44px desktop / 38px mobile, weight 700 */
+.t-price-lg {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #1a1410;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+@media (min-width: 768px) {
+  .t-price-lg { font-size: 44px; }
+}
+
+/* Standard (cards, wishlist, cart page rows) */
+.t-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: #1a1410;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+@media (min-width: 768px) {
+  .t-price { font-size: 18px; }
+}
+
+/* Compact (cart drawer, checkout summary rows) */
+.t-price-sm {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: #1a1410;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+@media (min-width: 768px) {
+  .t-price-sm { font-size: 15px; }
+}
+
+/* ► Prices — old / strikethrough (60% opacity, line-through) */
+.t-price-old-lg {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  color: #1a1410;
+  opacity: 0.6;
+  text-decoration: line-through;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.t-price-old {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  color: #1a1410;
+  opacity: 0.6;
+  text-decoration: line-through;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ► Discount */
+.t-discount-lg {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  color: #7a2e2e;
+}
+.t-discount {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  color: #7a2e2e;
+}
+
+/* ► Supporting text */
+.t-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #9a8c75;
+  line-height: 1.4;
+}
+.t-caption {
+  font-size: 12px;
+  color: #6b5d4c;
+  line-height: 1.5;
+}
+
+/* Baseline-aligned price row — currency, current, old, discount all sit
+   on the same line so nothing looks jittery between cards. */
+.t-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+/* ► Quantity selector — one component, two sizes.
+   Every button is a square with min touch target ≥ 36px; the readout has a
+   fixed width so 1-digit and 3-digit values render at the exact same width
+   — no shifting when quantity changes. */
+.qty-selector {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid rgba(184, 137, 58, 0.32);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+}
+.qty-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: #1a1410;
+  transition: background-color 0.2s;
+}
+.qty-btn:hover:not(:disabled) { background: #f8f2e6; }
+.qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.qty-value {
+  min-width: 44px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1410;
+  font-variant-numeric: lining-nums tabular-nums;
+  border-left: 1px solid rgba(184, 137, 58, 0.24);
+  border-right: 1px solid rgba(184, 137, 58, 0.24);
+  background: #ffffff;
+}
+/* Large variant (PDP, cart page) — meets 44×44 AA min touch target. */
+.qty-selector-lg .qty-btn { width: 48px; height: 48px; }
+.qty-selector-lg .qty-value { min-width: 52px; height: 48px; font-size: 16px; }
+
+/* Container that makes product cards stretch to identical height inside
+   any grid — flex column + `mt-auto` on the trailing footer row. */
+.t-card-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.t-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .luxury-card {
   background: #ffffff;
   border: 1px solid rgba(184, 137, 58, 0.18);

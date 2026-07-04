@@ -65,35 +65,48 @@ export default function CartPage() {
             {/* Items */}
             <div className="lg:col-span-2 space-y-3">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4 bg-white border border-[rgba(184,137,58,0.18)] p-4 items-center">
+                <div key={item.id} className="flex gap-4 md:gap-5 bg-white border border-[rgba(184,137,58,0.18)] p-4 items-center rounded">
                   <div
-                    className="w-20 h-20 md:w-24 md:h-24 bg-[#f8f2e6] bg-cover bg-center flex-shrink-0"
+                    className="w-24 h-24 md:w-28 md:h-28 bg-[#f8f2e6] bg-cover bg-center flex-shrink-0 rounded"
                     style={{ backgroundImage: `url(${item.image})` }}
                   />
-                  <div className="flex-1 min-w-0">
-                    <div className="serif text-base md:text-lg font-medium text-[#1a1410] mb-1 truncate">
+                  <div className="flex-1 min-w-0 flex flex-col gap-2">
+                    <div className="t-product-title">
                       {item.name}
                     </div>
-                    <div className="text-[#b8893a] text-sm md:text-base font-semibold mb-2">
+                    <div className="t-price">
                       ₹{item.price.toLocaleString('en-IN')}
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="inline-flex items-center border border-[rgba(184,137,58,0.32)]">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Decrease" className="w-7 h-7 grid place-items-center hover:bg-[#f8f2e6]">
-                          <Minus size={12} />
+                    <div className="flex items-center gap-4 flex-wrap mt-1">
+                      <div className="qty-selector qty-selector-lg">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          aria-label="Decrease quantity"
+                          className="qty-btn"
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus size={14} />
                         </button>
-                        <span className="text-sm font-medium min-w-[28px] text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Increase" className="w-7 h-7 grid place-items-center hover:bg-[#f8f2e6]">
-                          <Plus size={12} />
+                        <span className="qty-value">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          aria-label="Increase quantity"
+                          className="qty-btn"
+                        >
+                          <Plus size={14} />
                         </button>
                       </div>
-                      <div className="text-xs text-[#6b5d4c] hidden md:block">
-                        Subtotal: <span className="text-[#1a1410] font-semibold">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                      <div className="t-caption hidden md:block">
+                        Line total: <span className="t-price-sm">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => removeFromCart(item.id)} aria-label="Remove" className="text-[#9a8c75] hover:text-[#7a2e2e] p-2">
-                    <Trash2 size={16} />
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    aria-label={`Remove ${item.name}`}
+                    className="w-11 h-11 grid place-items-center text-[#9a8c75] hover:text-[#7a2e2e] shrink-0"
+                  >
+                    <Trash2 size={17} />
                   </button>
                 </div>
               ))}
@@ -170,7 +183,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between items-baseline mb-5">
                   <span className="display text-xs tracking-[2px] uppercase text-[#1a1410]">Total</span>
-                  <span className="serif lining-nums text-2xl text-[#1a1410] font-bold">
+                  <span className="t-price-lg" style={{ fontSize: 'clamp(28px, 5.5vw, 36px)' }}>
                     ₹{finalTotal.toLocaleString('en-IN')}
                   </span>
                 </div>

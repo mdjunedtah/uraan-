@@ -98,14 +98,14 @@ export default function ProductDetailPage({
 
           {/* Info */}
           <div>
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <h1 className="serif text-3xl md:text-4xl text-[#1a1410] leading-tight">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <h1 className="t-product-title-lg pr-1">
                 {product.name}
               </h1>
               <ShareButton
                 title={product.name}
                 text={`Check out ${product.name} on Uraan`}
-                className="shrink-0 mt-2 text-[#9a8c75] hover:text-[#b8893a]"
+                className="shrink-0 mt-1 w-11 h-11 grid place-items-center text-[#9a8c75] hover:text-[#b8893a]"
               />
             </div>
 
@@ -128,17 +128,17 @@ export default function ProductDetailPage({
               </span>
             </div>
 
-            <div className="flex items-baseline gap-3 mb-5 pb-5 border-b border-[rgba(184,137,58,0.18)]">
-              <span className="serif lining-nums text-3xl md:text-4xl text-[#1a1410] font-semibold">
+            <div className="t-price-row mb-5 pb-5 border-b border-[rgba(184,137,58,0.18)]">
+              <span className="t-price-lg">
                 ₹{product.price.toLocaleString('en-IN')}
               </span>
               {product.oldPrice && (
-                <span className="lining-nums text-base text-[#9a8c75] line-through">
+                <span className="t-price-old-lg">
                   ₹{product.oldPrice.toLocaleString('en-IN')}
                 </span>
               )}
               {discount > 0 && (
-                <span className="text-xs text-[#7a2e2e] font-bold">{discount}% OFF</span>
+                <span className="t-discount-lg">{discount}% OFF</span>
               )}
             </div>
 
@@ -168,19 +168,20 @@ export default function ProductDetailPage({
             </div>
 
             <div className="flex items-center gap-3 mb-4">
-              <div className="inline-flex items-center border border-[rgba(184,137,58,0.32)]">
+              <div className="qty-selector qty-selector-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  aria-label="Decrease"
-                  className="w-10 h-12 grid place-items-center hover:bg-[#f8f2e6]"
+                  aria-label="Decrease quantity"
+                  className="qty-btn"
+                  disabled={quantity <= 1}
                 >
                   <Minus size={14} />
                 </button>
-                <span className="text-sm font-semibold min-w-[40px] text-center">{quantity}</span>
+                <span className="qty-value">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  aria-label="Increase"
-                  className="w-10 h-12 grid place-items-center hover:bg-[#f8f2e6]"
+                  aria-label="Increase quantity"
+                  className="qty-btn"
                 >
                   <Plus size={14} />
                 </button>
