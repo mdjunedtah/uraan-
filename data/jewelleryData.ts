@@ -35,6 +35,11 @@ export type Review = {
   rating: number;
   text: string;
   product?: string;
+  productId?: string;
+  title?: string;
+  photo?: string;
+  helpful?: number;
+  reported?: boolean;
   date: string;
   verified: boolean;
 };

@@ -1,13 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Star, Trash2, CheckCircle2, XCircle, Database, HardDrive } from 'lucide-react';
+import { Star, Trash2, CheckCircle2, XCircle, Database, HardDrive, Flag } from 'lucide-react';
 import { type Review, getReviews, setReviewVerified, deleteReview } from '@/lib/reviewsStore';
 
 export default function AdminReviewsPage() {
   const [reviewList, setReviewList] = useState<Review[]>([]);
   const [configured, setConfigured] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'verified' | 'pending'>('all');
+  const [filter, setFilter] = useState<'all' | 'verified' | 'pending' | 'reported'>('all');
 
   const load = useCallback(async () => {
     try {
@@ -29,11 +29,11 @@ export default function AdminReviewsPage() {
     load();
   }, [load]);
 
-  const filtered = filter === 'all'
-    ? reviewList
-    : filter === 'verified'
-      ? reviewList.filter((r) => r.verified)
-      : reviewList.filter((r) => !r.verified);
+  const filtered =
+    filter === 'all' ? reviewList
+    : filter === 'verified' ? reviewList.filter((r) => r.verified)
+    : filter === 'reported' ? reviewList.filter((r) => r.reported)
+    : reviewList.filter((r) => !r.verified);
 
   const avgRating = reviewList.length
     ? (reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length).toFixed(1)
@@ -75,7 +75,7 @@ export default function AdminReviewsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         <button
           onClick={() => setFilter('all')}
           className={`bg-white border p-4 text-center ${filter === 'all' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
@@ -97,6 +97,13 @@ export default function AdminReviewsPage() {
           <div className="stat-value text-[#7a2e2e]">{reviewList.filter((r) => !r.verified).length}</div>
           <div className="stat-label mt-1">Pending</div>
         </button>
+        <button
+          onClick={() => setFilter('reported')}
+          className={`bg-white border p-4 text-center ${filter === 'reported' ? 'border-[#b8893a]' : 'border-[rgba(184,137,58,0.18)]'}`}
+        >
+          <div className="stat-value text-[#7a2e2e]">{reviewList.filter((r) => r.reported).length}</div>
+          <div className="stat-label mt-1">Reported</div>
+        </button>
       </div>
 
       <div className="space-y-3">
@@ -116,6 +123,11 @@ export default function AdminReviewsPage() {
                       <CheckCircle2 size={9} /> Verified
                     </span>
                   )}
+                  {r.reported && (
+                    <span className="bg-[#7a2e2e]/10 text-[#7a2e2e] px-2 py-0.5 text-[9px] font-semibold flex items-center gap-1">
+                      <Flag size={9} /> Reported
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex gap-0.5">
@@ -128,7 +140,11 @@ export default function AdminReviewsPage() {
                     ))}
                   </div>
                   <span className="text-[10px] text-[#9a8c75]">{r.date}</span>
+                  {Boolean(r.helpful) && (
+                    <span className="text-[10px] text-[#9a8c75]">· {r.helpful} found helpful</span>
+                  )}
                 </div>
+                {r.title && <p className="text-sm font-semibold text-[#1a1410] mb-1">{r.title}</p>}
                 <p className="text-sm text-[#6b5d4c] leading-relaxed mb-2">{r.text}</p>
                 {r.product && (
                   <div className="text-[10px] text-[#b8893a] tracking-[0.5px]">

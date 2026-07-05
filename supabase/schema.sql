@@ -140,10 +140,24 @@ create table if not exists public.reviews (
   rating     integer not null default 5,
   "text"     text,
   product    text,
+  product_id text,
+  title      text,
+  photo      text,
+  helpful    integer not null default 0,
+  reported   boolean not null default false,
   "date"     text,
   verified   boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+-- Adds the customer-review columns above to a `reviews` table that already
+-- exists from an earlier deploy of this schema (the `create table if not
+-- exists` above is a no-op in that case).
+alter table public.reviews add column if not exists product_id text;
+alter table public.reviews add column if not exists title text;
+alter table public.reviews add column if not exists photo text;
+alter table public.reviews add column if not exists helpful integer not null default 0;
+alter table public.reviews add column if not exists reported boolean not null default false;
 
 -- $$...$$ dollar-quoting lets the review text contain apostrophes safely.
 insert into public.reviews (id, name, city, avatar, rating, "text", product, "date", verified) values
