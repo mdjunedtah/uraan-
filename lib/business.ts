@@ -6,14 +6,23 @@
 export const BUSINESS_NAME = process.env.NEXT_PUBLIC_BUSINESS_NAME || 'Om Gauri Putra';
 
 export const BUSINESS_ADDRESS = {
-  line1: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_LINE1 || 'A/69/1, Pocket C, Sector 24',
-  line2: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_LINE2 || 'Budh Vihar, Phase 2',
-  locality: process.env.NEXT_PUBLIC_BUSINESS_CITY || 'New Delhi',
+  line1: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_LINE1 || 'Ground Floor, Plot No. G-6, KH No. 69/17/1',
+  line2: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS_LINE2 || 'Veer Singh Colony, Budh Vihar Phase 2',
+  locality: process.env.NEXT_PUBLIC_BUSINESS_CITY || 'Rohini, New Delhi',
   region: process.env.NEXT_PUBLIC_BUSINESS_STATE || 'Delhi',
   postalCode: process.env.NEXT_PUBLIC_BUSINESS_PINCODE || '110086',
   country: process.env.NEXT_PUBLIC_BUSINESS_COUNTRY || 'India',
   countryCode: process.env.NEXT_PUBLIC_BUSINESS_COUNTRY_CODE || 'IN',
 };
+
+// Delhi has more than one locality named "Budh Vihar" (this one, in Rohini/
+// North West Delhi, and an unrelated one near Munirka), which regularly
+// confuses text-address geocoding and sends "Get Directions" to the wrong
+// part of the city. Setting these two env vars pins the map links to the
+// store's exact GPS coordinates instead, sidestepping that ambiguity entirely.
+const BUSINESS_LAT = process.env.NEXT_PUBLIC_BUSINESS_LAT;
+const BUSINESS_LNG = process.env.NEXT_PUBLIC_BUSINESS_LNG;
+const BUSINESS_COORDS = BUSINESS_LAT && BUSINESS_LNG ? { lat: BUSINESS_LAT, lng: BUSINESS_LNG } : null;
 
 /** Single-line address, e.g. for <address>, JSON-LD and map queries. */
 export const BUSINESS_ADDRESS_INLINE = [
@@ -30,9 +39,11 @@ export const BUSINESS_ADDRESS_LINES = [
   `${BUSINESS_ADDRESS.locality}, ${BUSINESS_ADDRESS.region} – ${BUSINESS_ADDRESS.postalCode}`,
 ];
 
-const mapQuery = encodeURIComponent(
-  `${BUSINESS_ADDRESS.line1}, ${BUSINESS_ADDRESS.line2}, ${BUSINESS_ADDRESS.locality}, ${BUSINESS_ADDRESS.region} ${BUSINESS_ADDRESS.postalCode}, India`
-);
+const mapQuery = BUSINESS_COORDS
+  ? `${BUSINESS_COORDS.lat},${BUSINESS_COORDS.lng}`
+  : encodeURIComponent(
+      `${BUSINESS_ADDRESS.line1}, ${BUSINESS_ADDRESS.line2}, ${BUSINESS_ADDRESS.locality}, ${BUSINESS_ADDRESS.region} ${BUSINESS_ADDRESS.postalCode}, India`
+    );
 
 /** Opens Google Maps centered on the store — safe to use as a plain link. */
 export const MAPS_VIEW_URL = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
