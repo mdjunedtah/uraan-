@@ -7,17 +7,19 @@
    ---------------------------------------------------------------------- */
 
 /* ► Product titles */
-/* Large (PDP) — 30px desktop / 22px mobile, weight 500, line-height 1.35/1.4 */
+/* Large (PDP) — 22px desktop / 18px mobile, weight 500, line-height 1.35/1.4.
+   Kept only slightly larger than the card title (15/16px) so the same product
+   name reads at a consistent visual weight everywhere on the site. */
 .t-product-title-lg {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0;
   color: #1a1410;
 }
 @media (min-width: 768px) {
-  .t-product-title-lg { font-size: 30px; line-height: 1.35; }
+  .t-product-title-lg { font-size: 22px; line-height: 1.35; }
 }
 
 /* Standard (cards, wishlist, related, search, bestseller, trending) */
