@@ -623,6 +623,7 @@ export default function HomePage() {
               desc: 'Visa, Mastercard, RuPay, Amex',
               gradient: 'linear-gradient(140deg, #4B8BE0 0%, #1F5F8B 100%)',
               glow: 'rgba(31,95,139,0.35)',
+              titleColor: '#1F5F8B',
             },
             {
               icon: Smartphone,
@@ -630,6 +631,7 @@ export default function HomePage() {
               desc: 'GPay, PhonePe, Paytm, BHIM',
               gradient: 'linear-gradient(140deg, #4FC38A 0%, #2C7A50 100%)',
               glow: 'rgba(44,122,80,0.35)',
+              titleColor: '#2C7A50',
             },
             {
               icon: Wallet,
@@ -637,6 +639,7 @@ export default function HomePage() {
               desc: 'Paytm, Amazon Pay, MobiKwik',
               gradient: 'linear-gradient(140deg, #A67BEA 0%, #6B3CBD 100%)',
               glow: 'rgba(107,60,189,0.35)',
+              titleColor: '#6B3CBD',
             },
             {
               icon: Banknote,
@@ -644,6 +647,7 @@ export default function HomePage() {
               desc: 'All major banks + No-cost EMI',
               gradient: 'linear-gradient(140deg, #F1D07A 0%, #9C7B2E 100%)',
               glow: 'rgba(156,123,46,0.4)',
+              titleColor: '#9C7B2E',
             },
           ].map((p, i) => (
             <article
@@ -670,7 +674,7 @@ export default function HomePage() {
               <h3
                 className="display uppercase font-medium"
                 style={{
-                  color: '#9C7B2E',
+                  color: p.titleColor,
                   fontSize: 'clamp(15px, 1.4vw, 18px)',
                   letterSpacing: '2px',
                   lineHeight: 1.2,
