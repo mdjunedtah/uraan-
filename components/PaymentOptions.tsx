@@ -54,60 +54,35 @@ function RupayLogo() {
   return (
     <svg viewBox="0 0 170 52" className="h-6 md:h-7 w-auto" aria-label="RuPay">
       <text
-        x="8"
+        x="6"
         y="40"
         fontFamily="'Arial Black', 'Helvetica', sans-serif"
         fontWeight={900}
         fontStyle="italic"
         fontSize="38"
         fill="#00457C"
-        letterSpacing="0.5"
+        letterSpacing="0"
       >
         RuPay
       </text>
-      <path d="M132 8 L162 26 L132 44 L142 26 Z" fill="#F58220" />
-      <path d="M118 8 L148 26 L118 44 L128 26 Z" fill="#009A49" />
+      {/* Single prominent orange chevron arrow (as in reference) */}
+      <path d="M128 8 L162 26 L128 44 L142 26 Z" fill="#F58220" />
     </svg>
   );
 }
 
 function AmexLogo() {
   return (
-    <svg viewBox="0 0 130 52" className="h-7 md:h-8 w-auto" aria-label="American Express">
-      <rect x="0" y="0" width="130" height="52" rx="6" fill="#006FCF" />
+    <svg viewBox="0 0 130 52" className="h-6 md:h-7 w-auto" aria-label="Amex">
       <text
         x="65"
-        y="21"
+        y="40"
         textAnchor="middle"
         fontFamily="'Arial Black', 'Helvetica', sans-serif"
-        fontSize="10"
-        fontWeight={700}
-        fill="#FFFFFF"
-        letterSpacing="0.5"
-      >
-        AMERICAN
-      </text>
-      <text
-        x="65"
-        y="35"
-        textAnchor="middle"
-        fontFamily="'Arial Black', 'Helvetica', sans-serif"
-        fontSize="10"
-        fontWeight={700}
-        fill="#FFFFFF"
-        letterSpacing="0.5"
-      >
-        EXPRESS
-      </text>
-      <text
-        x="65"
-        y="47"
-        textAnchor="middle"
-        fontFamily="'Arial Black', 'Helvetica', sans-serif"
-        fontSize="5"
-        fontWeight={700}
-        fill="#FFFFFF"
-        letterSpacing="1.4"
+        fontWeight={900}
+        fontSize="40"
+        fill="#006FCF"
+        letterSpacing="1"
       >
         AMEX
       </text>
@@ -147,25 +122,40 @@ function UpiLogo() {
 }
 
 function GPayLogo() {
+  // Google G — 4-color ring quarters + horizontal blue bar, matching brand mark.
   return (
-    <svg viewBox="0 0 130 52" className="h-7 md:h-8 w-auto" aria-label="Google Pay">
-      {/* Google G */}
-      <g transform="translate(0,4)">
+    <svg viewBox="0 0 140 48" className="h-6 md:h-7 w-auto" aria-label="Google Pay">
+      <g transform="translate(4,4)">
+        {/* Red — top-right quarter */}
         <path
-          d="M22 21 h-9.6 v3.9 h5.4 c-0.5 2.4 -2.6 4 -5.4 4 c-3.3 0 -6 -2.7 -6 -6 s2.7 -6 6 -6 c1.5 0 2.9 0.5 3.9 1.4 l2.9 -2.9 c-1.8 -1.7 -4.2 -2.7 -6.8 -2.7 c-5.6 0 -10.2 4.5 -10.2 10.2 s4.6 10.2 10.2 10.2 c5.9 0 9.8 -4.1 9.8 -9.9 c0 -0.7 -0.1 -1.4 -0.2 -2.1 Z"
+          d="M20 4 A16 16 0 0 1 34.1 12 L 28.9 15 A10 10 0 0 0 20 10 Z"
+          fill="#EA4335"
+        />
+        {/* Yellow — top-left quarter */}
+        <path
+          d="M4 20 A16 16 0 0 1 20 4 L 20 10 A10 10 0 0 0 10 20 Z"
+          fill="#FBBC04"
+        />
+        {/* Green — bottom-left quarter */}
+        <path
+          d="M20 36 A16 16 0 0 1 4 20 L 10 20 A10 10 0 0 0 20 30 Z"
+          fill="#34A853"
+        />
+        {/* Blue — right side + horizontal bar */}
+        <path
+          d="M34.1 12 A16 16 0 0 1 34.7 26 L 22 26 L 22 21 L 36 21 L 36 20 A16 16 0 0 0 34.1 12 Z"
           fill="#4285F4"
         />
         <path
-          d="M22 21 h-9.6 v3.9 h5.4 c-0.3 1.5 -1.2 2.7 -2.6 3.4 l3.5 2.7 c2.1 -1.9 3.3 -4.8 3.3 -7.9 c0 -0.7 -0.1 -1.4 -0.2 -2.1 Z"
-          fill="#34A853"
-          opacity="0"
+          d="M34.7 26 A16 16 0 0 1 20 36 L 20 30 A10 10 0 0 0 28.9 25 Z"
+          fill="#4285F4"
         />
       </g>
       <text
-        x="34"
-        y="34"
+        x="46"
+        y="30"
         fontFamily="Arial, sans-serif"
-        fontSize="20"
+        fontSize="22"
         fontWeight={500}
         fill="#5F6368"
       >
@@ -177,22 +167,22 @@ function GPayLogo() {
 
 function PhonePeLogo() {
   return (
-    <svg viewBox="0 0 160 52" className="h-6 md:h-7 w-auto" aria-label="PhonePe">
-      <circle cx="20" cy="26" r="16" fill="#5F259F" />
+    <svg viewBox="0 0 150 44" className="h-5 md:h-6 w-auto" aria-label="PhonePe">
+      <circle cx="14" cy="22" r="12" fill="#5F259F" />
       <text
-        x="20"
-        y="32"
+        x="14"
+        y="27"
         textAnchor="middle"
         fontFamily="'Arial Black', sans-serif"
-        fontSize="18"
+        fontSize="14"
         fontWeight={700}
         fill="#FFFFFF"
       >
         ₹
       </text>
       <text
-        x="42"
-        y="34"
+        x="30"
+        y="30"
         fontFamily="Arial, sans-serif"
         fontSize="20"
         fontWeight={700}
@@ -206,26 +196,17 @@ function PhonePeLogo() {
 
 function PaytmLogo() {
   return (
-    <svg viewBox="0 0 130 52" className="h-6 md:h-7 w-auto" aria-label="Paytm">
+    <svg viewBox="0 0 120 40" className="h-6 md:h-7 w-auto" aria-label="Paytm">
       <text
-        x="6"
-        y="36"
+        x="60"
+        y="30"
+        textAnchor="middle"
         fontFamily="Arial, sans-serif"
-        fontSize="26"
+        fontSize="28"
         fontWeight={800}
-        fill="#002E6E"
       >
-        Pay
-      </text>
-      <text
-        x="70"
-        y="36"
-        fontFamily="Arial, sans-serif"
-        fontSize="26"
-        fontWeight={800}
-        fill="#00BAF2"
-      >
-        tm
+        <tspan fill="#002E6E">Pay</tspan>
+        <tspan fill="#00BAF2">tm</tspan>
       </text>
     </svg>
   );
@@ -233,7 +214,7 @@ function PaytmLogo() {
 
 function BhimLogo() {
   return (
-    <svg viewBox="0 0 170 60" className="h-8 md:h-9 w-auto" aria-label="BHIM">
+    <svg viewBox="0 0 170 60" className="h-7 md:h-8 w-auto" aria-label="BHIM">
       <text
         x="6"
         y="34"
@@ -246,11 +227,11 @@ function BhimLogo() {
       >
         BHIM
       </text>
-      <path d="M96 8 L128 30 L96 52 L106 30 Z" fill="#F58220" />
-      <path d="M114 8 L146 30 L114 52 L124 30 Z" fill="#009A49" />
+      <path d="M100 8 L134 30 L100 52 L110 30 Z" fill="#F58220" />
+      <path d="M118 8 L152 30 L118 52 L128 30 Z" fill="#009A49" />
       <text
         x="6"
-        y="50"
+        y="52"
         fontFamily="Arial, sans-serif"
         fontSize="6"
         fill="#414042"
@@ -264,43 +245,43 @@ function BhimLogo() {
 
 function AmazonPayLogo() {
   return (
-    <svg viewBox="0 0 160 60" className="h-8 md:h-9 w-auto" aria-label="Amazon Pay">
+    <svg viewBox="0 0 170 56" className="h-7 md:h-8 w-auto" aria-label="Amazon Pay">
       <text
         x="6"
         y="30"
         fontFamily="Arial, sans-serif"
-        fontSize="24"
-        fontWeight={700}
+        fontSize="26"
+        fontWeight={500}
         fill="#111111"
       >
         amazon
       </text>
-      <text
-        x="90"
-        y="30"
-        fontFamily="Arial, sans-serif"
-        fontSize="24"
-        fontWeight={400}
-        fill="#111111"
-      >
-        pay
-      </text>
-      {/* Amazon smile */}
+      {/* Amazon smile — spans only "amazon" as in the reference */}
       <path
-        d="M12 40 Q46 54 84 40"
+        d="M10 40 Q46 54 88 40"
         stroke="#FF9900"
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
       />
       <path
-        d="M80 38 L86 40 L82 44"
+        d="M82 37 L90 40 L84 46"
         stroke="#FF9900"
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <text
+        x="98"
+        y="30"
+        fontFamily="Arial, sans-serif"
+        fontSize="26"
+        fontWeight={500}
+        fill="#111111"
+      >
+        pay
+      </text>
     </svg>
   );
 }
@@ -331,16 +312,15 @@ function MobikwikLogo() {
 function RazorpayLogo() {
   return (
     <svg viewBox="0 0 170 52" className="h-6 md:h-7 w-auto" aria-label="Razorpay">
-      {/* Blue chevron mark */}
-      <path d="M6 40 L22 4 L18 22 L34 22 L14 44 Z" fill="#0F52BA" />
-      <path d="M22 4 L18 22 L28 12 Z" fill="#3468C0" opacity="0.7" />
+      <path d="M8 44 L26 4 L20 26 L34 26 L14 44 Z" fill="#0D3AA5" />
+      <path d="M20 26 L26 4 L28 15 Z" fill="#3468C0" />
       <text
         x="42"
-        y="36"
+        y="34"
         fontFamily="Arial, sans-serif"
         fontSize="22"
         fontWeight={600}
-        fill="#0F52BA"
+        fill="#0D3AA5"
       >
         Razorpay
       </text>
