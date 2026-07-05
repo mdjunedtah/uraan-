@@ -61,7 +61,7 @@ export default function PriceDisplay({
         {originalPrice!.toLocaleString('en-IN')}
       </span>
       {showDiscountBadge && discount > 0 && (
-        <span className={styles.discount}>{discount}% OFF</span>
+        <span className={styles.discount}>({discount}% OFF)</span>
       )}
     </div>
   );

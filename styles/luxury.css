@@ -122,8 +122,10 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* ► Discount */
+/* ► Discount — always its own line under the price row, never inline
+   with the current/old price, so every card reads the same way. */
 .t-discount-lg {
+  flex-basis: 100%;
   font-size: 20px;
   font-weight: 700;
   line-height: 1;
@@ -131,6 +133,7 @@
   color: #7a2e2e;
 }
 .t-discount {
+  flex-basis: 100%;
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
