@@ -16,9 +16,14 @@ import { useProducts } from '@/hooks/useProducts';
 import { getGalleryImages } from '@/lib/gallery';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/wishlistContext';
+import { useReviews, verifiedOnly } from '@/hooks/useReviews';
+import { voteHelpful, reportReviewAction } from '@/lib/reviewsActions';
+import { reviewAccent, initialsOf } from '@/lib/reviewStyle';
+import WriteReviewModal from '@/components/WriteReviewModal';
 import {
   Heart, Truck, ShieldCheck, RotateCw,
   Star, Plus, Minus, ChevronRight, Award,
+  PenLine, ThumbsUp, Flag, CheckCircle2,
 } from 'lucide-react';
 
 export default function ProductDetailPage({
@@ -32,9 +37,13 @@ export default function ProductDetailPage({
 
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'shipping'>('desc');
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewSort, setReviewSort] = useState<'newest' | 'helpful'>('newest');
+  const [votedReview, setVotedReview] = useState<string | null>(null);
 
   const { addToCart, openCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { reviews: allReviews } = useReviews();
 
   if (!product) {
     // Still fetching the live catalogue — don't 404 a DB-only product yet.
@@ -53,6 +62,29 @@ export default function ProductDetailPage({
 
   const inWishlist = isInWishlist(product.id);
   const related = getRelatedProducts(product.id, 4, list);
+
+  const productReviews = verifiedOnly(allReviews).filter(
+    (r) => r.productId === product.id || r.product === product.name
+  );
+  const hasLiveReviews = productReviews.length > 0;
+  const avgRating = hasLiveReviews
+    ? productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length
+    : product.rating;
+  const reviewCount = hasLiveReviews ? productReviews.length : product.reviewCount;
+  const sortedReviews = [...productReviews].sort((a, b) =>
+    reviewSort === 'helpful'
+      ? (b.helpful || 0) - (a.helpful || 0)
+      : new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
+  const handleHelpful = async (id: string) => {
+    const voted = await voteHelpful(id);
+    if (voted) setVotedReview(id);
+  };
+
+  const handleReport = async (id: string) => {
+    await reportReviewAction(id);
+  };
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -106,14 +138,14 @@ export default function ProductDetailPage({
               />
             </div>
 
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
                     size={14}
                     className={
-                      i < Math.round(product.rating)
+                      i < Math.round(avgRating)
                         ? 'text-[#b8893a] fill-[#b8893a]'
                         : 'text-[#d4cfc5]'
                     }
@@ -121,8 +153,14 @@ export default function ProductDetailPage({
                 ))}
               </div>
               <span className="text-xs text-[#6b5d4c]">
-                {product.rating} ({product.reviewCount} reviews)
+                {avgRating.toFixed(1)} ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
               </span>
+              <button
+                onClick={() => setReviewModalOpen(true)}
+                className="inline-flex items-center gap-1.5 text-[11px] tracking-[1px] uppercase font-semibold text-[#b8893a] hover:text-[#7a5a1f] hover:underline ml-auto"
+              >
+                <PenLine size={13} /> Write a Review
+              </button>
             </div>
 
             <PriceDisplay
@@ -276,6 +314,107 @@ export default function ProductDetailPage({
           </div>
         </div>
       </section>
+
+      <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[rgba(184,137,58,0.18)]">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+          <div>
+            <p className="section-tag-italic">Words of Love</p>
+            <h2 className="section-heading !mb-0">Customer Reviews</h2>
+          </div>
+          {sortedReviews.length > 1 && (
+            <div className="flex items-center gap-2 text-[11px]">
+              <label htmlFor="review-sort" className="text-[#9a8c75] tracking-[1px] uppercase">Sort</label>
+              <select
+                id="review-sort"
+                value={reviewSort}
+                onChange={(e) => setReviewSort(e.target.value as 'newest' | 'helpful')}
+                className="border border-[rgba(184,137,58,0.3)] px-2 py-1.5 text-[#1a1410] focus:outline-none focus:border-[#b8893a]"
+              >
+                <option value="newest">Newest</option>
+                <option value="helpful">Most Helpful</option>
+              </select>
+            </div>
+          )}
+        </div>
+
+        {sortedReviews.length === 0 ? (
+          <p className="text-sm text-[#6b5d4c]">
+            No reviews yet for this piece —{' '}
+            <button onClick={() => setReviewModalOpen(true)} className="text-[#b8893a] font-medium hover:underline">
+              be the first to write one
+            </button>
+            .
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {sortedReviews.map((r, idx) => {
+              const accent = reviewAccent(idx);
+              return (
+                <div
+                  key={r.id}
+                  className="bg-white border border-[rgba(184,137,58,0.18)] rounded-xl p-5"
+                  style={{ borderTop: `3px solid ${accent}` }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          className={i < r.rating ? 'text-[#b8893a] fill-[#b8893a]' : 'text-[#d4cfc5]'}
+                        />
+                      ))}
+                    </div>
+                    {r.verified && (
+                      <div className="flex items-center gap-1 text-[10px] text-[#3d6b5a] font-medium">
+                        <CheckCircle2 size={11} />
+                        <span>Verified Purchase</span>
+                      </div>
+                    )}
+                  </div>
+                  {r.title && <p className="text-sm font-semibold text-[#1a1410] mb-1">{r.title}</p>}
+                  <p className="text-sm text-[#6b5d4c] leading-relaxed mb-3">{r.text}</p>
+                  {r.photo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={r.photo} alt={`Photo from ${r.name}'s review`} className="h-20 w-20 object-cover rounded mb-3 border border-[rgba(184,137,58,0.18)]" />
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+                        style={{ backgroundColor: accent }}
+                      >
+                        {initialsOf(r.name)}
+                      </div>
+                      <span className="font-semibold text-[#1a1410]">{r.name}</span>
+                      {r.city && <span className="text-[#9a8c75]">· {r.city}</span>}
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px] text-[#9a8c75]">
+                      <button
+                        onClick={() => handleHelpful(r.id)}
+                        disabled={votedReview === r.id}
+                        className="flex items-center gap-1 hover:text-[#b8893a] disabled:text-[#3d6b5a]"
+                      >
+                        <ThumbsUp size={12} /> Helpful{r.helpful ? ` (${r.helpful})` : ''}
+                      </button>
+                      <button onClick={() => handleReport(r.id)} className="flex items-center gap-1 hover:text-[#7a2e2e]">
+                        <Flag size={12} /> Report
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <WriteReviewModal
+        isOpen={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        productId={product.id}
+        productName={product.name}
+      />
 
       {related.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-12 border-t border-[rgba(184,137,58,0.18)] mt-8">
