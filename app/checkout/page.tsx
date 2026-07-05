@@ -14,6 +14,7 @@ import type { GeoAddress } from '@/lib/geo/nominatim';
 import {
   CreditCard, Smartphone, Wallet, Building2, Banknote,
   Lock, CheckCircle2, ShieldCheck, Truck, ChevronRight, MapPin,
+  Tag, X, Loader2,
 } from 'lucide-react';
 import { BUSINESS_ADDRESS_INLINE, MAPS_DIRECTIONS_URL } from '@/lib/business';
 
@@ -64,8 +65,48 @@ export default function CheckoutPage() {
   const [cardForm, setCardForm] = useState({ number: '', name: '', expiry: '', cvv: '' });
   const [upiId, setUpiId] = useState('');
 
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+
   const shipping = totalPrice >= 1999 ? 0 : 99;
-  const finalTotal = totalPrice + shipping;
+  const discount = appliedCoupon?.discount || 0;
+  const finalTotal = Math.max(0, totalPrice + shipping - discount);
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim();
+    if (!code) {
+      setCouponError('Please enter a coupon code.');
+      return;
+    }
+    setCouponLoading(true);
+    setCouponError('');
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, orderTotal: totalPrice }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setCouponError(data.error || 'Could not apply this coupon.');
+        setAppliedCoupon(null);
+        return;
+      }
+      setAppliedCoupon({ code: data.code, discount: data.discount });
+      setCouponCode('');
+    } catch {
+      setCouponError('Network error. Please try again.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +150,8 @@ export default function CheckoutPage() {
     amount: finalTotal,
     items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
     address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+    couponCode: appliedCoupon?.code,
+    discount,
   });
 
   // COD / demo (no online payment): record the order directly as unpaid.
@@ -507,6 +550,53 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Coupon */}
+              <div className="pt-3 border-t border-[rgba(184,137,58,0.18)]">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between gap-2 bg-[#3d6b5a]/10 border border-[#3d6b5a]/30 rounded px-3 py-2">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-[#3d6b5a]">
+                      <Tag size={12} /> {appliedCoupon.code} applied
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      aria-label="Remove coupon"
+                      className="text-[#3d6b5a] hover:text-[#7a2e2e]"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Tag size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+                        <input
+                          value={couponCode}
+                          onChange={(e) => {
+                            setCouponCode(e.target.value.toUpperCase());
+                            setCouponError('');
+                          }}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleApplyCoupon())}
+                          placeholder="Have a coupon?"
+                          maxLength={40}
+                          className="w-full h-9 pl-8 pr-2 border border-[rgba(184,137,58,0.3)] bg-white text-xs uppercase tracking-wide focus:outline-none focus:border-[#b8893a]"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading}
+                        className="h-9 px-4 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[1.5px] uppercase font-semibold hover:bg-[#b8893a] hover:text-[#1a1410] disabled:opacity-60 flex items-center gap-1.5 shrink-0"
+                      >
+                        {couponLoading ? <Loader2 size={13} className="animate-spin" /> : 'Apply'}
+                      </button>
+                    </div>
+                    {couponError && <p className="text-[11px] text-[#7a2e2e] mt-1.5">{couponError}</p>}
+                  </>
+                )}
+              </div>
+
               <div className="space-y-2 pt-3 border-t border-[rgba(184,137,58,0.18)] text-sm">
                 <div className="flex justify-between text-[#6b5d4c]">
                   <span>Subtotal ({totalItems})</span>
@@ -516,6 +606,12 @@ export default function CheckoutPage() {
                   <span className="flex items-center gap-1"><Truck size={11} /> Shipping</span>
                   <span className="text-[#1a1410] font-medium">{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-[#3d6b5a]">
+                    <span className="flex items-center gap-1"><Tag size={11} /> Discount ({appliedCoupon?.code})</span>
+                    <span className="font-medium">−₹{discount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-baseline pt-3 mt-3 border-t border-[rgba(184,137,58,0.18)]">
