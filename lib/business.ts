@@ -18,11 +18,12 @@ export const BUSINESS_ADDRESS = {
 // Delhi has more than one locality named "Budh Vihar" (this one, in Rohini/
 // North West Delhi, and an unrelated one near Munirka), which regularly
 // confuses text-address geocoding and sends "Get Directions" to the wrong
-// part of the city. Setting these two env vars pins the map links to the
-// store's exact GPS coordinates instead, sidestepping that ambiguity entirely.
-const BUSINESS_LAT = process.env.NEXT_PUBLIC_BUSINESS_LAT;
-const BUSINESS_LNG = process.env.NEXT_PUBLIC_BUSINESS_LNG;
-const BUSINESS_COORDS = BUSINESS_LAT && BUSINESS_LNG ? { lat: BUSINESS_LAT, lng: BUSINESS_LNG } : null;
+// part of the city. Pinning the store's verified exact GPS coordinates
+// sidesteps that ambiguity entirely — override with the matching env vars if
+// the store ever relocates.
+const BUSINESS_LAT = process.env.NEXT_PUBLIC_BUSINESS_LAT || '28.7192471';
+const BUSINESS_LNG = process.env.NEXT_PUBLIC_BUSINESS_LNG || '77.0945902';
+const BUSINESS_COORDS = { lat: BUSINESS_LAT, lng: BUSINESS_LNG };
 
 /** Single-line address, e.g. for <address>, JSON-LD and map queries. */
 export const BUSINESS_ADDRESS_INLINE = [
