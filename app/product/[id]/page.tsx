@@ -23,7 +23,7 @@ import WriteReviewModal from '@/components/WriteReviewModal';
 import {
   Heart, Truck, ShieldCheck, RotateCw,
   Star, Plus, Minus, ChevronRight, Award,
-  PenLine, ThumbsUp, Flag, CheckCircle2,
+  ThumbsUp, Flag, CheckCircle2, Pencil, ArrowUpLeft,
 } from 'lucide-react';
 
 export default function ProductDetailPage({
@@ -127,18 +127,39 @@ export default function ProductDetailPage({
 
           {/* Info */}
           <div>
-            <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="flex justify-between items-start gap-4 mb-3 flex-wrap">
               <h1 className="t-product-title-lg pr-1">
                 {product.name}
               </h1>
-              <ShareButton
-                title={product.name}
-                text={`Check out ${product.name} on Uraan`}
-                className="shrink-0 mt-1 w-11 h-11 grid place-items-center text-[#9a8c75] hover:text-[#b8893a]"
-              />
+
+              <div className="flex items-start gap-3 shrink-0 pt-1">
+                <ShareButton
+                  title={product.name}
+                  text={`Check out ${product.name} on Uraan`}
+                  iconSize={15}
+                  className="!gap-1.5 h-10 px-4 rounded-full border border-[#B8860B] bg-transparent text-[#B8860B] hover:bg-[#B8860B]/10 hover:scale-100 active:scale-95"
+                />
+
+                <div className="relative">
+                  <span className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1 bg-white border border-[#B8860B] text-[#B8860B] text-[9px] font-semibold px-2.5 py-1 rounded-full shadow-sm z-10">
+                    ⭐ VERIFIED BUYERS
+                  </span>
+                  <button
+                    onClick={() => setReviewModalOpen(true)}
+                    className="relative inline-flex items-center gap-2 h-10 px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-500 text-white font-bold text-[11px] uppercase tracking-wide shadow-[0_0_15px_rgba(184,134,11,0.5)] hover:shadow-[0_0_22px_rgba(184,134,11,0.7)] transition-shadow duration-300"
+                  >
+                    <Pencil size={14} className="text-white" />
+                    Write a Review
+                  </button>
+                  <p className="absolute top-full right-0 mt-1.5 flex items-start gap-1 text-[11px] italic text-[#B8860B] whitespace-nowrap">
+                    <ArrowUpLeft size={12} className="mt-0.5 shrink-0" />
+                    Share your experience &amp; earn rewards!
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-3 mb-4 flex-wrap mt-6">
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
@@ -155,12 +176,6 @@ export default function ProductDetailPage({
               <span className="text-xs text-[#6b5d4c]">
                 {avgRating.toFixed(1)} ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
               </span>
-              <button
-                onClick={() => setReviewModalOpen(true)}
-                className="inline-flex items-center gap-1.5 text-[11px] tracking-[1px] uppercase font-semibold text-[#b8893a] hover:text-[#7a5a1f] hover:underline ml-auto"
-              >
-                <PenLine size={13} /> Write a Review
-              </button>
             </div>
 
             <PriceDisplay
