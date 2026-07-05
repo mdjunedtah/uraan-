@@ -27,8 +27,10 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   // Don't leak full URLs to other origins.
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  // Disable powerful features the storefront doesn't use.
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+  // Disable powerful features the storefront doesn't use. Geolocation is
+  // allowed for our own origin only (checkout's "Use My Location" address
+  // detection) — still blocked for any third-party/embedded content.
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), browsing-topics=()' },
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'Content-Security-Policy-Report-Only', value: cspReportOnly },
 ];

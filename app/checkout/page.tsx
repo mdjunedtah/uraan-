@@ -9,6 +9,8 @@ import { useCart } from '@/context/CartContext';
 import PriceDisplay from '@/components/ui/PriceDisplay';
 import { getCurrentUser } from '@/lib/auth';
 import { saveOrder } from '@/lib/userOrders';
+import LocationPicker from '@/components/LocationPicker';
+import type { GeoAddress } from '@/lib/geo/nominatim';
 import {
   CreditCard, Smartphone, Wallet, Building2, Banknote,
   Lock, CheckCircle2, ShieldCheck, Truck, ChevronRight, MapPin,
@@ -36,6 +38,17 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '',
   });
+
+  const handleLocationResolved = (addr: GeoAddress) => {
+    const parts = [addr.line1, addr.area !== addr.line1 ? addr.area : ''].filter(Boolean);
+    setForm((f) => ({
+      ...f,
+      address: parts.join(', ') || f.address,
+      city: addr.city || f.city,
+      state: addr.state || f.state,
+      pincode: addr.pincode || f.pincode,
+    }));
+  };
 
   // Checkout requires an account so the order is tied to it; prefill from profile.
   useEffect(() => {
@@ -303,6 +316,9 @@ export default function CheckoutPage() {
                 <h2 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-5 pb-3 border-b border-[rgba(184,137,58,0.18)]">
                   Shipping Address
                 </h2>
+
+                <LocationPicker onLocationResolved={handleLocationResolved} />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <label className="luxury-label">Full Name *</label>
