@@ -62,10 +62,12 @@
 }
 
 /* ► Prices — current */
-/* Large (PDP) — 44px desktop / 38px mobile, weight 700 */
+/* Large (PDP) — 26px desktop / 22px mobile, weight 700.
+   Kept close to the card price (16/18px) so the PDP layout reads as
+   one system with the grid instead of jumping ~2× in size. */
 .t-price-lg {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 38px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0;
@@ -73,7 +75,7 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 @media (min-width: 768px) {
-  .t-price-lg { font-size: 44px; }
+  .t-price-lg { font-size: 26px; }
 }
 
 /* Standard (cards, wishlist, cart page rows) */
@@ -105,7 +107,7 @@
 /* ► Prices — old / strikethrough (60% opacity, line-through) */
 .t-price-old-lg {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 24px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1;
   color: #1a1410;
@@ -128,7 +130,7 @@
    with the current/old price, so every card reads the same way. */
 .t-discount-lg {
   flex-basis: 100%;
-  font-size: 20px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.5px;
