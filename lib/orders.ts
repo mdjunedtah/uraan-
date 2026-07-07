@@ -14,6 +14,16 @@ export type Order = {
   address?: string;
   paid?: boolean;
   paymentId?: string;
+  notes?: string;
+  statusHistory?: { status: string; at: string; by: string }[];
+  trackingNumber?: string;
+  courier?: string;
+  refundAmount?: number;
+  refundStatus?: 'none' | 'partial' | 'full';
+  // Itemized line items (the actual products in the order). `items` above
+  // remains a plain COUNT for backwards compatibility with existing table/
+  // stat code — this is the additional detail for the order-detail UI.
+  lineItems?: { name: string; quantity: number; price: number; image?: string }[];
 };
 
 export const orders: Order[] = [];

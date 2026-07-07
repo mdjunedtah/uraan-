@@ -33,6 +33,50 @@ export async function logAudit(entry: AuditEntry): Promise<void> {
   }
 }
 
+export type AuditLogRow = {
+  id: number;
+  actorEmail: string | null;
+  actorRole: string | null;
+  action: string;
+  target: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
+// Recent admin activity for the dashboard "Activity Feed" / a dedicated Audit
+// Log page. Fail-safe: returns null when unconfigured or on any DB error.
+export async function getAuditLogs(opts?: {
+  limit?: number;
+  offset?: number;
+  action?: string;
+  actorEmail?: string;
+}): Promise<AuditLogRow[] | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    let query = sb
+      .from('audit_logs')
+      .select('id, actor_email, actor_role, action, target, metadata, created_at')
+      .order('created_at', { ascending: false })
+      .range(opts?.offset || 0, (opts?.offset || 0) + (opts?.limit || 50) - 1);
+    if (opts?.action) query = query.eq('action', opts.action);
+    if (opts?.actorEmail) query = query.ilike('actor_email', opts.actorEmail);
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map((r) => ({
+      id: r.id as number,
+      actorEmail: r.actor_email as string | null,
+      actorRole: r.actor_role as string | null,
+      action: r.action as string,
+      target: r.target as string | null,
+      metadata: (r.metadata as Record<string, unknown>) || {},
+      createdAt: r.created_at as string,
+    }));
+  } catch {
+    return null;
+  }
+}
+
 export type SecurityEvent = {
   type: string; // login_failed, login_blocked, account_locked, new_device, suspicious, ...
   severity?: SecuritySeverity;

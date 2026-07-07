@@ -44,6 +44,10 @@ export async function POST(request: Request) {
   });
   if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
+  const category = String(body.category || '').trim();
+  const categoryLengthError = checkLengths({ Category: { value: category, max: MAX_LEN.short } });
+  if (categoryLengthError) return NextResponse.json({ ok: false, error: categoryLengthError }, { status: 400 });
+
   const input: CouponInput = {
     code,
     type: (String(body.type) === 'flat' ? 'flat' : 'percent') as CouponType,
@@ -51,6 +55,8 @@ export async function POST(request: Request) {
     minOrder: Number(body.minOrder || 0),
     usageLimit: Number(body.usageLimit || 0),
     validUntil,
+    firstOrderOnly: Boolean(body.firstOrderOnly),
+    category: category || undefined,
   };
   const coupon = await dbInsertCoupon(input);
   if (!coupon) return NextResponse.json({ ok: false, error: 'Could not save coupon.' }, { status: 502 });

@@ -24,10 +24,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (body.used !== undefined) patch.used = Number(body.used);
   if (body.validUntil !== undefined) patch.validUntil = String(body.validUntil);
   if (body.active !== undefined) patch.active = Boolean(body.active);
+  if (body.firstOrderOnly !== undefined) patch.firstOrderOnly = Boolean(body.firstOrderOnly);
+  if (body.category !== undefined) patch.category = String(body.category || '').trim() || undefined;
 
   const lengthError = checkLengths({
     Code: { value: patch.code ?? '', max: MAX_LEN.short },
     'Valid until': { value: patch.validUntil ?? '', max: MAX_LEN.short },
+    Category: { value: patch.category ?? '', max: MAX_LEN.short },
   });
   if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 

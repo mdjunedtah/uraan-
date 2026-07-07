@@ -1,15 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { Eye, Edit2, Trash2, Package } from 'lucide-react';
+import { Eye, Edit2, Trash2, Package, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Product } from '@/data/jewelleryData';
 
 type ProductTableProps = {
   products: Product[];
   onDelete?: (id: string) => void;
+  onRestore?: (id: string) => void;
 };
 
-export default function ProductTable({ products, onDelete }: ProductTableProps) {
+export default function ProductTable({ products, onDelete, onRestore }: ProductTableProps) {
   return (
     <div className="bg-white border border-[rgba(184,137,58,0.18)] overflow-x-auto">
       <table className="w-full text-sm">
@@ -48,34 +49,58 @@ export default function ProductTable({ products, onDelete }: ProductTableProps) 
                 )}
               </td>
               <td className="py-3 px-4">
-                <span
-                  className={`inline-block px-2 py-0.5 text-[10px] font-semibold ${
-                    p.inStock
-                      ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]'
-                      : 'bg-[#7a2e2e]/10 text-[#7a2e2e]'
-                  }`}
-                >
-                  {p.inStock ? 'In Stock' : 'Out of Stock'}
-                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  <span
+                    className={`inline-block px-2 py-0.5 text-[10px] font-semibold ${
+                      p.inStock
+                        ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]'
+                        : 'bg-[#7a2e2e]/10 text-[#7a2e2e]'
+                    }`}
+                  >
+                    {p.inStock ? 'In Stock' : 'Out of Stock'}
+                  </span>
+                  {(p.stockQuantity ?? 0) === 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-[#7a2e2e]/10 text-[#7a2e2e]">
+                      <AlertTriangle size={10} /> Out of Stock
+                    </span>
+                  )}
+                  {(p.stockQuantity ?? 0) > 0 && (p.stockQuantity ?? 0) <= (p.lowStockThreshold ?? 5) && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-[#b8893a]/10 text-[#b8893a]">
+                      <AlertTriangle size={10} /> Low Stock
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="py-3 px-4 text-[#6b5d4c]">
                 {p.rating} ★ ({p.reviewCount})
               </td>
               <td className="py-3 px-4">
                 <div className="flex justify-end gap-2">
-                  <Link href={`/product/${p.id}`} aria-label="View" className="text-[#6b5d4c] hover:text-[#b8893a]">
-                    <Eye size={14} />
-                  </Link>
-                  <Link href={`/admin/products/edit/${p.id}`} aria-label="Edit" className="text-[#6b5d4c] hover:text-[#b8893a]">
-                    <Edit2 size={14} />
-                  </Link>
-                  <button
-                    onClick={() => onDelete && onDelete(p.id)}
-                    aria-label="Delete"
-                    className="text-[#6b5d4c] hover:text-[#7a2e2e]"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {onRestore ? (
+                    <button
+                      onClick={() => onRestore(p.id)}
+                      aria-label="Restore"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[rgba(184,137,58,0.32)] text-[10px] tracking-[1px] uppercase font-semibold hover:bg-[#fbf8f1] text-[#1a1410]"
+                    >
+                      <RotateCcw size={12} /> Restore
+                    </button>
+                  ) : (
+                    <>
+                      <Link href={`/product/${p.id}`} aria-label="View" className="text-[#6b5d4c] hover:text-[#b8893a]">
+                        <Eye size={14} />
+                      </Link>
+                      <Link href={`/admin/products/edit/${p.id}`} aria-label="Edit" className="text-[#6b5d4c] hover:text-[#b8893a]">
+                        <Edit2 size={14} />
+                      </Link>
+                      <button
+                        onClick={() => onDelete && onDelete(p.id)}
+                        aria-label="Delete"
+                        className="text-[#6b5d4c] hover:text-[#7a2e2e]"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </td>
             </tr>

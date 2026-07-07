@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import OrderTable from '@/components/admin/OrderTable';
 import { orders as demoOrders, type Order, type OrderStatus, getStatusColor } from '@/lib/orders';
 import { whatsappLink, orderUpdateMessage } from '@/lib/whatsapp';
-import { Search, Database, HardDrive, X, MessageCircle } from 'lucide-react';
+import { Search, Database, HardDrive, X, MessageCircle, FileText, RotateCcw } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
@@ -56,6 +57,11 @@ export default function AdminOrdersPage() {
         body: JSON.stringify({ status }),
       });
     }
+  };
+
+  const handleOrderUpdated = (id: string, patch: Partial<Order>) => {
+    setData((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
+    setSelected((prev) => (prev && prev.id === id ? { ...prev, ...patch } : prev));
   };
 
   return (
@@ -132,8 +138,10 @@ export default function AdminOrdersPage() {
       {selected && (
         <OrderDetailModal
           order={selected}
+          configured={configured}
           onClose={() => setSelected(null)}
           onStatusChange={handleStatusChange}
+          onOrderUpdated={handleOrderUpdated}
         />
       )}
     </div>
@@ -144,13 +152,106 @@ const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Deli
 
 function OrderDetailModal({
   order,
+  configured,
   onClose,
   onStatusChange,
+  onOrderUpdated,
 }: {
   order: Order;
+  configured: boolean;
   onClose: () => void;
   onStatusChange: (id: string, status: OrderStatus) => void;
+  onOrderUpdated: (id: string, patch: Partial<Order>) => void;
 }) {
+  const [notes, setNotes] = useState(order.notes || '');
+  const [notesSaving, setNotesSaving] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber || '');
+  const [courier, setCourier] = useState(order.courier || '');
+  const [trackingSaving, setTrackingSaving] = useState(false);
+  const [showRefundForm, setShowRefundForm] = useState(false);
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundReason, setRefundReason] = useState('');
+  const [refundSaving, setRefundSaving] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
+
+  // Reset the local editing state whenever a different order is opened.
+  useEffect(() => {
+    setNotes(order.notes || '');
+    setTrackingNumber(order.trackingNumber || '');
+    setCourier(order.courier || '');
+    setShowRefundForm(false);
+    setRefundReason('');
+    setRefundError(null);
+    const remaining = Math.max(0, order.amount - (order.refundAmount || 0));
+    setRefundAmount(remaining ? String(remaining) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order.id]);
+
+  const saveNotes = async () => {
+    if (!configured || notesSaving) return;
+    if (notes === (order.notes || '')) return;
+    setNotesSaving(true);
+    try {
+      await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      });
+      onOrderUpdated(order.id, { notes });
+    } finally {
+      setNotesSaving(false);
+    }
+  };
+
+  const saveTracking = async () => {
+    if (!configured || trackingSaving) return;
+    setTrackingSaving(true);
+    try {
+      await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trackingNumber, courier }),
+      });
+      onOrderUpdated(order.id, { trackingNumber, courier });
+    } finally {
+      setTrackingSaving(false);
+    }
+  };
+
+  const remainingRefundable = Math.max(0, order.amount - (order.refundAmount || 0));
+
+  const submitRefund = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = Number(refundAmount);
+    if (!amount || amount <= 0) {
+      setRefundError('Enter a valid refund amount.');
+      return;
+    }
+    setRefundSaving(true);
+    setRefundError(null);
+    try {
+      const res = await fetch(`/api/orders/${order.id}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, reason: refundReason || undefined }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setRefundError(json.error || 'Could not process refund.');
+        return;
+      }
+      onOrderUpdated(order.id, { refundStatus: json.refundStatus, refundAmount: json.refundAmount });
+      setShowRefundForm(false);
+      setRefundReason('');
+    } catch {
+      setRefundError('Could not process refund.');
+    } finally {
+      setRefundSaving(false);
+    }
+  };
+
+  const lineItemsTotal = (order.lineItems || []).reduce((sum, li) => sum + li.price * li.quantity, 0);
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
@@ -186,12 +287,80 @@ function OrderDetailModal({
             </select>
           </div>
 
+          {/* Status timeline */}
+          {order.statusHistory && order.statusHistory.length > 0 && (
+            <div>
+              <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Status Timeline</h3>
+              <ul className="space-y-2 border-l border-[rgba(184,137,58,0.32)] pl-4">
+                {order.statusHistory.map((h, idx) => (
+                  <li key={idx} className="text-xs relative text-[#6b5d4c]">
+                    <span className="absolute -left-[21px] top-1 w-2 h-2 rounded-full bg-[#b8893a]" />
+                    <span className="font-semibold text-[#1a1410]">{h.status}</span>
+                    {' · '}
+                    {new Date(h.at).toLocaleString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    {' · by '}
+                    {h.by}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div>
             <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Customer</h3>
             <div className="text-sm text-[#1a1410] font-medium">{order.customer}</div>
             <div className="text-sm text-[#6b5d4c]">{order.email}</div>
             <div className="text-sm text-[#6b5d4c]">{order.phone}</div>
             {order.address && <div className="text-sm text-[#6b5d4c] mt-1">{order.address}</div>}
+          </div>
+
+          {/* Itemized line items */}
+          <div>
+            <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Items</h3>
+            {order.lineItems && order.lineItems.length > 0 ? (
+              <div className="border border-[rgba(184,137,58,0.18)] overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-[9px] tracking-[1px] uppercase text-[#9a8c75] bg-[#fbf8f1] border-b border-[rgba(184,137,58,0.18)]">
+                      <th className="text-left py-2 px-3 font-semibold">Item</th>
+                      <th className="text-right py-2 px-3 font-semibold">Qty</th>
+                      <th className="text-right py-2 px-3 font-semibold">Price</th>
+                      <th className="text-right py-2 px-3 font-semibold">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.lineItems.map((li, idx) => (
+                      <tr key={idx} className="border-b border-[rgba(184,137,58,0.1)] last:border-0">
+                        <td className="py-2 px-3 text-[#1a1410]">{li.name}</td>
+                        <td className="py-2 px-3 text-right text-[#6b5d4c]">{li.quantity}</td>
+                        <td className="py-2 px-3 text-right text-[#6b5d4c]">₹{li.price.toLocaleString('en-IN')}</td>
+                        <td className="py-2 px-3 text-right text-[#1a1410] font-medium">
+                          ₹{(li.price * li.quantity).toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-[#fbf8f1]">
+                      <td colSpan={3} className="py-2 px-3 text-right text-[10px] uppercase tracking-[1px] text-[#9a8c75] font-semibold">
+                        Total
+                      </td>
+                      <td className="py-2 px-3 text-right text-[#1a1410] font-bold">
+                        ₹{lineItemsTotal.toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            ) : (
+              <div className="text-sm text-[#6b5d4c]">{order.items} item(s)</div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -220,6 +389,138 @@ function OrderDetailModal({
             </div>
           </div>
 
+          {/* Order notes */}
+          <div>
+            <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Order Notes</h3>
+            <textarea
+              className="luxury-input"
+              rows={3}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={saveNotes}
+              placeholder="Internal notes about this order…"
+              disabled={!configured}
+            />
+            <div className="flex items-center justify-between mt-1">
+              <span className="text-[10px] text-[#9a8c75]">{notesSaving ? 'Saving…' : ''}</span>
+              <button
+                type="button"
+                onClick={saveNotes}
+                disabled={!configured || notesSaving}
+                className="px-4 py-1.5 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold disabled:opacity-40"
+              >
+                Save Notes
+              </button>
+            </div>
+          </div>
+
+          {/* Tracking */}
+          <div>
+            <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Tracking</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="luxury-label">Courier</label>
+                <input
+                  type="text"
+                  className="luxury-input"
+                  value={courier}
+                  onChange={(e) => setCourier(e.target.value)}
+                  placeholder="e.g., Bluedart"
+                  disabled={!configured}
+                />
+              </div>
+              <div>
+                <label className="luxury-label">Tracking / AWB Number</label>
+                <input
+                  type="text"
+                  className="luxury-input"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value)}
+                  placeholder="AWB number"
+                  disabled={!configured}
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={saveTracking}
+              disabled={!configured || trackingSaving}
+              className="mt-2 px-4 py-1.5 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold disabled:opacity-40"
+            >
+              {trackingSaving ? 'Saving…' : 'Save Tracking'}
+            </button>
+          </div>
+
+          {/* Refund */}
+          {order.paid && (
+            <div>
+              <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Refund</h3>
+              {order.refundStatus && order.refundStatus !== 'none' && (
+                <div className="text-xs text-[#6b5d4c] mb-2 flex items-center gap-2">
+                  <span
+                    className={`inline-block px-2 py-0.5 text-[10px] font-semibold ${
+                      order.refundStatus === 'full' ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'
+                    }`}
+                  >
+                    {order.refundStatus === 'full' ? 'Fully Refunded' : 'Partially Refunded'}
+                  </span>
+                  ₹{(order.refundAmount || 0).toLocaleString('en-IN')} refunded
+                </div>
+              )}
+              {!showRefundForm ? (
+                <button
+                  type="button"
+                  onClick={() => setShowRefundForm(true)}
+                  disabled={!configured || remainingRefundable <= 0}
+                  className="px-4 py-1.5 border border-[#7a2e2e] text-[#7a2e2e] text-[10px] tracking-[1.5px] uppercase font-semibold disabled:opacity-40"
+                >
+                  Refund
+                </button>
+              ) : (
+                <form onSubmit={submitRefund} className="border border-[rgba(184,137,58,0.18)] p-3 space-y-2">
+                  <div>
+                    <label className="luxury-label">Amount (₹)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={remainingRefundable}
+                      className="luxury-input"
+                      value={refundAmount}
+                      onChange={(e) => setRefundAmount(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="luxury-label">Reason</label>
+                    <input
+                      type="text"
+                      className="luxury-input"
+                      value={refundReason}
+                      onChange={(e) => setRefundReason(e.target.value)}
+                      placeholder="Optional"
+                    />
+                  </div>
+                  {refundError && <div className="text-xs text-[#7a2e2e]">{refundError}</div>}
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={refundSaving}
+                      className="px-4 py-1.5 bg-[#7a2e2e] text-white text-[10px] tracking-[1.5px] uppercase font-semibold disabled:opacity-60"
+                    >
+                      {refundSaving ? 'Processing…' : 'Confirm Refund'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowRefundForm(false)}
+                      className="px-4 py-1.5 border border-[#1a1410] text-[10px] tracking-[1.5px] uppercase font-semibold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
           <a
             href={whatsappLink(orderUpdateMessage(order), order.phone)}
             target="_blank"
@@ -228,6 +529,23 @@ function OrderDetailModal({
           >
             <MessageCircle size={14} /> Send update on WhatsApp
           </a>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href={{ pathname: '/admin/returns', query: { orderId: order.id, customer: order.customer, phone: order.phone } }}
+              className="px-5 py-3 border border-[#1a1410] text-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] inline-flex items-center justify-center gap-2"
+            >
+              <RotateCcw size={14} /> Create Return
+            </Link>
+            <a
+              href={`/admin/orders/${order.id}/invoice`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-3 border border-[#1a1410] text-[#1a1410] text-[11px] tracking-[2px] uppercase font-semibold hover:bg-[#1a1410] hover:text-[#e8d49b] inline-flex items-center justify-center gap-2"
+            >
+              <FileText size={14} /> Download Invoice
+            </a>
+          </div>
         </div>
       </div>
     </div>

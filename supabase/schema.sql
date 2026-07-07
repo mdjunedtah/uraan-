@@ -319,3 +319,153 @@ create table if not exists public.email_otps (
 );
 create index if not exists email_otps_email_idx on public.email_otps (email, created_at desc);
 alter table public.email_otps enable row level security;
+
+-- ════════════════════════════════════════════════════════════════════════
+--  LEVEL 1-3 UPGRADE — inventory, variants, orders lifecycle, RMA,
+--  transactions, CRM/marketing, blog. Safe to re-run (idempotent).
+-- ════════════════════════════════════════════════════════════════════════
+
+-- Products: real inventory, multi-image alt text, jewellery variants,
+-- per-product SEO, and optional dynamic (weight × gold-rate) pricing.
+alter table public.products add column if not exists stock_quantity integer not null default 0;
+alter table public.products add column if not exists low_stock_threshold integer not null default 5;
+alter table public.products add column if not exists alt_texts jsonb not null default '[]'::jsonb;
+alter table public.products add column if not exists variants jsonb not null default '[]'::jsonb;
+alter table public.products add column if not exists seo_title text;
+alter table public.products add column if not exists seo_description text;
+alter table public.products add column if not exists making_charge numeric;
+alter table public.products add column if not exists use_dynamic_pricing boolean not null default false;
+alter table public.products add column if not exists sku text;
+alter table public.products add column if not exists barcode text;
+alter table public.products add column if not exists status text not null default 'published'; -- draft | published
+alter table public.products add column if not exists featured boolean not null default false;
+alter table public.products add column if not exists trending boolean not null default false;
+alter table public.products add column if not exists deleted_at timestamptz; -- soft delete; null = active
+create index if not exists products_deleted_idx on public.products (deleted_at);
+
+-- Generic key/value store for admin-editable global settings — starts with
+-- the daily gold rate used by dynamic pricing (₹ per gram).
+create table if not exists public.store_settings (
+  key        text primary key,
+  value      jsonb not null,
+  updated_at timestamptz not null default now()
+);
+insert into public.store_settings (key, value) values
+  ('gold_rate_per_gram', '7000')
+on conflict (key) do nothing;
+alter table public.store_settings enable row level security;
+
+-- Orders: internal notes, status timeline, courier tracking, refund state.
+alter table public.orders add column if not exists notes text;
+alter table public.orders add column if not exists status_history jsonb not null default '[]'::jsonb;
+alter table public.orders add column if not exists tracking_number text;
+alter table public.orders add column if not exists courier text;
+alter table public.orders add column if not exists refund_amount integer not null default 0;
+alter table public.orders add column if not exists refund_status text not null default 'none';
+
+-- Payment/refund/failure log — one row per gateway event.
+create table if not exists public.transactions (
+  id                bigint generated always as identity primary key,
+  order_id          text references public.orders(id) on delete cascade,
+  type              text not null,                      -- payment | refund | failure
+  gateway           text,
+  gateway_response  jsonb not null default '{}'::jsonb,
+  amount            integer not null default 0,
+  status            text not null default 'success',
+  created_at        timestamptz not null default now()
+);
+create index if not exists transactions_order_idx on public.transactions (order_id, created_at desc);
+alter table public.transactions enable row level security;
+
+-- Return / Exchange (RMA) requests, tied to an order.
+create table if not exists public.returns (
+  id             text primary key,
+  order_id       text references public.orders(id) on delete cascade,
+  customer_name  text,
+  customer_phone text,
+  customer_email text,
+  reason         text,
+  type           text not null default 'return',        -- return | exchange
+  status         text not null default 'requested',      -- requested | approved | rejected | refunded | replaced
+  admin_notes    text,
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
+);
+create index if not exists returns_created_idx on public.returns (created_at desc);
+alter table public.returns enable row level security;
+
+-- Coupons: first-order-only + category-specific restrictions.
+alter table public.coupons add column if not exists first_order_only boolean not null default false;
+alter table public.coupons add column if not exists category text;
+
+-- Checkout started but not completed — powers abandoned-cart recovery.
+create table if not exists public.abandoned_carts (
+  id          bigint generated always as identity primary key,
+  name        text,
+  phone       text,
+  email       text,
+  items       jsonb not null default '[]'::jsonb,
+  total       integer not null default 0,
+  reminded_at timestamptz,
+  recovered   boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+create index if not exists abandoned_carts_created_idx on public.abandoned_carts (created_at desc);
+alter table public.abandoned_carts enable row level security;
+
+-- Bulk WhatsApp / email marketing sends — one row per campaign.
+create table if not exists public.campaign_logs (
+  id               bigint generated always as identity primary key,
+  channel          text not null,                        -- whatsapp | email
+  subject          text,
+  message          text not null,
+  recipient_count  integer not null default 0,
+  sent_count       integer not null default 0,
+  failed_count     integer not null default 0,
+  created_by       text,
+  created_at       timestamptz not null default now()
+);
+create index if not exists campaign_logs_created_idx on public.campaign_logs (created_at desc);
+alter table public.campaign_logs enable row level security;
+
+-- Blog / CMS articles (SEO content lever).
+create table if not exists public.blog_posts (
+  id               text primary key,
+  title            text not null,
+  slug             text unique not null,
+  excerpt          text,
+  content          text not null,
+  cover_image      text,
+  seo_title        text,
+  seo_description  text,
+  published        boolean not null default false,
+  author           text,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+create index if not exists blog_posts_published_idx on public.blog_posts (published, created_at desc);
+alter table public.blog_posts enable row level security;
+
+-- Internal notes on a customer, keyed by phone (customers themselves are
+-- derived from orders, not a separate table — see lib/customersDb.ts).
+create table if not exists public.customer_notes (
+  id          bigint generated always as identity primary key,
+  phone       text not null,
+  note        text not null,
+  created_by  text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists customer_notes_phone_idx on public.customer_notes (phone, created_at desc);
+alter table public.customer_notes enable row level security;
+
+-- Inventory adjustment log (manual stock corrections, not tied to an order).
+create table if not exists public.inventory_logs (
+  id          bigint generated always as identity primary key,
+  product_id  text references public.products(id) on delete cascade,
+  delta       integer not null,             -- +ve = stock in, -ve = stock out
+  reason      text,
+  created_by  text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists inventory_logs_product_idx on public.inventory_logs (product_id, created_at desc);
+alter table public.inventory_logs enable row level security;

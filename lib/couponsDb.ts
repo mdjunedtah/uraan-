@@ -14,6 +14,8 @@ type Row = {
   used: number | null;
   valid_until: string | null;
   active: boolean;
+  first_order_only: boolean | null;
+  category: string | null;
 };
 
 function toCoupon(r: Row): Coupon {
@@ -27,6 +29,8 @@ function toCoupon(r: Row): Coupon {
     used: r.used ?? 0,
     validUntil: r.valid_until || '',
     active: r.active,
+    firstOrderOnly: Boolean(r.first_order_only),
+    category: r.category || undefined,
   };
 }
 
@@ -57,6 +61,8 @@ export async function dbInsertCoupon(input: CouponInput): Promise<Coupon | null>
       used: 0,
       valid_until: input.validUntil.trim(),
       active: true,
+      first_order_only: Boolean(input.firstOrderOnly),
+      category: input.category?.trim() || null,
     })
     .select()
     .single();
@@ -79,6 +85,8 @@ export async function dbUpdateCoupon(id: string, patch: Partial<Coupon>): Promis
   if (patch.used !== undefined) row.used = patch.used;
   if (patch.validUntil !== undefined) row.valid_until = patch.validUntil;
   if (patch.active !== undefined) row.active = patch.active;
+  if (patch.firstOrderOnly !== undefined) row.first_order_only = patch.firstOrderOnly;
+  if (patch.category !== undefined) row.category = patch.category || null;
   const { error } = await sb.from('coupons').update(row).eq('id', id);
   if (error) {
     console.error('[couponsDb] update:', error.message);
