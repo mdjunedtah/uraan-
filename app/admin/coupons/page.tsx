@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive } from 'lucide-react';
+import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive, UserPlus, Tag } from 'lucide-react';
 import {
   type Coupon,
   type CouponType,
@@ -11,6 +11,7 @@ import {
   toggleCoupon,
   deleteCoupon,
 } from '@/lib/coupons';
+import { categories } from '@/data/jewelleryData';
 
 const emptyForm = {
   code: '',
@@ -19,6 +20,8 @@ const emptyForm = {
   minOrder: 0,
   usageLimit: 100,
   validUntil: '',
+  firstOrderOnly: false,
+  category: '',
 };
 
 export default function AdminCouponsPage() {
@@ -64,6 +67,8 @@ export default function AdminCouponsPage() {
       minOrder: c.minOrder,
       usageLimit: c.usageLimit,
       validUntil: c.validUntil,
+      firstOrderOnly: c.firstOrderOnly,
+      category: c.category || '',
     });
     setShowForm(true);
   };
@@ -84,6 +89,8 @@ export default function AdminCouponsPage() {
       minOrder: Number(form.minOrder) || 0,
       usageLimit: Number(form.usageLimit) || 0,
       validUntil: form.validUntil.trim(),
+      firstOrderOnly: form.firstOrderOnly,
+      category: form.category.trim() || undefined,
     };
     if (configured) {
       if (editingId) {
@@ -231,6 +238,30 @@ export default function AdminCouponsPage() {
                 placeholder="e.g., 31 Dec 2026"
               />
             </div>
+            <div>
+              <label className="luxury-label">Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="luxury-input"
+              >
+                <option value="">All categories</option>
+                {categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-end pb-2">
+              <label className="flex items-center gap-2 text-xs text-[#1a1410] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.firstOrderOnly}
+                  onChange={(e) => setForm({ ...form, firstOrderOnly: e.target.checked })}
+                  className="accent-[#b8893a]"
+                />
+                First order only
+              </label>
+            </div>
           </div>
           <div className="mt-4 flex gap-3">
             <button type="submit" className="px-6 py-2 bg-[#1a1410] text-[#e8d49b] text-[11px] tracking-[2px] uppercase font-semibold">
@@ -260,12 +291,24 @@ export default function AdminCouponsPage() {
             {coupons.map((c) => (
               <tr key={c.id} className="border-b border-[rgba(184,137,58,0.1)] hover:bg-[#fbf8f1]/40">
                 <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Ticket size={14} className="text-[#b8893a]" />
                     <span className="font-bold text-[#1a1410] tracking-[1px]">{c.code}</span>
                     <button onClick={() => copyCode(c.code)} aria-label="Copy" className="text-[#9a8c75] hover:text-[#b8893a]">
                       {copied === c.code ? <Check size={11} className="text-[#3d6b5a]" /> : <Copy size={11} />}
                     </button>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                    {c.firstOrderOnly && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.5px] bg-blue-500/10 text-blue-600">
+                        <UserPlus size={9} /> First order
+                      </span>
+                    )}
+                    {c.category && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.5px] bg-[#b8893a]/10 text-[#b8893a]">
+                        <Tag size={9} /> {c.category}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="py-3 px-4 font-semibold text-[#b8893a]">

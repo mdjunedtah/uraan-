@@ -52,6 +52,41 @@ export async function createRazorpayOrder(
   }
 }
 
+export interface RazorpayRefundResult {
+  ok: boolean;
+  id?: string;
+  error?: string;
+}
+
+export async function createRazorpayRefund(
+  paymentId: string,
+  amountPaise: number
+): Promise<RazorpayRefundResult> {
+  const keyId = razorpayKeyId();
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !secret) return { ok: false, error: 'Razorpay not configured.' };
+
+  try {
+    const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${keyId}:${secret}`).toString('base64'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount: amountPaise }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      console.error('[razorpay] refund failed:', res.status, data);
+      return { ok: false, error: data?.error?.description || `Razorpay error (${res.status})` };
+    }
+    return { ok: true, id: data?.id };
+  } catch (err) {
+    console.error('[razorpay] refund error:', err);
+    return { ok: false, error: 'Could not reach Razorpay API.' };
+  }
+}
+
 export function verifyRazorpaySignature(
   orderId: string,
   paymentId: string,

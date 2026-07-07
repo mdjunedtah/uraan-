@@ -29,7 +29,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── /admin route protection ──
-  if (pathname === '/admin/login') {
+  // Login and the password-reset landing page must be reachable while signed
+  // out (reset-password relies on a short-lived Supabase recovery session,
+  // not a full admin session, so it can't go through the checks below).
+  if (pathname === '/admin/login' || pathname === '/admin/reset-password') {
     return NextResponse.next();
   }
 

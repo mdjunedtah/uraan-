@@ -14,6 +14,7 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import { getProductById, getRelatedProducts } from '@/lib/products';
 import { useProducts } from '@/hooks/useProducts';
 import { getGalleryImages } from '@/lib/gallery';
+import { SITE_URL } from '@/lib/site';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/wishlistContext';
 import { useReviews, verifiedOnly } from '@/hooks/useReviews';
@@ -99,8 +100,44 @@ export default function ProductDetailPage({
     openCart();
   };
 
+  const absoluteImage = product.image
+    ? product.image.startsWith('http')
+      ? product.image
+      : `${SITE_URL}${product.image}`
+    : undefined;
+
+  // schema.org Product structured data — powers rich results (price,
+  // availability, rating) in Google search for this product page.
+  const productSchema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: absoluteImage ? [absoluteImage] : undefined,
+    description: product.seoDescription || product.description,
+    sku: product.sku || undefined,
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL}/product/${product.id}`,
+      price: product.price,
+      priceCurrency: 'INR',
+      availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+  };
+  if (reviewCount > 0) {
+    productSchema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: avgRating,
+      reviewCount,
+    };
+  }
+
   return (
     <main className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <Navbar />
       <CartDrawer />
 

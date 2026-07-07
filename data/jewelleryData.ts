@@ -1,5 +1,17 @@
 // Master jewellery data
 
+export type ProductVariant = {
+  id: string; // e.g. 'v1', crypto.randomUUID() or Date.now()-based
+  size?: string; // e.g. ring size '14', bangle size '2.4'
+  metal?: string; // e.g. 'Gold', 'Silver'
+  purity?: string; // e.g. '22K', '916'
+  weight?: string; // e.g. '12g'
+  stone?: string; // e.g. 'Ruby', 'None'
+  sku?: string;
+  priceDelta: number; // added to/subtracted from base product price for this variant
+  stock: number; // stock quantity for this specific variant
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -17,6 +29,23 @@ export type Product = {
   inStock: boolean;
   rating: number;
   reviewCount: number;
+  // Inventory & catalogue upgrade fields (all optional so the bundled demo
+  // catalogue below — which predates these — still type-checks without
+  // being updated). Callers should default sensibly, e.g. `?? 0` / `?? 5`.
+  stockQuantity?: number;
+  lowStockThreshold?: number;
+  altTexts?: string[];
+  variants?: ProductVariant[];
+  seoTitle?: string;
+  seoDescription?: string;
+  makingCharge?: number;
+  useDynamicPricing?: boolean;
+  sku?: string;
+  barcode?: string;
+  status?: 'draft' | 'published';
+  featured?: boolean;
+  trending?: boolean;
+  deletedAt?: string;
 };
 
 export type Category = {

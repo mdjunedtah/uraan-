@@ -1,8 +1,26 @@
 import { NextResponse } from 'next/server';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, getSupabase } from '@/lib/supabase';
 import { dbGetCoupons, dbUpdateCoupon } from '@/lib/couponsDb';
 import { getCoupons as getSeedCoupons } from '@/lib/coupons';
 import { MAX_LEN, checkLengths } from '@/lib/security/validate';
+
+// Best-effort "has this phone/email ordered before?" check for first-order-only
+// coupons. Returns false (never blocks) when Supabase isn't configured — we
+// can't verify in demo mode, so we don't punish the customer for it.
+async function hasPriorOrder(phone: string, email: string): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+  if (!phone && !email) return false;
+  const query = sb.from('orders').select('id', { count: 'exact', head: true });
+  const { count, error } = phone
+    ? await query.eq('phone', phone)
+    : await query.ilike('email', email);
+  if (error) {
+    console.error('[coupons/validate] priorOrder check:', error.message);
+    return false;
+  }
+  return (count || 0) > 0;
+}
 
 function isExpired(validUntil: string): boolean {
   if (!validUntil) return false;
@@ -59,6 +77,46 @@ export async function POST(request: Request) {
       },
       { status: 400 }
     );
+  }
+
+  // Category restriction — only enforced when BOTH the coupon has a category
+  // AND the request actually sent cart category info. If checkout didn't send
+  // anything usable we skip this check rather than break a working checkout.
+  if (coupon.category) {
+    const categories: string[] = Array.isArray(body.categories)
+      ? (body.categories as unknown[]).map((c) => String(c).toLowerCase())
+      : typeof body.category === 'string' && body.category
+      ? [String(body.category).toLowerCase()]
+      : [];
+    if (categories.length > 0 && !categories.includes(coupon.category.toLowerCase())) {
+      return NextResponse.json(
+        { ok: false, error: `This coupon only applies to ${coupon.category} products.` },
+        { status: 400 }
+      );
+    }
+  }
+
+  // First-order-only restriction — requires a phone or email to check against
+  // past orders. Skips gracefully (never blocks) when Supabase isn't
+  // configured, since we can't verify order history in demo mode.
+  if (coupon.firstOrderOnly) {
+    const phone = String(body.phone || '').trim();
+    const email = String(body.email || '').trim().toLowerCase();
+    if (!phone && !email) {
+      return NextResponse.json(
+        { ok: false, error: 'Please enter your phone or email to use this coupon.' },
+        { status: 400 }
+      );
+    }
+    if (configured) {
+      const alreadyOrdered = await hasPriorOrder(phone, email);
+      if (alreadyOrdered) {
+        return NextResponse.json(
+          { ok: false, error: 'This coupon is valid for first-time customers only.' },
+          { status: 400 }
+        );
+      }
+    }
   }
 
   const discount =

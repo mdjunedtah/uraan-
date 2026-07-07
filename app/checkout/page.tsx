@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/navbar';
@@ -83,10 +83,17 @@ export default function CheckoutPage() {
     setCouponLoading(true);
     setCouponError('');
     try {
+      const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean))) as string[];
       const res = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, orderTotal: totalPrice }),
+        body: JSON.stringify({
+          code,
+          orderTotal: totalPrice,
+          categories,
+          phone: form.phone,
+          email: form.email,
+        }),
       });
       const data = await res.json();
       if (!data.ok) {
@@ -106,6 +113,42 @@ export default function CheckoutPage() {
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponError('');
+  };
+
+  // Best-effort abandoned-cart capture: fires once per session (guarded by a
+  // ref) once the customer has entered a phone number and has cart items but
+  // hasn't completed the order yet. Never blocks or alters checkout UX.
+  const abandonedCaptured = useRef(false);
+  const handlePhoneBlur = () => {
+    if (abandonedCaptured.current) return;
+    if (!form.phone.trim() || items.length === 0) return;
+    abandonedCaptured.current = true;
+    fetch('/api/abandoned-carts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+        total: totalPrice,
+      }),
+    }).catch(() => {
+      /* best-effort only — never surface this to the customer */
+    });
+  };
+
+  // Best-effort: mark any abandoned cart for this phone as recovered now that
+  // a real order has completed. Never blocks or alters checkout UX.
+  const recoverAbandonedCart = (phone: string) => {
+    if (!phone.trim()) return;
+    fetch('/api/abandoned-carts/recover', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    }).catch(() => {
+      /* best-effort only */
+    });
   };
 
   const handleAddressSubmit = (e: React.FormEvent) => {
@@ -138,6 +181,7 @@ export default function CheckoutPage() {
       status: 'Processing',
       address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
     });
+    recoverAbandonedCart(form.phone);
     setOrderId(id);
     setStep('success');
     clearCart();
@@ -373,7 +417,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="luxury-label">Phone *</label>
-                    <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="10 digit" className="luxury-input" />
+                    <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={handlePhoneBlur} placeholder="10 digit" className="luxury-input" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="luxury-label">Address *</label>

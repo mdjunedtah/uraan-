@@ -14,16 +14,19 @@ export type Coupon = {
   used: number;
   validUntil: string;
   active: boolean;
+  // First-order-only + category restrictions (#coupons-l3).
+  firstOrderOnly: boolean;
+  category?: string; // undefined/empty = applies to all categories
 };
 
 const KEY = 'ogp_coupons';
 
 const seedCoupons: Coupon[] = [
-  { id: 'CP001', code: 'WELCOME10', type: 'percent', value: 10, minOrder: 999, usageLimit: 1000, used: 245, validUntil: '31 Dec 2026', active: true },
-  { id: 'CP002', code: 'FESTIVE25', type: 'percent', value: 25, minOrder: 4999, usageLimit: 500, used: 78, validUntil: '15 Nov 2026', active: true },
-  { id: 'CP003', code: 'FLAT500', type: 'flat', value: 500, minOrder: 2499, usageLimit: 200, used: 56, validUntil: '30 Jun 2026', active: true },
-  { id: 'CP004', code: 'SUMMER15', type: 'percent', value: 15, minOrder: 1999, usageLimit: 800, used: 800, validUntil: '15 Apr 2026', active: false },
-  { id: 'CP005', code: 'NEWUSER', type: 'flat', value: 200, minOrder: 999, usageLimit: 5000, used: 1245, validUntil: '31 Dec 2026', active: true },
+  { id: 'CP001', code: 'WELCOME10', type: 'percent', value: 10, minOrder: 999, usageLimit: 1000, used: 245, validUntil: '31 Dec 2026', active: true, firstOrderOnly: false },
+  { id: 'CP002', code: 'FESTIVE25', type: 'percent', value: 25, minOrder: 4999, usageLimit: 500, used: 78, validUntil: '15 Nov 2026', active: true, firstOrderOnly: false },
+  { id: 'CP003', code: 'FLAT500', type: 'flat', value: 500, minOrder: 2499, usageLimit: 200, used: 56, validUntil: '30 Jun 2026', active: true, firstOrderOnly: false },
+  { id: 'CP004', code: 'SUMMER15', type: 'percent', value: 15, minOrder: 1999, usageLimit: 800, used: 800, validUntil: '15 Apr 2026', active: false, firstOrderOnly: false },
+  { id: 'CP005', code: 'NEWUSER', type: 'flat', value: 200, minOrder: 999, usageLimit: 5000, used: 1245, validUntil: '31 Dec 2026', active: true, firstOrderOnly: true },
 ];
 
 function read(): Coupon[] | null {
@@ -67,6 +70,8 @@ export type CouponInput = {
   minOrder: number;
   usageLimit: number;
   validUntil: string;
+  firstOrderOnly?: boolean;
+  category?: string;
 };
 
 export function addCoupon(input: CouponInput): Coupon {
@@ -81,6 +86,8 @@ export function addCoupon(input: CouponInput): Coupon {
     used: 0,
     validUntil: input.validUntil.trim(),
     active: true,
+    firstOrderOnly: Boolean(input.firstOrderOnly),
+    category: input.category?.trim() || undefined,
   };
   write([...list, coupon]);
   return coupon;
