@@ -59,12 +59,17 @@ export default function ProductTable({ products, onDelete, onRestore }: ProductT
                   >
                     {p.inStock ? 'In Stock' : 'Out of Stock'}
                   </span>
-                  {(p.stockQuantity ?? 0) === 0 && (
+                  {/* Quantity-based badges only apply once a product actually has stock
+                      tracking data — the bundled demo catalogue (and any product added
+                      before this field existed) has no stockQuantity, and treating that
+                      "unknown" as 0 would falsely flag every one of them as out of stock
+                      alongside the (correct) legacy in-stock badge above. */}
+                  {p.stockQuantity !== undefined && p.stockQuantity === 0 && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-[#7a2e2e]/10 text-[#7a2e2e]">
                       <AlertTriangle size={10} /> Out of Stock
                     </span>
                   )}
-                  {(p.stockQuantity ?? 0) > 0 && (p.stockQuantity ?? 0) <= (p.lowStockThreshold ?? 5) && (
+                  {p.stockQuantity !== undefined && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold ?? 5) && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-[#b8893a]/10 text-[#b8893a]">
                       <AlertTriangle size={10} /> Low Stock
                     </span>

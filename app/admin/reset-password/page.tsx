@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Gem, Lock, KeyRound, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/browser';
+import { isSupabaseAuthConfigured } from '@/lib/supabase/config';
 
 export default function AdminResetPasswordPage() {
   const router = useRouter();
@@ -19,7 +20,13 @@ export default function AdminResetPasswordPage() {
   // Clicking the emailed link lands here with a Supabase recovery session.
   // @supabase/ssr exchanges the URL code for a session automatically; we just
   // wait for the PASSWORD_RECOVERY event (or an already-established session).
+  // Supabase Auth (Phase 2) may not be configured at all — createClient()
+  // throws on an empty URL, so guard against that instead of crashing the page.
   useEffect(() => {
+    if (!isSupabaseAuthConfigured()) {
+      setChecking(false);
+      return;
+    }
     const supabase = createClient();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {

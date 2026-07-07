@@ -32,14 +32,15 @@ export default function AdminAbandonedCartsPage() {
       }
     } catch {
       /* ignore — use local fallback */
+    } finally {
+      setLoading(false);
     }
     setConfigured(false);
     setCarts(getAbandonedCarts());
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    load().finally(() => setLoading(false));
+    load();
   }, [load]);
 
   const handleRemind = async (cart: AbandonedCart) => {
