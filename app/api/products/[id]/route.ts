@@ -39,9 +39,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   });
   if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
-  const ok = await dbUpdateProduct(params.id, body);
-  if (!ok) {
-    return NextResponse.json({ ok: false, error: 'Could not update product.' }, { status: 502 });
+  const result = await dbUpdateProduct(params.id, body);
+  if (!result.ok) {
+    return NextResponse.json({ ok: false, error: result.error || 'Could not update product.' }, { status: 502 });
   }
 
   const admin = await currentApiAdmin();

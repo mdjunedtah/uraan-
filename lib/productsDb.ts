@@ -182,15 +182,15 @@ export async function dbInsertProduct(p: Product): Promise<{ data: Product; erro
 
 // Only the provided fields are updated, so rating / reviews / images set
 // elsewhere are preserved when the admin form doesn't include them.
-export async function dbUpdateProduct(id: string, p: Partial<Product>): Promise<boolean> {
+export async function dbUpdateProduct(id: string, p: Partial<Product>): Promise<{ ok: true } | { ok: false; error: string }> {
   const sb = getSupabase();
-  if (!sb) return false;
+  if (!sb) return { ok: false, error: 'Database not configured.' };
   const patch: Record<string, unknown> = {};
   if (p.name !== undefined) patch.name = p.name;
   if (p.slug !== undefined) patch.slug = p.slug;
   if (p.category !== undefined) patch.category = p.category;
-  if (p.price !== undefined) patch.price = p.price;
-  if (p.oldPrice !== undefined) patch.old_price = p.oldPrice || null;
+  if (p.price !== undefined) patch.price = Math.round(p.price);
+  if (p.oldPrice !== undefined) patch.old_price = p.oldPrice ? Math.round(p.oldPrice) : null;
   if (p.image !== undefined) patch.image = p.image;
   if (p.images !== undefined) patch.images = p.images;
   if (p.description !== undefined) patch.description = p.description;
@@ -218,9 +218,9 @@ export async function dbUpdateProduct(id: string, p: Partial<Product>): Promise<
   const { error } = await sb.from('products').update(patch).eq('id', id);
   if (error) {
     console.error('[productsDb] update:', error.message);
-    return false;
+    return { ok: false, error: error.message };
   }
-  return true;
+  return { ok: true };
 }
 
 // Hard delete — kept for completeness, but the admin UI now uses
