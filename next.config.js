@@ -10,12 +10,14 @@ const cspReportOnly = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co https://*.razorpay.com https://api.razorpay.com",
-  "frame-src 'self' https://*.razorpay.com https://api.razorpay.com",
+  // Razorpay checkout iframes + Google Maps embed on the Contact page.
+  "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://www.google.com https://maps.google.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  'upgrade-insecure-requests',
+  // upgrade-insecure-requests is NOT valid in Report-Only mode (browsers ignore
+  // it and emit a console warning). It belongs only in the enforcing header.
 ].join('; ');
 
 const securityHeaders = [
