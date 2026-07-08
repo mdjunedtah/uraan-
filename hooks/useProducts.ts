@@ -4,18 +4,28 @@ import { useEffect, useState } from 'react';
 import { products as seed, type Product } from '@/data/jewelleryData';
 
 // Module-level cache so the many product-consuming components on a page share a
-// single /api/products request (and navigations are instant).
+// single /api/products request (and navigations are instant). The 5-minute TTL
+// means admin changes propagate to the storefront without a hard browser reload.
+const CACHE_TTL_MS = 5 * 60 * 1000;
 let cached: Product[] | null = null;
+let cachedAt = 0;
 let inflight: Promise<Product[] | null> | null = null;
 
+export function invalidateProductCache() {
+  cached = null;
+  cachedAt = 0;
+}
+
 function loadProducts(): Promise<Product[] | null> {
-  if (cached) return Promise.resolve(cached);
+  if (cached && Date.now() - cachedAt < CACHE_TTL_MS) return Promise.resolve(cached);
+  if (cached) { cached = null; } // TTL expired — discard stale cache
   if (!inflight) {
     inflight = fetch('/api/products')
       .then((r) => r.json())
       .then((d) => {
         if (d?.ok && Array.isArray(d.products) && d.products.length) {
           cached = d.products as Product[];
+          cachedAt = Date.now();
           return cached;
         }
         return null;

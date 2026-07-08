@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ProductTable from '@/components/admin/ProductTable';
 import { Plus, Search, Database, HardDrive, DownloadCloud, UploadCloud, X } from 'lucide-react';
 import type { Product } from '@/data/jewelleryData';
+import { invalidateProductCache } from '@/hooks/useProducts';
 
 export default function AdminProductsPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -75,12 +76,14 @@ export default function AdminProductsPage() {
     }
     if (!confirm(`Move product ${id} to trash?`)) return;
     await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    invalidateProductCache();
     load();
     if (view === 'deleted') loadDeleted();
   };
 
   const handleRestore = async (id: string) => {
     await fetch(`/api/products/${id}/restore`, { method: 'POST' });
+    invalidateProductCache();
     loadDeleted();
     load();
   };
