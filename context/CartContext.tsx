@@ -27,14 +27,31 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const CART_KEY = 'ogp_cart';
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CART_KEY);
+      if (saved) setItems(JSON.parse(saved));
+    } catch {
+      // ignore corrupt storage
+    }
     setIsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(items));
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [items, isHydrated]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setItems((prev) => {
@@ -62,7 +79,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = () => {
+    setItems([]);
+    try { localStorage.removeItem(CART_KEY); } catch { /* ignore */ }
+  };
 
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);

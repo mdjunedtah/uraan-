@@ -77,8 +77,8 @@ function fullRow(p: Product) {
     name: p.name,
     slug: p.slug || p.id,
     category: p.category || null,
-    price: p.price,
-    old_price: p.oldPrice || null,
+    price: Math.round(p.price),
+    old_price: p.oldPrice ? Math.round(p.oldPrice) : null,
     image: p.image || null,
     images: p.images || [],
     description: p.description || null,
@@ -161,28 +161,36 @@ export async function dbGetDeletedProducts(): Promise<Product[] | null> {
   return (data as Row[]).map(toProduct);
 }
 
-export async function dbInsertProduct(p: Product): Promise<Product | null> {
+export async function dbInsertProduct(p: Product): Promise<{ data: Product; error?: never } | { data: null; error: string }> {
   const sb = getSupabase();
-  if (!sb) return null;
-  const { data, error } = await sb.from('products').insert(fullRow(p)).select().single();
+  if (!sb) return { data: null, error: 'Database not configured.' };
+  const row = fullRow(p);
+  let { data, error } = await sb.from('products').insert(row).select().single();
+  // Slug unique-constraint violation → retry once with a disambiguating suffix.
+  if (error?.code === '23505' && error.message.includes('slug')) {
+    const suffix = Math.random().toString(36).slice(2, 6);
+    const retried = await sb.from('products').insert({ ...row, slug: `${row.slug}-${suffix}` }).select().single();
+    data = retried.data;
+    error = retried.error;
+  }
   if (error) {
     console.error('[productsDb] insert:', error.message);
-    return null;
+    return { data: null, error: error.message };
   }
-  return toProduct(data as Row);
+  return { data: toProduct(data as Row) };
 }
 
 // Only the provided fields are updated, so rating / reviews / images set
 // elsewhere are preserved when the admin form doesn't include them.
-export async function dbUpdateProduct(id: string, p: Partial<Product>): Promise<boolean> {
+export async function dbUpdateProduct(id: string, p: Partial<Product>): Promise<{ ok: true } | { ok: false; error: string }> {
   const sb = getSupabase();
-  if (!sb) return false;
+  if (!sb) return { ok: false, error: 'Database not configured.' };
   const patch: Record<string, unknown> = {};
   if (p.name !== undefined) patch.name = p.name;
   if (p.slug !== undefined) patch.slug = p.slug;
   if (p.category !== undefined) patch.category = p.category;
-  if (p.price !== undefined) patch.price = p.price;
-  if (p.oldPrice !== undefined) patch.old_price = p.oldPrice || null;
+  if (p.price !== undefined) patch.price = Math.round(p.price);
+  if (p.oldPrice !== undefined) patch.old_price = p.oldPrice ? Math.round(p.oldPrice) : null;
   if (p.image !== undefined) patch.image = p.image;
   if (p.images !== undefined) patch.images = p.images;
   if (p.description !== undefined) patch.description = p.description;
@@ -210,9 +218,9 @@ export async function dbUpdateProduct(id: string, p: Partial<Product>): Promise<
   const { error } = await sb.from('products').update(patch).eq('id', id);
   if (error) {
     console.error('[productsDb] update:', error.message);
-    return false;
+    return { ok: false, error: error.message };
   }
-  return true;
+  return { ok: true };
 }
 
 // Hard delete — kept for completeness, but the admin UI now uses

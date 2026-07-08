@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, X, Upload, Plus, Trash2, ArrowUp, ArrowDown, Info } from 'lucide-react';
 import { Product, ProductVariant, categories } from '@/data/jewelleryData';
+import { invalidateProductCache } from '@/hooks/useProducts';
 
 type ProductFormProps = {
   initialProduct?: Product;
@@ -142,6 +143,7 @@ export default function ProductForm({ initialProduct, mode = 'add' }: ProductFor
       });
       const data = await res.json();
       if (res.ok && data.ok) {
+        invalidateProductCache();
         router.push('/admin/products');
         router.refresh();
       } else {

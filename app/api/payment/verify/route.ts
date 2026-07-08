@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
 import { dbInsertOrder } from '@/lib/ordersDb';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
+import { notifyAdminNewOrder } from '@/lib/whatsappServer';
 
 const MAX_ITEMS = 100;
 
@@ -49,6 +50,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, valid: false, error: lengthError }, { status: 400 });
   }
 
+  const orderItems = items.map((i) => ({
+    name: String(i.name || ''),
+    quantity: Number(i.quantity || 1),
+    price: Number(i.price || 0),
+    image: i.image ? String(i.image) : undefined,
+  }));
+  const paymentLabel = o.payment ? `${String(o.payment)} · Paid` : 'Paid';
   try {
     await dbInsertOrder({
       id,
@@ -56,13 +64,8 @@ export async function POST(request: Request) {
       email: o.email ? String(o.email) : undefined,
       phone: o.phone ? String(o.phone) : undefined,
       amount: Number(o.amount || 0),
-      items: items.map((i) => ({
-        name: String(i.name || ''),
-        quantity: Number(i.quantity || 1),
-        price: Number(i.price || 0),
-        image: i.image ? String(i.image) : undefined,
-      })),
-      payment: o.payment ? `${String(o.payment)} · Paid` : 'Paid',
+      items: orderItems,
+      payment: paymentLabel,
       status: 'Processing',
       address: address || undefined,
       paid: true,
@@ -71,6 +74,15 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error('[verify] save order failed:', err);
   }
+
+  // Best-effort admin notification — never fails the payment response.
+  notifyAdminNewOrder({
+    orderId: id,
+    customer,
+    amount: Number(o.amount || 0),
+    payment: paymentLabel,
+    items: orderItems.map((i) => ({ name: i.name, quantity: i.quantity })),
+  }).catch(() => {});
 
   return NextResponse.json({ ok: true, valid: true, orderId: id });
 }
