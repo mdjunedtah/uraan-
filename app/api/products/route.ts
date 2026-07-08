@@ -105,10 +105,11 @@ export async function POST(request: Request) {
     trending: body.trending ?? false,
   };
 
-  const saved = await dbInsertProduct(product);
-  if (!saved) {
-    return NextResponse.json({ ok: false, error: 'Could not save product.' }, { status: 502 });
+  const result = await dbInsertProduct(product);
+  if (!result.data) {
+    return NextResponse.json({ ok: false, error: result.error || 'Could not save product.' }, { status: 502 });
   }
+  const saved = result.data;
 
   const admin = await currentApiAdmin();
   await logAudit({ actorEmail: admin?.email, actorRole: admin?.role, action: 'product_created', target: saved.id, metadata: { name: saved.name } });

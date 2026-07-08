@@ -77,8 +77,8 @@ function fullRow(p: Product) {
     name: p.name,
     slug: p.slug || p.id,
     category: p.category || null,
-    price: p.price,
-    old_price: p.oldPrice || null,
+    price: Math.round(p.price),
+    old_price: p.oldPrice ? Math.round(p.oldPrice) : null,
     image: p.image || null,
     images: p.images || [],
     description: p.description || null,
@@ -161,15 +161,23 @@ export async function dbGetDeletedProducts(): Promise<Product[] | null> {
   return (data as Row[]).map(toProduct);
 }
 
-export async function dbInsertProduct(p: Product): Promise<Product | null> {
+export async function dbInsertProduct(p: Product): Promise<{ data: Product; error?: never } | { data: null; error: string }> {
   const sb = getSupabase();
-  if (!sb) return null;
-  const { data, error } = await sb.from('products').insert(fullRow(p)).select().single();
+  if (!sb) return { data: null, error: 'Database not configured.' };
+  const row = fullRow(p);
+  let { data, error } = await sb.from('products').insert(row).select().single();
+  // Slug unique-constraint violation → retry once with a disambiguating suffix.
+  if (error?.code === '23505' && error.message.includes('slug')) {
+    const suffix = Math.random().toString(36).slice(2, 6);
+    const retried = await sb.from('products').insert({ ...row, slug: `${row.slug}-${suffix}` }).select().single();
+    data = retried.data;
+    error = retried.error;
+  }
   if (error) {
     console.error('[productsDb] insert:', error.message);
-    return null;
+    return { data: null, error: error.message };
   }
-  return toProduct(data as Row);
+  return { data: toProduct(data as Row) };
 }
 
 // Only the provided fields are updated, so rating / reviews / images set
