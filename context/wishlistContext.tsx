@@ -22,13 +22,30 @@ type WishlistContextType = {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
+const WISHLIST_KEY = 'ogp_wishlist';
+
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(WISHLIST_KEY);
+      if (saved) setItems(JSON.parse(saved));
+    } catch {
+      // ignore corrupt storage
+    }
     setIsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(WISHLIST_KEY, JSON.stringify(items));
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [items, isHydrated]);
 
   const addToWishlist = (item: WishlistItem) => {
     setItems((prev) => {
@@ -51,7 +68,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearWishlist = () => setItems([]);
+  const clearWishlist = () => {
+    setItems([]);
+    try { localStorage.removeItem(WISHLIST_KEY); } catch { /* ignore */ }
+  };
 
   return (
     <WishlistContext.Provider

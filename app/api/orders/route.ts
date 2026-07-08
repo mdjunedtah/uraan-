@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetOrders, dbInsertOrder } from '@/lib/ordersDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
+import { notifyAdminNewOrder } from '@/lib/whatsappServer';
 
 const MAX_ITEMS = 100;
 
@@ -90,6 +91,16 @@ export async function POST(request: Request) {
   if (!saved) {
     return NextResponse.json({ ok: false, error: 'Could not save order.' }, { status: 502 });
   }
+
+  // Best-effort admin notification — never fails the order response.
+  notifyAdminNewOrder({
+    orderId: id,
+    customer,
+    amount,
+    payment: payment || 'COD',
+    items: items.map((i) => ({ name: String(i.name || ''), quantity: Number(i.quantity || 1) })),
+  }).catch(() => {});
+
   return NextResponse.json({ ok: true, configured: true });
 }
 

@@ -113,6 +113,39 @@ export async function sendWhatsAppTemplate(
   );
 }
 
+// ── Admin order notifications ───────────────────────────────────────────────
+export interface OrderNotification {
+  orderId: string;
+  customer: string;
+  amount: number;
+  payment: string;
+  items: { name: string; quantity: number }[];
+}
+
+export async function notifyAdminNewOrder(order: OrderNotification): Promise<WhatsAppResult> {
+  const templateName = process.env.WHATSAPP_ORDER_TEMPLATE;
+  const summary = order.items.map((i) => `${i.name} x${i.quantity}`).join(', ').slice(0, 200);
+  const summaryLines = [
+    `Order: ${order.orderId}`,
+    `Customer: ${order.customer}`,
+    `Amount: ₹${order.amount}`,
+    `Payment: ${order.payment}`,
+    `Items: ${summary}`,
+  ];
+
+  if (templateName) {
+    const lang = process.env.WHATSAPP_ORDER_TEMPLATE_LANG || 'en_US';
+    const params =
+      (process.env.WHATSAPP_ORDER_TEMPLATE_VARS ?? '1') === '0'
+        ? []
+        : [summaryLines.join(' | ').replace(/\s+/g, ' ').trim().slice(0, 900)];
+    return sendWhatsAppTemplate(ADMIN_WHATSAPP_NUMBER, templateName, lang, params);
+  }
+
+  const text = `🛍️ New Order — Om Gauri Putra\n\n${summaryLines.join('\n')}`;
+  return sendWhatsAppText(ADMIN_WHATSAPP_NUMBER, text);
+}
+
 // ── Admin lead notifications ────────────────────────────────────────────────
 // Recipient for new-lead WhatsApp alerts. Override per-environment with
 // ADMIN_WHATSAPP_NUMBER (digits only, international format, e.g. 91XXXXXXXXXX);
