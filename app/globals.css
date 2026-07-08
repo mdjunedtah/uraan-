@@ -37,6 +37,7 @@ body {
   font-family: 'Jost', sans-serif;
   overflow-x: hidden;
   scroll-behavior: smooth;
+  font-variant-numeric: lining-nums;
 }
 
 body {

@@ -72,7 +72,7 @@ export default function CartPage() {
                     style={{ backgroundImage: `url(${item.image})` }}
                   />
                   <div className="flex-1 min-w-0 flex flex-col gap-2">
-                    <div className="t-product-title">
+                    <div className="t-product-title-sm">
                       {item.name}
                     </div>
                     <PriceDisplay currentPrice={item.price} size="md" />
