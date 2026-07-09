@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Plus, X, Database, HardDrive, RotateCcw, Repeat } from 'lucide-react';
+import { Plus, X, Database, HardDrive, RotateCcw, Repeat, MessageCircle } from 'lucide-react';
+import { whatsappLink } from '@/lib/whatsapp';
 import {
   type Return,
   type ReturnType,
@@ -266,8 +267,33 @@ function ReturnsContent() {
                 <td className="py-3 px-4 text-xs text-[#6b5d4c]">{r.orderId}</td>
                 <td className="py-3 px-4">
                   <div className="font-medium text-[#1a1410]">{r.customerName}</div>
-                  <div className="text-[10px] text-[#9a8c75]">{r.customerPhone}</div>
-                  {r.customerEmail && <div className="text-[10px] text-[#9a8c75]">{r.customerEmail}</div>}
+                  {r.customerPhone && (
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <a
+                        href={`tel:${r.customerPhone.replace(/\s/g, '')}`}
+                        className="text-[10px] text-[#9a8c75] hover:text-[#b8893a]"
+                      >
+                        {r.customerPhone}
+                      </a>
+                      <a
+                        href={whatsappLink(undefined, r.customerPhone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Contact on WhatsApp"
+                        className="text-[#16796F] hover:opacity-70"
+                      >
+                        <MessageCircle size={12} />
+                      </a>
+                    </div>
+                  )}
+                  {r.customerEmail && (
+                    <a
+                      href={`mailto:${r.customerEmail}`}
+                      className="text-[10px] text-[#9a8c75] hover:text-[#b8893a]"
+                    >
+                      {r.customerEmail}
+                    </a>
+                  )}
                 </td>
                 <td className="py-3 px-4 text-xs text-[#6b5d4c] capitalize">{r.type}</td>
                 <td className="py-3 px-4 text-xs text-[#6b5d4c] max-w-[220px]">{r.reason}</td>

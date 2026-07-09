@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Search, X, Mail, Phone, Users, IndianRupee, TrendingUp,
+  Search, X, Mail, Phone, MessageCircle, Users, IndianRupee, TrendingUp,
   Database, HardDrive, StickyNote,
 } from 'lucide-react';
+import { whatsappLink } from '@/lib/whatsapp';
 import type { Customer } from '@/lib/customersDb';
 import type { Order } from '@/lib/orders';
 import { getStatusColor } from '@/lib/orders';
@@ -262,13 +263,31 @@ function CustomerDetailModal({ customer, onClose }: { customer: Customer; onClos
         <div className="p-5 space-y-5">
           <div className="space-y-1">
             {customer.email && (
-              <div className="text-sm text-[#6b5d4c] flex items-center gap-2">
+              <a
+                href={`mailto:${customer.email}`}
+                className="text-sm text-[#6b5d4c] flex items-center gap-2 hover:text-[#b8893a] transition-colors"
+              >
                 <Mail size={13} /> {customer.email}
-              </div>
+              </a>
             )}
             {customer.phone && (
-              <div className="text-sm text-[#6b5d4c] flex items-center gap-2">
-                <Phone size={13} /> {customer.phone}
+              <div className="flex items-center gap-3 flex-wrap">
+                <a
+                  href={`tel:${customer.phone.replace(/\s/g, '')}`}
+                  className="text-sm text-[#6b5d4c] flex items-center gap-2 hover:text-[#b8893a] transition-colors"
+                >
+                  <Phone size={13} /> {customer.phone}
+                </a>
+                <a
+                  href={whatsappLink(undefined, customer.phone)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Contact on WhatsApp"
+                  title="Open WhatsApp"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#16796F] hover:opacity-70 transition-opacity px-2.5 py-1 border border-[#16796F]/30 rounded"
+                >
+                  <MessageCircle size={13} /> WhatsApp
+                </a>
               </div>
             )}
           </div>
