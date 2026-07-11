@@ -3,6 +3,7 @@ import { submitLead } from '@/lib/crm';
 import { dbInsertLead } from '@/lib/leadsDb';
 import { notifyAdminNewLead } from '@/lib/whatsappServer';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
+import { normalizePhone } from '@/lib/phone';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 
   const name = String(body.name || '').trim();
   const email = String(body.email || '').trim();
-  const phone = String(body.phone || '').trim();
+  const rawPhone = String(body.phone || '').trim();
   const message = String(body.message || '').trim();
   const source = String(body.source || 'Website').trim();
 
@@ -29,9 +30,11 @@ export async function POST(request: Request) {
   if (!EMAIL_RE.test(email)) {
     return NextResponse.json({ ok: false, error: 'Please enter a valid email address.' }, { status: 400 });
   }
-  if (phone && !/^[0-9+\-\s]{7,15}$/.test(phone)) {
+  const normalizedPhone = rawPhone ? normalizePhone(rawPhone) : null;
+  if (rawPhone && !normalizedPhone) {
     return NextResponse.json({ ok: false, error: 'Please enter a valid phone number.' }, { status: 400 });
   }
+  const phone = normalizedPhone || '';
   const lengthError = checkLengths({
     Name: { value: name, max: MAX_LEN.short },
     Email: { value: email, max: MAX_LEN.short },

@@ -123,9 +123,10 @@ export default function AdminCampaignsPage() {
       });
       const data = await res.json();
       if (data.ok) {
+        const base = `Sent ${data.sentCount} of ${selectedRecipients.length} — ${data.failedCount} failed.`;
         setResult({
-          type: 'success',
-          text: `Sent ${data.sentCount} of ${selectedRecipients.length} — ${data.failedCount} failed.`,
+          type: data.failedCount > 0 ? 'error' : 'success',
+          text: data.warning ? `${base} ${data.warning}` : base,
         });
         await loadLogs();
       } else {

@@ -8,6 +8,7 @@
 // empty/"connect a database" state instead.
 import { getSupabase } from './supabase';
 import type { Order, OrderStatus } from './orders';
+import { normalizePhone } from './phone';
 
 export type CustomerSegment = 'new' | 'repeat' | 'high-value';
 export type LoyaltyTier = 'Bronze' | 'Silver' | 'Gold';
@@ -51,8 +52,12 @@ function segmentFor(orderCount: number, totalSpent: number): CustomerSegment {
   return 'new';
 }
 
+// Normalizes the phone to E.164 before using it as the grouping key, so two
+// orders for the same customer saved in different raw formats (e.g. before
+// normalization existed, or "9876543210" vs "+919876543210") still group as
+// one customer instead of appearing as two.
 function keyFor(phone: string | null | undefined, email: string | null | undefined): string | null {
-  const p = (phone || '').trim();
+  const p = normalizePhone(phone) || (phone || '').trim();
   if (p) return p;
   const e = (email || '').trim().toLowerCase();
   return e || null;
@@ -193,9 +198,14 @@ export async function dbGetCustomerByPhone(
   if (!key) return null;
 
   const isEmailKey = key.includes('@');
+  // Match by the trailing significant digits rather than an exact string —
+  // older rows may still hold a raw, un-normalized phone (e.g. "9876543210"
+  // instead of "+919876543210"), and a suffix match bridges both formats
+  // without requiring a database migration.
+  const significantDigits = (normalizePhone(key) || key).replace(/[^0-9]/g, '').slice(-10);
   const { data, error } = isEmailKey
     ? await sb.from('orders').select('*').ilike('email', key).order('created_at', { ascending: false })
-    : await sb.from('orders').select('*').eq('phone', key).order('created_at', { ascending: false });
+    : await sb.from('orders').select('*').like('phone', `%${significantDigits}`).order('created_at', { ascending: false });
   if (error) {
     console.error('[customersDb] byPhone:', error.message);
     return null;

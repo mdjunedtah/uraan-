@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetLeads, dbInsertLead } from '@/lib/leadsDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { checkLengths, MAX_LEN } from '@/lib/security/validate';
+import { normalizePhone } from '@/lib/phone';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,7 +40,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Valid email is required.' }, { status: 400 });
   }
 
-  const phone = String(body.phone || '').trim();
+  const rawPhone = String(body.phone || '').trim();
+  const phone = rawPhone ? normalizePhone(rawPhone) || rawPhone : '';
   const message = String(body.message || '').trim();
   const source = String(body.source || 'Website').trim();
   const lengthError = checkLengths({
