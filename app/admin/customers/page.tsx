@@ -8,6 +8,7 @@ import {
 import type { Customer } from '@/lib/customersDb';
 import type { Order } from '@/lib/orders';
 import { getStatusColor } from '@/lib/orders';
+import type { Address } from '@/lib/addresses';
 
 type NoteEntry = { id: number; note: string; createdBy?: string; createdAt: string };
 
@@ -188,6 +189,7 @@ function CustomerDetailModal({ customer, onClose }: { customer: Customer; onClos
   const [noteText, setNoteText] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
 
   const encodedKey = encodeURIComponent(customer.phone || customer.email || customer.id);
 
@@ -212,6 +214,18 @@ function CustomerDetailModal({ customer, onClose }: { customer: Customer; onClos
   useEffect(() => {
     loadDetail();
   }, [loadDetail]);
+
+  useEffect(() => {
+    if (!customer.email) return;
+    fetch(`/api/addresses?email=${encodeURIComponent(customer.email)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.ok) setAddresses((data.addresses || []) as Address[]);
+      })
+      .catch(() => {
+        /* saved addresses are supplementary — leave empty on failure */
+      });
+  }, [customer.email]);
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -309,6 +323,29 @@ function CustomerDetailModal({ customer, onClose }: { customer: Customer; onClos
               </div>
             )}
           </div>
+
+          {addresses.length > 0 && (
+            <div>
+              <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2">Saved Addresses</h3>
+              <div className="space-y-2">
+                {addresses.map((a) => (
+                  <div key={a.id} className="bg-[#fbf8f1] border border-[rgba(184,137,58,0.12)] p-3 text-xs text-[#1a1410]">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[9px] tracking-[1px] uppercase font-semibold px-1.5 py-0.5 bg-white text-[#b8893a]">
+                        {a.addressType}
+                      </span>
+                      {a.isDefault && <span className="text-[9px] text-[#3d6b5a] font-semibold">Default</span>}
+                    </div>
+                    <p className="font-semibold">{a.fullName} · {a.mobile}</p>
+                    <p className="text-[#6b5d4c] mt-0.5">
+                      {a.houseNo}, {a.street}
+                      {a.landmark ? `, ${a.landmark}` : ''}, {a.city}, {a.state} - {a.pincode}, {a.country}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <h3 className="display text-[11px] tracking-[2px] uppercase text-[#9a8c75] mb-2 flex items-center gap-1.5">
