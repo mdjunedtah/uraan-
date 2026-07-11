@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/navbar';
@@ -9,9 +9,12 @@ import CartDrawer from '@/components/CartDrawer';
 import {
   User, Package, Heart, MapPin, CreditCard, Settings,
   LogOut, ChevronRight, Edit2, Phone, Mail, ShoppingBag,
+  Trash2, Star, Loader2,
 } from 'lucide-react';
 import { getCurrentUser, logoutUser, type AuthUser } from '@/lib/auth';
 import { getUserOrders, type StoredOrder } from '@/lib/userOrders';
+import AddressForm from '@/components/AddressForm';
+import type { Address } from '@/lib/addresses';
 
 type Tab = 'overview' | 'orders' | 'addresses' | 'settings';
 
@@ -28,6 +31,30 @@ export default function ProfilePage() {
   const [account, setAccount] = useState<AuthUser | null>(null);
   const [userOrders, setUserOrders] = useState<StoredOrder[]>([]);
 
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(true);
+  const [addressesConfigured, setAddressesConfigured] = useState(false);
+  const [addressFormOpen, setAddressFormOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [addressMessage, setAddressMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [busyAddressId, setBusyAddressId] = useState<string | null>(null);
+
+  const loadAddresses = useCallback(async (email: string) => {
+    setAddressesLoading(true);
+    try {
+      const res = await fetch(`/api/addresses?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setAddressesConfigured(Boolean(data.configured));
+        setAddresses((data.addresses || []) as Address[]);
+      }
+    } catch {
+      /* leave last-known list in place */
+    } finally {
+      setAddressesLoading(false);
+    }
+  }, []);
+
   // New customers must sign in before seeing the profile.
   useEffect(() => {
     const u = getCurrentUser();
@@ -36,8 +63,82 @@ export default function ProfilePage() {
     } else {
       setAccount(u);
       setUserOrders(getUserOrders());
+      loadAddresses(u.email);
     }
-  }, [router]);
+  }, [router, loadAddresses]);
+
+  const openAddAddress = () => {
+    setEditingAddress(null);
+    setAddressFormOpen(true);
+  };
+  const openEditAddress = (a: Address) => {
+    setEditingAddress(a);
+    setAddressFormOpen(true);
+  };
+
+  const handleAddressSaved = () => {
+    setAddressMessage({ type: 'success', text: 'Address saved.' });
+    if (account) loadAddresses(account.email);
+    setTimeout(() => setAddressMessage(null), 3000);
+  };
+
+  const handleDeleteAddress = async (a: Address) => {
+    if (!account || !confirm('Delete this address?')) return;
+    setBusyAddressId(a.id);
+    try {
+      const res = await fetch(`/api/addresses/${a.id}?email=${encodeURIComponent(account.email)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.ok) {
+        setAddressMessage({ type: 'success', text: 'Address deleted.' });
+        await loadAddresses(account.email);
+      } else {
+        setAddressMessage({ type: 'error', text: data.error || 'Could not delete address.' });
+      }
+    } catch {
+      setAddressMessage({ type: 'error', text: 'Network error. Please try again.' });
+    } finally {
+      setBusyAddressId(null);
+      setTimeout(() => setAddressMessage(null), 3000);
+    }
+  };
+
+  const handleSetDefault = async (a: Address) => {
+    if (!account || a.isDefault) return;
+    setBusyAddressId(a.id);
+    try {
+      const res = await fetch(`/api/addresses/${a.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: account.email,
+          fullName: a.fullName,
+          mobile: a.mobile,
+          alternateMobile: a.alternateMobile,
+          houseNo: a.houseNo,
+          street: a.street,
+          landmark: a.landmark,
+          city: a.city,
+          state: a.state,
+          pincode: a.pincode,
+          country: a.country,
+          addressType: a.addressType,
+          isDefault: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setAddressMessage({ type: 'success', text: 'Default address updated.' });
+        await loadAddresses(account.email);
+      } else {
+        setAddressMessage({ type: 'error', text: data.error || 'Could not update default address.' });
+      }
+    } catch {
+      setAddressMessage({ type: 'error', text: 'Network error. Please try again.' });
+    } finally {
+      setBusyAddressId(null);
+      setTimeout(() => setAddressMessage(null), 3000);
+    }
+  };
 
   const handleLogout = () => {
     logoutUser();
@@ -244,12 +345,102 @@ export default function ProfilePage() {
             <div className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="display text-sm tracking-[3px] uppercase text-[#1a1410]">My Addresses</h3>
-                <button className="text-[10px] tracking-[1.5px] uppercase text-[#b8893a] font-semibold hover:underline">+ Add New</button>
+                <button
+                  onClick={openAddAddress}
+                  aria-label="Add new address"
+                  className="text-[10px] tracking-[1.5px] uppercase text-[#b8893a] font-semibold hover:underline"
+                >
+                  + Add New
+                </button>
               </div>
-              <div className="text-center py-10">
-                <MapPin size={32} className="mx-auto mb-3 text-[#b8893a]/50" />
-                <p className="text-sm text-[#6b5d4c]">No saved addresses yet. Add one during checkout.</p>
-              </div>
+
+              {addressMessage && (
+                <div
+                  className={`mb-4 px-4 py-3 text-sm border ${
+                    addressMessage.type === 'success'
+                      ? 'bg-[#3d6b5a]/10 text-[#3d6b5a] border-[#3d6b5a]/30'
+                      : 'bg-[#7a2e2e]/10 text-[#7a2e2e] border-[#7a2e2e]/30'
+                  }`}
+                >
+                  {addressMessage.text}
+                </div>
+              )}
+
+              {addressesLoading ? (
+                <div className="text-center py-10 text-sm text-[#9a8c75] flex items-center justify-center gap-2">
+                  <Loader2 size={16} className="animate-spin" /> Loading addresses…
+                </div>
+              ) : addresses.length === 0 ? (
+                <div className="text-center py-10">
+                  <MapPin size={32} className="mx-auto mb-3 text-[#b8893a]/50" />
+                  <p className="text-sm text-[#6b5d4c] mb-1">No saved addresses yet.</p>
+                  {!addressesConfigured && (
+                    <p className="text-xs text-[#9a8c75]">You can still add one during checkout.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {addresses.map((a) => (
+                    <div key={a.id} className="border border-[rgba(184,137,58,0.18)] p-4 relative">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="text-[10px] tracking-[1px] uppercase font-semibold px-2 py-0.5 bg-[#f8f2e6] text-[#b8893a]">
+                          {a.addressType}
+                        </span>
+                        {a.isDefault && (
+                          <span className="text-[10px] tracking-[1px] uppercase font-semibold px-2 py-0.5 bg-[#3d6b5a]/10 text-[#3d6b5a] flex items-center gap-1">
+                            <Star size={9} className="fill-[#3d6b5a]" /> Default
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm font-semibold text-[#1a1410]">{a.fullName}</div>
+                      <div className="text-sm text-[#6b5d4c] mt-1">
+                        {a.houseNo}, {a.street}
+                        {a.landmark ? `, ${a.landmark}` : ''}
+                        <br />
+                        {a.city}, {a.state} - {a.pincode}
+                        <br />
+                        {a.country}
+                      </div>
+                      <div className="text-xs text-[#9a8c75] mt-1">{a.mobile}</div>
+
+                      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[rgba(184,137,58,0.1)]">
+                        <button
+                          onClick={() => openEditAddress(a)}
+                          className="text-[10px] tracking-[1px] uppercase font-semibold text-[#b8893a] hover:underline flex items-center gap-1"
+                        >
+                          <Edit2 size={11} /> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAddress(a)}
+                          disabled={busyAddressId === a.id}
+                          className="text-[10px] tracking-[1px] uppercase font-semibold text-[#7a2e2e] hover:underline flex items-center gap-1 disabled:opacity-50"
+                        >
+                          <Trash2 size={11} /> Delete
+                        </button>
+                        {!a.isDefault && (
+                          <button
+                            onClick={() => handleSetDefault(a)}
+                            disabled={busyAddressId === a.id}
+                            className="text-[10px] tracking-[1px] uppercase font-semibold text-[#6b5d4c] hover:underline flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <Star size={11} /> Set as Default
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {account && (
+                <AddressForm
+                  isOpen={addressFormOpen}
+                  onClose={() => setAddressFormOpen(false)}
+                  email={account.email}
+                  editing={editingAddress}
+                  onSaved={handleAddressSaved}
+                />
+              )}
             </div>
           )}
 

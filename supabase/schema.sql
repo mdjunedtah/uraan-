@@ -484,3 +484,31 @@ create table if not exists public.inventory_logs (
 );
 create index if not exists inventory_logs_product_idx on public.inventory_logs (product_id, created_at desc);
 alter table public.inventory_logs enable row level security;
+
+-- Saved delivery addresses ("My Addresses"). Keyed by email, matching how
+-- customers are identified everywhere else in this app (orders, leads,
+-- abandoned_carts) — there is no real backend account/session system for
+-- shoppers yet (lib/auth.ts is a client-side demo store), so this is not a
+-- Supabase-Auth-authenticated user_id. The API routes are the authorization
+-- boundary: every read/write is scoped to the email the caller claims, same
+-- trust model as the rest of the storefront's customer-facing data.
+create table if not exists public.user_addresses (
+  id                uuid primary key default gen_random_uuid(),
+  email             text not null,
+  full_name         text not null,
+  mobile            text not null,
+  alternate_mobile  text,
+  house_no          text not null,
+  street            text not null,
+  landmark          text,
+  city              text not null,
+  state             text not null,
+  pincode           text not null,
+  country           text not null default 'India',
+  address_type      text not null default 'Home',
+  is_default        boolean not null default false,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+create index if not exists user_addresses_email_idx on public.user_addresses (email, created_at desc);
+alter table public.user_addresses enable row level security;

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { BUSINESS_ADDRESS_INLINE, MAPS_DIRECTIONS_URL } from '@/lib/business';
 import { COUNTRIES, DEFAULT_COUNTRY, normalizePhone } from '@/lib/phone';
+import type { Address } from '@/lib/addresses';
 
 type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
 
@@ -43,6 +44,9 @@ export default function CheckoutPage() {
   const [dialCode, setDialCode] = useState(DEFAULT_COUNTRY.dial);
   const [phoneError, setPhoneError] = useState('');
 
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+
   const handleLocationResolved = (addr: GeoAddress) => {
     const parts = [addr.line1, addr.area !== addr.line1 ? addr.area : ''].filter(Boolean);
     setForm((f) => ({
@@ -63,7 +67,38 @@ export default function CheckoutPage() {
     }
     setForm((f) => ({ ...f, name: user.name, email: user.email, phone: user.phone }));
     setAuthChecked(true);
+
+    // Best-effort: load this customer's saved addresses so they can pick one
+    // instead of retyping it. Never blocks checkout if it fails.
+    fetch(`/api/addresses?email=${encodeURIComponent(user.email)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.ok && Array.isArray(data.addresses)) {
+          const list = data.addresses as Address[];
+          setSavedAddresses(list);
+          const preferred = list.find((a) => a.isDefault) || list[0];
+          if (preferred) applySavedAddress(preferred);
+        }
+      })
+      .catch(() => {
+        /* no saved addresses available — manual entry still works */
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
+
+  const applySavedAddress = (a: Address) => {
+    setSelectedAddressId(a.id);
+    setForm((f) => ({
+      ...f,
+      name: a.fullName,
+      phone: a.mobile,
+      address: [a.houseNo, a.street, a.landmark].filter(Boolean).join(', '),
+      city: a.city,
+      state: a.state,
+      pincode: a.pincode,
+    }));
+    setPhoneError('');
+  };
 
   const [cardForm, setCardForm] = useState({ number: '', name: '', expiry: '', cvv: '' });
   const [upiId, setUpiId] = useState('');
@@ -414,6 +449,37 @@ export default function CheckoutPage() {
                 <h2 className="display text-sm tracking-[3px] uppercase text-[#1a1410] mb-5 pb-3 border-b border-[rgba(184,137,58,0.18)]">
                   Shipping Address
                 </h2>
+
+                {savedAddresses.length > 0 && (
+                  <div className="mb-5">
+                    <p className="luxury-label mb-2">Saved Addresses</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {savedAddresses.map((a) => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => applySavedAddress(a)}
+                          className={`text-left p-3 border text-xs transition-colors ${
+                            selectedAddressId === a.id
+                              ? 'border-[#b8893a] ring-1 ring-[#b8893a] bg-[#fbf8f1]'
+                              : 'border-[rgba(184,137,58,0.18)] hover:border-[#b8893a]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[9px] tracking-[1px] uppercase font-semibold px-1.5 py-0.5 bg-[#f8f2e6] text-[#b8893a]">
+                              {a.addressType}
+                            </span>
+                            {a.isDefault && <span className="text-[9px] text-[#3d6b5a] font-semibold">Default</span>}
+                          </div>
+                          <div className="font-semibold text-[#1a1410]">{a.fullName}</div>
+                          <div className="text-[#6b5d4c] mt-0.5">
+                            {a.houseNo}, {a.street}, {a.city}, {a.state} - {a.pincode}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <LocationPicker onLocationResolved={handleLocationResolved} />
 
