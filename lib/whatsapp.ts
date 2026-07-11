@@ -4,6 +4,8 @@
 // both client components and server code. The actual Cloud API sender (which
 // uses a private token) lives in lib/whatsappServer.ts.
 
+import { normalizePhone } from './phone';
+
 // Business WhatsApp number in international format, digits only.
 export const WHATSAPP_NUMBER = (
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '918851911653'
@@ -12,9 +14,12 @@ export const WHATSAPP_NUMBER = (
 /**
  * Build a wa.me click-to-chat link, optionally pre-filled with a message.
  * Pass a specific number to message a customer; omit it to reach the store.
+ * Normalizes to E.164 first (defaulting to India) so numbers saved before
+ * normalization existed, or missing a country code, still produce a working
+ * link instead of a broken `wa.me/9876543210`.
  */
 export function whatsappLink(message?: string, number?: string): string {
-  const digits = (number || WHATSAPP_NUMBER).replace(/[^0-9]/g, '') || WHATSAPP_NUMBER;
+  const digits = (number ? normalizePhone(number)?.slice(1) : null) || WHATSAPP_NUMBER;
   const base = `https://wa.me/${digits}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }

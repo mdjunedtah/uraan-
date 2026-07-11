@@ -17,6 +17,7 @@ import {
   Tag, X, Loader2,
 } from 'lucide-react';
 import { BUSINESS_ADDRESS_INLINE, MAPS_DIRECTIONS_URL } from '@/lib/business';
+import { COUNTRIES, DEFAULT_COUNTRY, normalizePhone } from '@/lib/phone';
 
 type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
 
@@ -39,6 +40,8 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({
     name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '',
   });
+  const [dialCode, setDialCode] = useState(DEFAULT_COUNTRY.dial);
+  const [phoneError, setPhoneError] = useState('');
 
   const handleLocationResolved = (addr: GeoAddress) => {
     const parts = [addr.line1, addr.area !== addr.line1 ? addr.area : ''].filter(Boolean);
@@ -121,14 +124,15 @@ export default function CheckoutPage() {
   const abandonedCaptured = useRef(false);
   const handlePhoneBlur = () => {
     if (abandonedCaptured.current) return;
-    if (!form.phone.trim() || items.length === 0) return;
+    const normalized = normalizePhone(form.phone, dialCode);
+    if (!normalized || items.length === 0) return;
     abandonedCaptured.current = true;
     fetch('/api/abandoned-carts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: form.name,
-        phone: form.phone,
+        phone: normalized,
         email: form.email,
         items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
         total: totalPrice,
@@ -153,6 +157,13 @@ export default function CheckoutPage() {
 
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const normalized = normalizePhone(form.phone, dialCode);
+    if (!normalized) {
+      setPhoneError('Please enter a valid phone number for the selected country.');
+      return;
+    }
+    setPhoneError('');
+    setForm((f) => ({ ...f, phone: normalized }));
     setStep('payment');
   };
 
@@ -417,7 +428,28 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="luxury-label">Phone *</label>
-                    <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onBlur={handlePhoneBlur} placeholder="10 digit" className="luxury-input" />
+                    <div className="flex gap-2">
+                      <select
+                        value={dialCode}
+                        onChange={(e) => setDialCode(e.target.value)}
+                        className="luxury-input !w-auto shrink-0"
+                        aria-label="Country code"
+                      >
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.dial}>+{c.dial}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        required
+                        value={form.phone}
+                        onChange={(e) => { setForm({ ...form, phone: e.target.value }); setPhoneError(''); }}
+                        onBlur={handlePhoneBlur}
+                        placeholder="Mobile number"
+                        className="luxury-input flex-1"
+                      />
+                    </div>
+                    {phoneError && <p className="text-[11px] text-[#7a2e2e] mt-1">{phoneError}</p>}
                   </div>
                   <div className="md:col-span-2">
                     <label className="luxury-label">Address *</label>

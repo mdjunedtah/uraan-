@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetAbandonedCarts, dbInsertAbandonedCart } from '@/lib/abandonedCartsDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
+import { normalizePhone } from '@/lib/phone';
 
 const MAX_ITEMS = 100;
 
@@ -35,7 +36,8 @@ export async function POST(request: Request) {
   }
 
   const name = String(body.name || '').trim();
-  const phone = String(body.phone || '').trim();
+  const rawPhone = String(body.phone || '').trim();
+  const phone = rawPhone ? normalizePhone(rawPhone) || rawPhone : '';
   const email = String(body.email || '').trim();
   const items = Array.isArray(body.items) ? (body.items as CartItem[]) : [];
   const total = Number(body.total || 0);

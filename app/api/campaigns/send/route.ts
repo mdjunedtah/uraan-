@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/adminApi';
 import { currentApiAdmin } from '@/lib/security/guard';
-import { sendWhatsAppText } from '@/lib/whatsappServer';
+import { sendWhatsAppText, sendWhatsAppTemplate } from '@/lib/whatsappServer';
 import { sendEmail } from '@/lib/email';
 import { dbInsertCampaignLog } from '@/lib/campaignsDb';
 import { personalize, htmlWrap, type CampaignChannel, type CampaignRecipient } from '@/lib/campaigns';
 import { logAudit } from '@/lib/audit';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
+import { normalizePhone } from '@/lib/phone';
 
 const MAX_RECIPIENTS = 500;
 
@@ -57,17 +58,47 @@ export async function POST(request: Request) {
 
   let sentCount = 0;
   let failedCount = 0;
+  let warning: string | undefined;
 
   if (channel === 'whatsapp') {
+    const whatsappConfigured = !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
+    if (!whatsappConfigured) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            'WhatsApp is not connected — set WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID before sending campaigns.',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Meta only delivers free-form text to a recipient who messaged the
+    // business within the last 24 hours — a marketing blast is almost always
+    // outside that window, so it gets silently rejected. An approved template
+    // (WHATSAPP_CAMPAIGN_TEMPLATE) is the only way to reliably deliver a
+    // proactive campaign; without one we still attempt free-form text (it may
+    // reach recently-active customers) but warn the admin why the rest fail.
+    const templateName = process.env.WHATSAPP_CAMPAIGN_TEMPLATE;
+    const templateLang = process.env.WHATSAPP_CAMPAIGN_TEMPLATE_LANG || 'en_US';
+    if (!templateName) {
+      warning =
+        'No WHATSAPP_CAMPAIGN_TEMPLATE is configured — only customers who messaged you in the last 24 hours ' +
+        'will receive this campaign. Set up an approved Meta template and WHATSAPP_CAMPAIGN_TEMPLATE to reach everyone.';
+    }
+
     for (const r of recipients) {
-      const phone = String(r.phone || '').trim();
+      const phone = normalizePhone(r.phone) || String(r.phone || '').trim();
       if (!phone) {
         failedCount++;
         continue;
       }
       try {
-        const result = await sendWhatsAppText(phone, personalize(message, r.name));
-        if (result.ok) sentCount++;
+        const personalized = personalize(message, r.name);
+        const result = templateName
+          ? await sendWhatsAppTemplate(phone, templateName, templateLang, [personalized])
+          : await sendWhatsAppText(phone, personalized);
+        if (result.ok && result.configured) sentCount++;
         else failedCount++;
       } catch {
         failedCount++;
@@ -108,5 +139,5 @@ export async function POST(request: Request) {
     metadata: { channel, recipientCount: recipients.length, sentCount, failedCount },
   });
 
-  return NextResponse.json({ ok: true, sentCount, failedCount });
+  return NextResponse.json({ ok: true, sentCount, failedCount, warning });
 }

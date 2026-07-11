@@ -7,12 +7,14 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { User, Mail, Lock, Phone, Eye, EyeOff, ChevronRight, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { registerUser, getCurrentUser, passwordIssue, passwordStrength } from '@/lib/auth';
+import { COUNTRIES, DEFAULT_COUNTRY, normalizePhone } from '@/lib/phone';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', password: '', confirmPassword: '',
   });
+  const [dialCode, setDialCode] = useState(DEFAULT_COUNTRY.dial);
   const [showPassword, setShowPassword] = useState(false);
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState('');
@@ -30,6 +32,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    const normalizedPhone = normalizePhone(form.phone, dialCode);
+    if (!normalizedPhone) {
+      setError('Please enter a valid phone number for the selected country.');
+      return;
+    }
     const issue = passwordIssue(form.password);
     if (issue) {
       setError(issue);
@@ -44,7 +51,7 @@ export default function RegisterPage() {
       return;
     }
     setLoading(true);
-    const res = await registerUser(form);
+    const res = await registerUser({ ...form, phone: normalizedPhone });
     setLoading(false);
     if (res.ok) {
       // Capture the new account as a CRM lead (HubSpot + database). Non-blocking.
@@ -54,7 +61,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          phone: form.phone,
+          phone: normalizedPhone,
           message: 'New account registration',
           source: 'Registration',
         }),
@@ -103,9 +110,21 @@ export default function RegisterPage() {
 
           <div>
             <label className="luxury-label">Phone</label>
-            <div className="relative">
-              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
-              <input type="tel" required pattern="[0-9]{10}" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="luxury-input !pl-11" placeholder="10 digit mobile" />
+            <div className="flex gap-2">
+              <select
+                value={dialCode}
+                onChange={(e) => setDialCode(e.target.value)}
+                className="luxury-input !w-auto shrink-0"
+                aria-label="Country code"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.dial}>+{c.dial}</option>
+                ))}
+              </select>
+              <div className="relative flex-1">
+                <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+                <input type="tel" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="luxury-input !pl-11 w-full" placeholder="Mobile number" />
+              </div>
             </div>
           </div>
 

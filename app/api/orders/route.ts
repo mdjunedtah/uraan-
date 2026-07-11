@@ -4,6 +4,7 @@ import { dbGetOrders, dbInsertOrder } from '@/lib/ordersDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { notifyAdminNewOrder } from '@/lib/whatsappServer';
+import { normalizePhone } from '@/lib/phone';
 
 const MAX_ITEMS = 100;
 
@@ -44,7 +45,8 @@ export async function POST(request: Request) {
   }
 
   const email = String(body.email || '').trim();
-  const phone = String(body.phone || '').trim();
+  const rawPhone = String(body.phone || '').trim();
+  const phone = normalizePhone(rawPhone) || rawPhone;
   const payment = String(body.payment || '').trim();
   const status = String(body.status || 'Processing').trim();
   const address = String(body.address || '').trim();
