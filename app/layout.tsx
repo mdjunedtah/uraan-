@@ -6,6 +6,7 @@ import '../styles/animations.css';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/wishlistContext';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import StorageWarningBanner from '@/components/StorageWarningBanner';
 import { SITE_URL } from '@/lib/site';
 import { BUSINESS_NAME, BUSINESS_ADDRESS } from '@/lib/business';
 
@@ -162,6 +163,7 @@ export default function RootLayout({
           <WishlistProvider>
             {children}
             <MobileBottomNav />
+            <StorageWarningBanner />
           </WishlistProvider>
         </CartProvider>
       </body>
