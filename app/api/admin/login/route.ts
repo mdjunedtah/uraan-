@@ -7,6 +7,7 @@ import { getGeo, geoLabel } from '@/lib/security/geo';
 import { upsertDevice } from '@/lib/security/devices';
 import { sendEmail, isEmailConfigured } from '@/lib/email';
 import { loginAlertEmail } from '@/lib/security/emails';
+import { notify } from '@/lib/notify';
 
 // This route runs on the Node.js runtime (default for route handlers) so the
 // Supabase service-role client used by the security helpers works. Every helper
@@ -58,12 +59,17 @@ export async function POST(request: Request) {
       userAgent,
       metadata: { permanent },
     });
+    notify('failed_login', `Failed login attempt for ${email} from ${ip}.`, {
+      priority: lockedNow ? 'critical' : 'high',
+      actorEmail: email,
+    }).catch(() => {});
     // Generic message — never reveal whether the email or the password was wrong.
     return NextResponse.json({ ok: false, error: 'Invalid email or password.' }, { status: 401 });
   }
 
   await recordAttempt({ email, ip, userAgent, success: true });
   await logAudit({ actorEmail: email, action: 'admin_login', ip, userAgent, metadata: { via: 'legacy' } });
+  notify('admin_login', `${email} signed in from ${ip}.`, { actorEmail: email }).catch(() => {});
 
   // Recovery login is always trusted (break-glass); record the device and send
   // a login alert when email is configured.

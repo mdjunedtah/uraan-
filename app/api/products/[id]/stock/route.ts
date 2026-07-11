@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { checkLengths, MAX_LEN, isBodyTooLarge } from '@/lib/security/validate';
 import { logAudit } from '@/lib/audit';
 import { currentApiAdmin } from '@/lib/security/guard';
+import { notify } from '@/lib/notify';
 
 // POST → manual stock correction (admin only). body: { delta, reason? }
 export async function POST(request: Request, { params }: { params: { id: string } }) {
@@ -37,8 +38,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (lengthError) return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
 
   const admin = await currentApiAdmin();
-  const ok = await dbAdjustStock(params.id, delta, reason || undefined, admin?.email);
-  if (!ok) {
+  const result = await dbAdjustStock(params.id, delta, reason || undefined, admin?.email);
+  if (!result) {
     return NextResponse.json({ ok: false, error: 'Could not adjust stock.' }, { status: 502 });
   }
 
@@ -49,6 +50,18 @@ export async function POST(request: Request, { params }: { params: { id: string 
     target: params.id,
     metadata: { delta, reason: reason || undefined },
   });
+
+  if (result.stock <= 0) {
+    notify('out_of_stock', `${result.name} is now out of stock.`, {
+      priority: 'critical',
+      link: `/admin/products/edit/${params.id}`,
+    }).catch(() => {});
+  } else if (result.stock <= result.threshold) {
+    notify('low_stock', `${result.name} is low on stock (${result.stock} left, threshold ${result.threshold}).`, {
+      priority: 'high',
+      link: `/admin/products/edit/${params.id}`,
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ ok: true });
 }

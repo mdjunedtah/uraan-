@@ -8,6 +8,7 @@ import { personalize, htmlWrap, type CampaignChannel, type CampaignRecipient } f
 import { logAudit } from '@/lib/audit';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { normalizePhone } from '@/lib/phone';
+import { notify } from '@/lib/notify';
 
 const MAX_RECIPIENTS = 500;
 
@@ -138,6 +139,12 @@ export async function POST(request: Request) {
     action: 'campaign_sent',
     metadata: { channel, recipientCount: recipients.length, sentCount, failedCount },
   });
+
+  notify(
+    channel === 'whatsapp' ? 'whatsapp_campaign' : 'email_campaign',
+    `Sent ${sentCount} of ${recipients.length} — ${failedCount} failed.`,
+    { priority: failedCount > 0 ? 'high' : 'normal', link: '/admin/campaigns', actorEmail: admin?.email }
+  ).catch(() => {});
 
   return NextResponse.json({ ok: true, sentCount, failedCount, warning });
 }

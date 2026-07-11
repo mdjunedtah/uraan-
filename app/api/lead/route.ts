@@ -4,6 +4,7 @@ import { dbInsertLead } from '@/lib/leadsDb';
 import { notifyAdminNewLead } from '@/lib/whatsappServer';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { normalizePhone } from '@/lib/phone';
+import { notify } from '@/lib/notify';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -51,6 +52,10 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error('[lead] db insert failed:', err);
   }
+
+  notify('contact_form', `${name} (${email}) sent an enquiry via ${source}.`, {
+    link: '/admin/leads',
+  }).catch(() => {});
 
   // Push to HubSpot (best-effort): a CRM hiccup must not fail the visitor's
   // form — the lead is already saved above and any error is logged server-side.

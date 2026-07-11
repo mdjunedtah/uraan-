@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetReviews, dbCreateReview } from '@/lib/reviewsDb';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { getClientIp } from '@/lib/security/request';
+import { notify } from '@/lib/notify';
 
 // GET → public review list. Database when configured, else the page falls back
 // to its bundled browser store.
@@ -130,5 +131,10 @@ export async function POST(request: Request) {
   if (!created) {
     return NextResponse.json({ ok: false, error: 'Could not save your review. Please try again.' }, { status: 502 });
   }
+
+  notify('new_review', `${name} left a ${rating}-star review${product ? ` on ${product}` : ''}.`, {
+    link: '/admin/reviews',
+  }).catch(() => {});
+
   return NextResponse.json({ ok: true, configured: true, review: created });
 }
