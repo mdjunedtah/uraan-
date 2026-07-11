@@ -156,7 +156,7 @@ export default function ProductDetailPage({
           {/* Image */}
           <div>
             <ProductGallery
-              images={getGalleryImages(product)}
+              images={product.images && product.images.length ? product.images : getGalleryImages(product)}
               name={product.name}
               tag={product.tag}
             />
