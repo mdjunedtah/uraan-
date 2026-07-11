@@ -53,3 +53,32 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   pendants: '/images/gallery/necklace-6.jpg',
   bridal: '/images/gallery/necklace-8.jpg',
 };
+
+// Fallback pool for a brand-new admin-created category that has no uploaded
+// photo yet. Picked deterministically from the category's own name so two
+// different categories don't default to the exact same picture (the bug
+// this replaces: every category with no image fell back to the identical
+// hardcoded '/images/necklace.jpg').
+const FALLBACK_IMAGE_POOL = [
+  '/images/gallery/necklace-3.jpg',
+  '/images/gallery/necklace-5.jpg',
+  '/images/gallery/necklace-7.jpg',
+  '/images/gallery/ring-3.jpg',
+  '/images/gallery/ring-4.jpg',
+  '/images/gallery/ring-6.jpg',
+  '/images/gallery/ring-7.jpg',
+  '/images/gallery/ring-8.jpg',
+  '/images/gallery/earrings-1.jpg',
+  '/images/gallery/earrings-2.jpg',
+  '/images/gallery/earrings-3.jpg',
+  '/images/gallery/earrings-5.jpg',
+  '/images/gallery/bracelet-2.jpg',
+  '/images/gallery/bracelet-4.jpg',
+  '/images/gallery/lifestyle-1.jpg',
+];
+
+export function fallbackCategoryImage(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return FALLBACK_IMAGE_POOL[hash % FALLBACK_IMAGE_POOL.length];
+}

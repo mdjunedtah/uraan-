@@ -2,6 +2,7 @@
 // localStorage so the admin panel's full add / edit / delete works without a
 // backend, seeded from the bundled catalogue on first use.
 import { categories as seedCategories, type Category } from '@/data/jewelleryData';
+import { fallbackCategoryImage } from './categoryStyles';
 
 export type { Category };
 
@@ -54,7 +55,7 @@ export function addCategory(input: { name: string; description?: string; image?:
     slug,
     name,
     description: input.description?.trim() || '',
-    image: input.image?.trim() || '/images/necklace.jpg',
+    image: input.image?.trim() || fallbackCategoryImage(name),
     count: 0,
   };
   write([...existing, category]);

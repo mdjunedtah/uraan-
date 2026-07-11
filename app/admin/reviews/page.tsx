@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Star, Trash2, CheckCircle2, XCircle, Database, HardDrive, Flag } from 'lucide-react';
 import { type Review, getReviews, setReviewVerified, deleteReview } from '@/lib/reviewsStore';
+import { initialsOf, reviewAccent } from '@/lib/reviewStyle';
 
 export default function AdminReviewsPage() {
   const [reviewList, setReviewList] = useState<Review[]>([]);
@@ -107,13 +108,15 @@ export default function AdminReviewsPage() {
       </div>
 
       <div className="space-y-3">
-        {filtered.map((r) => (
+        {filtered.map((r, idx) => (
           <div key={r.id} className="bg-white border border-[rgba(184,137,58,0.18)] p-5">
             <div className="flex items-start gap-4">
               <div
-                className="w-12 h-12 rounded-full bg-cover bg-center border border-[#b8893a] flex-shrink-0"
-                style={{ backgroundImage: `url(${r.avatar})` }}
-              />
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                style={{ backgroundColor: reviewAccent(idx) }}
+              >
+                {initialsOf(r.name)}
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <div className="font-semibold text-[#1a1410]">{r.name}</div>
