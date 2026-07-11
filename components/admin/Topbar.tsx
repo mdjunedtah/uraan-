@@ -1,6 +1,7 @@
 'use client';
 
-import { Bell, Search, User, Menu } from 'lucide-react';
+import { Search, User, Menu } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 type TopbarProps = {
   onMenuClick?: () => void;
@@ -26,10 +27,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-3 flex-shrink-0">
-        <button aria-label="Notifications" className="relative w-9 h-9 rounded-full grid place-items-center hover:bg-[#fbf8f1]">
-          <Bell size={16} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-[#7a2e2e] rounded-full" />
-        </button>
+        <NotificationBell />
         <div className="flex items-center gap-2 pl-3 border-l border-[rgba(184,137,58,0.18)]">
           <div className="w-9 h-9 rounded-full bg-[#b8893a]/10 grid place-items-center text-[#b8893a]">
             <User size={16} />

@@ -14,6 +14,7 @@ import { sendEmail } from '@/lib/email';
 import { currentApiAdmin } from '@/lib/security/guard';
 import { logAudit } from '@/lib/audit';
 import { checkLengths, MAX_LEN } from '@/lib/security/validate';
+import { notify } from '@/lib/notify';
 
 const STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 const NOTIFY_STATUSES: OrderStatus[] = ['Shipped', 'Delivered', 'Cancelled'];
@@ -114,6 +115,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
     if (existing && NOTIFY_STATUSES.includes(status)) {
       notifyCustomer(existing, status);
+    }
+
+    if (status === 'Cancelled') {
+      notify('order_cancelled', `Order ${params.id} was cancelled (was "${existing?.status || 'unknown'}").`, {
+        priority: 'high',
+        link: `/admin/orders/${params.id}`,
+        actorEmail: admin?.email,
+      }).catch(() => {});
     }
   }
 

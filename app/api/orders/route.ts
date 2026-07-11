@@ -5,6 +5,7 @@ import { isAdminRequest } from '@/lib/adminApi';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { notifyAdminNewOrder } from '@/lib/whatsappServer';
 import { normalizePhone } from '@/lib/phone';
+import { notify } from '@/lib/notify';
 
 const MAX_ITEMS = 100;
 
@@ -102,6 +103,15 @@ export async function POST(request: Request) {
     payment: payment || 'COD',
     items: items.map((i) => ({ name: String(i.name || ''), quantity: Number(i.quantity || 1) })),
   }).catch(() => {});
+
+  notify('new_order', `${customer} placed order ${id} for ₹${amount.toLocaleString('en-IN')}.`, {
+    link: `/admin/orders/${id}`,
+  }).catch(() => {});
+  if (Boolean(body.paid)) {
+    notify('payment_received', `Payment received for order ${id} (₹${amount.toLocaleString('en-IN')}, ${payment || 'online'}).`, {
+      link: `/admin/orders/${id}`,
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ ok: true, configured: true });
 }

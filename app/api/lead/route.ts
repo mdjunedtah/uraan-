@@ -4,6 +4,7 @@ import { dbInsertLead } from '@/lib/leadsDb';
 import { notifyAdminNewLead } from '@/lib/whatsappServer';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { normalizePhone } from '@/lib/phone';
+import { notify } from '@/lib/notify';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -52,6 +53,16 @@ export async function POST(request: Request) {
     console.error('[lead] db insert failed:', err);
   }
 
+  if (source === 'Newsletter Signup') {
+    notify('newsletter_subscriber', `${email} subscribed to the newsletter.`, {
+      link: '/admin/leads',
+    }).catch(() => {});
+  } else {
+    notify('contact_form', `${name} (${email}) sent an enquiry via ${source}.`, {
+      link: '/admin/leads',
+    }).catch(() => {});
+  }
+
   // Push to HubSpot (best-effort): a CRM hiccup must not fail the visitor's
   // form — the lead is already saved above and any error is logged server-side.
   const result = await submitLead({ name, email, phone, message, source });
@@ -64,10 +75,10 @@ export async function POST(request: Request) {
   // saved above. Requires WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID to actually
   // deliver; otherwise it is logged and skipped.
   try {
-    const notify = await notifyAdminNewLead({ name, email, phone, message, source });
-    if (!notify.ok) {
-      console.error('[lead] WhatsApp admin notify failed:', notify.error);
-    } else if (!notify.configured) {
+    const waResult = await notifyAdminNewLead({ name, email, phone, message, source });
+    if (!waResult.ok) {
+      console.error('[lead] WhatsApp admin notify failed:', waResult.error);
+    } else if (!waResult.configured) {
       console.warn(
         '[lead] WhatsApp admin notify skipped — Cloud API not configured ' +
           '(set WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID in Vercel).'

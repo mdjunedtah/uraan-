@@ -3,6 +3,7 @@ import { verifyRazorpaySignature } from '@/lib/razorpay';
 import { dbInsertOrder } from '@/lib/ordersDb';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
 import { notifyAdminNewOrder } from '@/lib/whatsappServer';
+import { notify } from '@/lib/notify';
 
 const MAX_ITEMS = 100;
 
@@ -82,6 +83,14 @@ export async function POST(request: Request) {
     amount: Number(o.amount || 0),
     payment: paymentLabel,
     items: orderItems.map((i) => ({ name: i.name, quantity: i.quantity })),
+  }).catch(() => {});
+
+  const amount = Number(o.amount || 0);
+  notify('new_order', `${customer} placed order ${id} for ₹${amount.toLocaleString('en-IN')}.`, {
+    link: `/admin/orders/${id}`,
+  }).catch(() => {});
+  notify('payment_received', `Payment received for order ${id} (₹${amount.toLocaleString('en-IN')}, online).`, {
+    link: `/admin/orders/${id}`,
   }).catch(() => {});
 
   return NextResponse.json({ ok: true, valid: true, orderId: id });

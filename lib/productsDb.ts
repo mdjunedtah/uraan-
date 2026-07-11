@@ -298,29 +298,32 @@ export async function dbBulkInsertProducts(products: Product[]): Promise<{ inser
 }
 
 // Manual stock correction: adjusts stock_quantity (clamped at 0) and records
-// the adjustment in inventory_logs for an audit trail.
+// the adjustment in inventory_logs for an audit trail. Returns the resulting
+// stock/threshold/name so the caller can decide whether to raise a
+// low-stock/out-of-stock notification — this comparison didn't exist before.
 export async function dbAdjustStock(
   productId: string,
   delta: number,
   reason: string | undefined,
   createdBy: string | undefined
-): Promise<boolean> {
+): Promise<{ stock: number; threshold: number; name: string } | null> {
   const sb = getSupabase();
-  if (!sb) return false;
+  if (!sb) return null;
   const { data: row, error: fetchError } = await sb
     .from('products')
-    .select('stock_quantity')
+    .select('stock_quantity, low_stock_threshold, name')
     .eq('id', productId)
     .single();
   if (fetchError || !row) {
     console.error('[productsDb] adjustStock fetch:', fetchError?.message);
-    return false;
+    return null;
   }
-  const next = Math.max(0, ((row as { stock_quantity: number | null }).stock_quantity ?? 0) + delta);
+  const current = row as { stock_quantity: number | null; low_stock_threshold: number | null; name: string };
+  const next = Math.max(0, (current.stock_quantity ?? 0) + delta);
   const { error } = await sb.from('products').update({ stock_quantity: next }).eq('id', productId);
   if (error) {
     console.error('[productsDb] adjustStock update:', error.message);
-    return false;
+    return null;
   }
   const { error: logError } = await sb.from('inventory_logs').insert({
     product_id: productId,
@@ -332,7 +335,7 @@ export async function dbAdjustStock(
     // Stock already updated successfully; the log is best-effort.
     console.error('[productsDb] adjustStock log:', logError.message);
   }
-  return true;
+  return { stock: next, threshold: current.low_stock_threshold ?? 5, name: current.name };
 }
 
 const DEFAULT_GOLD_RATE = 7000;

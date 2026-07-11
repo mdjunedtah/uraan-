@@ -512,3 +512,23 @@ create table if not exists public.user_addresses (
 );
 create index if not exists user_addresses_email_idx on public.user_addresses (email, created_at desc);
 alter table public.user_addresses enable row level security;
+
+-- Admin notification feed (the bell in the admin topbar). Shared across the
+-- whole admin team — this app has no per-admin-account inbox concept, same
+-- as audit_logs/security_events, so there is no user_id partition; actor_email
+-- (when set) just records who/what the notification is about.
+create table if not exists public.admin_notifications (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null,
+  message     text not null,
+  type        text not null,
+  priority    text not null default 'normal',   -- low | normal | high | critical
+  is_read     boolean not null default false,
+  link        text,
+  actor_email text,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists admin_notifications_created_idx on public.admin_notifications (created_at desc);
+create index if not exists admin_notifications_unread_idx on public.admin_notifications (is_read) where is_read = false;
+alter table public.admin_notifications enable row level security;
