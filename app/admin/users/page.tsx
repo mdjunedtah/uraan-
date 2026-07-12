@@ -210,6 +210,11 @@ export default function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+        {filtered.length === 0 && (
+          <div className="text-center py-12 text-sm text-[#6b5d4c]">
+            {users.length === 0 ? 'No team members yet.' : 'No team members match your search.'}
+          </div>
+        )}
       </div>
     </div>
   );
