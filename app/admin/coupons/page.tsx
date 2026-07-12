@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive, UserPlus, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive, UserPlus, Tag, Search } from 'lucide-react';
 import {
   type Coupon,
   type CouponType,
@@ -31,6 +31,7 @@ export default function AdminCouponsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [copied, setCopied] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -139,6 +140,8 @@ export default function AdminCouponsPage() {
       setCoupons(getCoupons());
     }
   };
+
+  const filtered = coupons.filter((c) => c.code.toLowerCase().includes(search.toLowerCase()));
 
   const copyCode = async (code: string) => {
     try {

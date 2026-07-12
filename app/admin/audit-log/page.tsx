@@ -32,6 +32,7 @@ function actionLabel(action: string): string {
 export default function AuditLogPage() {
   const [logs, setLogs] = useState<AuditLogRow[]>([]);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [actionFilter, setActionFilter] = useState('');
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -42,6 +43,7 @@ export default function AuditLogPage() {
     try {
       const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(nextOffset) });
       if (actionFilter) params.set('action', actionFilter);
+      if (debouncedSearch) params.set('q', debouncedSearch);
       const res = await fetch(`/api/admin/audit-log?${params.toString()}`);
       const data = await res.json();
       if (res.ok && data.ok) {
@@ -56,10 +58,21 @@ export default function AuditLogPage() {
     }
   };
 
+  // Debounce the free-text search before it hits the server, so typing
+  // doesn't fire a request per keystroke.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Re-fetch from the server (resetting pagination back to offset 0, same as
+  // changing actionFilter already did) whenever the action filter or the
+  // debounced search term changes — this is what makes search see the FULL
+  // dataset instead of only whatever page happens to already be in `logs`.
   useEffect(() => {
     load(0, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionFilter]);
+  }, [actionFilter, debouncedSearch]);
 
   const filtered = logs.filter((l) => {
     const q = search.toLowerCase();

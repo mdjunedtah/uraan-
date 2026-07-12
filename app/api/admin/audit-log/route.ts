@@ -14,7 +14,8 @@ export async function GET(request: Request) {
   const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0);
   const action = url.searchParams.get('action') || undefined;
   const actorEmail = url.searchParams.get('actor') || undefined;
+  const search = url.searchParams.get('q') || undefined;
 
-  const logs = await getAuditLogs({ limit, offset, action, actorEmail });
+  const logs = await getAuditLogs({ limit, offset, action, actorEmail, search });
   return NextResponse.json({ ok: true, logs: logs || [] });
 }
