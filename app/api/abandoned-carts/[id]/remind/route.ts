@@ -33,6 +33,20 @@ export async function POST(_request: Request, { params }: { params: { id: string
     `in your cart at Om Gauri Putra. Complete your order now before it's gone — we're here if you have any questions!`;
 
   const result = await sendWhatsAppText(cart.phone, message);
+  // `sendWhatsAppText` reports ok:true even when WhatsApp isn't configured
+  // (a graceful no-op for callers that can degrade silently) — but here that
+  // would mark the reminder as sent and tell the admin it went out when
+  // nothing was actually delivered. Require both flags before treating this
+  // as a real success.
+  if (!result.configured) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "WhatsApp isn't connected — set WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID to send reminders.",
+      },
+      { status: 400 }
+    );
+  }
   if (!result.ok) {
     return NextResponse.json({ ok: false, error: result.error || 'Could not send reminder.' }, { status: 502 });
   }

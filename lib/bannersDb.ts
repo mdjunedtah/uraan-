@@ -1,8 +1,37 @@
 // Server-side banner persistence (Supabase). Returns null / false when the DB
 // is not configured (or the table is missing) so callers fall back to the
 // in-browser store. Mirrors lib/leadsDb.ts.
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabase } from './supabase';
 import type { Banner, BannerPosition, BannerInput } from './banners';
+
+// Same bucket app/api/upload/route.ts uploads banner/product images into.
+const STORAGE_BUCKET = 'product-images';
+
+// Supabase public Storage URLs look like
+// https://<project>.supabase.co/storage/v1/object/public/product-images/<path>
+// — pull out the <path> so it can be passed to storage.remove(). Returns null
+// for anything that isn't a URL into our own bucket (e.g. a manually-typed
+// external image URL), so those are correctly left alone.
+function storagePathFromUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const marker = `/${STORAGE_BUCKET}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  const path = url.slice(idx + marker.length);
+  return path || null;
+}
+
+// Best-effort Storage cleanup: logs on failure but never throws, since the DB
+// row change (insert/update/delete) succeeding is what matters most.
+async function deleteStorageObject(sb: SupabaseClient, imageUrl: string | null | undefined): Promise<void> {
+  const path = storagePathFromUrl(imageUrl);
+  if (!path) return;
+  const { error } = await sb.storage.from(STORAGE_BUCKET).remove([path]);
+  if (error) {
+    console.error('[bannersDb] storage cleanup:', error.message);
+  }
+}
 
 type Row = {
   id: string;
@@ -75,21 +104,44 @@ export async function dbUpdateBanner(id: string, patch: Partial<Banner>): Promis
   if (patch.ctaLink !== undefined) row.cta_link = patch.ctaLink || null;
   if (patch.position !== undefined) row.position = patch.position;
   if (patch.active !== undefined) row.active = patch.active;
+
+  // When the image is being replaced, grab the current URL first so the
+  // Storage object it points at (if any — /api/upload always writes a new
+  // randomized path, so a replaced image is otherwise orphaned) can be
+  // cleaned up once the update succeeds.
+  let previousImage: string | null | undefined;
+  if (patch.image !== undefined) {
+    const { data } = await sb.from('banners').select('image').eq('id', id).maybeSingle();
+    previousImage = (data as { image: string | null } | null)?.image;
+  }
+
   const { error } = await sb.from('banners').update(row).eq('id', id);
   if (error) {
     console.error('[bannersDb] update:', error.message);
     return false;
   }
+
+  if (patch.image !== undefined && previousImage && previousImage !== patch.image) {
+    await deleteStorageObject(sb, previousImage);
+  }
+
   return true;
 }
 
 export async function dbDeleteBanner(id: string): Promise<boolean> {
   const sb = getSupabase();
   if (!sb) return false;
-  const { error } = await sb.from('banners').delete().eq('id', id);
+  // .select() after .delete() returns the deleted row (Postgres RETURNING),
+  // so the banner's image URL is available for Storage cleanup without a
+  // separate round-trip.
+  const { data, error } = await sb.from('banners').delete().eq('id', id).select('image');
   if (error) {
     console.error('[bannersDb] delete:', error.message);
     return false;
   }
+  const deletedImage = (data as { image: string | null }[] | null)?.[0]?.image;
+  // Best-effort: the DB row is already gone at this point either way, so a
+  // Storage failure here is logged but doesn't flip the result to false.
+  await deleteStorageObject(sb, deletedImage);
   return true;
 }

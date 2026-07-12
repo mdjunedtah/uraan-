@@ -6,10 +6,14 @@
 
 import { normalizePhone } from './phone';
 
-// Business WhatsApp number in international format, digits only.
-export const WHATSAPP_NUMBER = (
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '918851911653'
-).replace(/[^0-9]/g, '');
+// Business WhatsApp number in international format, digits only. Run through
+// normalizePhone() so a value hand-typed into Vercel's env var UI without its
+// country code (e.g. "8851911653" instead of "918851911653") still resolves
+// correctly; falls back to a bare digit-strip if normalization can't make
+// sense of the value, so an already-correct number never breaks.
+const WHATSAPP_NUMBER_RAW = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '918851911653';
+export const WHATSAPP_NUMBER =
+  normalizePhone(WHATSAPP_NUMBER_RAW)?.slice(1) || WHATSAPP_NUMBER_RAW.replace(/[^0-9]/g, '');
 
 /**
  * Build a wa.me click-to-chat link, optionally pre-filled with a message.

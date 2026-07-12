@@ -91,18 +91,18 @@ create table if not exists public.categories (
 );
 
 insert into public.categories (slug, name, description, image, count) values
-  ('gold','Gold Jewellery','916 Hallmarked Gold','/images/collection1.jpg',124),
-  ('silver','Silver Jewellery','92.5% Pure Silver','/images/collection2.jpg',98),
-  ('diamond','Diamond','Certified Diamonds','/images/collection3.jpg',56),
-  ('gems','Precious Gems','Ruby, Emerald, Sapphire','/images/diamond-set.jpg',42),
-  ('rudraksh','Rudraksh','1 to 21 Mukhi Certified','/images/necklace.jpg',38),
-  ('necklaces','Necklaces','Statement & Daily Wear','/images/necklace.jpg',87),
-  ('earrings','Earrings','Jhumkas, Studs, Chandbalis','/images/earrings.jpg',112),
-  ('rings','Rings','Engagement & Cocktail','/images/ring.jpg',64),
-  ('bangles','Bangles','Traditional & Modern','/images/bracelet.jpg',78),
-  ('bracelets','Bracelets','Chain & Charm','/images/bracelet.jpg',45),
-  ('pendants','Pendants','Religious & Designer','/images/necklace.jpg',52),
-  ('bridal','Bridal Sets','Complete Bridal','/images/bridal-set.jpg',28)
+  ('gold','Gold Jewellery','916 Hallmarked Gold','/images/gallery/necklace-1.jpg',124),
+  ('silver','Silver Jewellery','92.5% Pure Silver','/images/gallery/necklace-2.jpg',98),
+  ('diamond','Diamond','Certified Diamonds','/images/gallery/ring-5.jpg',56),
+  ('gems','Precious Gems','Ruby, Emerald, Sapphire','/images/gallery/ring-2.jpg',42),
+  ('rudraksh','Rudraksh','1 to 21 Mukhi Certified','/images/gallery/rudraksh-1.jpg',38),
+  ('necklaces','Necklaces','Statement & Daily Wear','/images/gallery/necklace-4.jpg',87),
+  ('earrings','Earrings','Jhumkas, Studs, Chandbalis','/images/gallery/earrings-4.jpg',112),
+  ('rings','Rings','Engagement & Cocktail','/images/gallery/ring-1.jpg',64),
+  ('bangles','Bangles','Traditional & Modern','/images/gallery/bracelet-3.jpg',78),
+  ('bracelets','Bracelets','Chain & Charm','/images/gallery/bracelet-1.jpg',45),
+  ('pendants','Pendants','Religious & Designer','/images/gallery/necklace-6.jpg',52),
+  ('bridal','Bridal Sets','Complete Bridal','/images/gallery/necklace-8.jpg',28)
 on conflict (slug) do nothing;
 
 -- ── Coupons ────────────────────────────────────────────────────────────

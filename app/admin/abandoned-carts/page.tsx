@@ -63,6 +63,8 @@ export default function AdminAbandonedCartsPage() {
   };
 
   const unrecoveredCount = carts.filter((c) => !c.recovered).length;
+  const recoveredCount = carts.length - unrecoveredCount;
+  const recoveryRate = carts.length > 0 ? Math.round((recoveredCount / carts.length) * 100) : 0;
 
   return (
     <div>
@@ -71,6 +73,9 @@ export default function AdminAbandonedCartsPage() {
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Abandoned Carts</h1>
           <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
             {carts.length} carts · {unrecoveredCount} not recovered
+            {carts.length > 0 && (
+              <span className="font-semibold text-[#3d6b5a]">· {recoveryRate}% recovery rate</span>
+            )}
             <span
               className={`inline-flex items-center gap-1 text-[10px] tracking-[1px] uppercase px-2 py-0.5 ${
                 configured ? 'bg-[#3d6b5a]/10 text-[#3d6b5a]' : 'bg-[#b8893a]/10 text-[#b8893a]'

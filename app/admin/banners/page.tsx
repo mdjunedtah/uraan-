@@ -11,6 +11,7 @@ import {
   toggleBanner,
   deleteBanner,
 } from '@/lib/banners';
+import { invalidateBannerCache } from '@/hooks/useBanners';
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -47,6 +48,7 @@ export default function AdminBannersPage() {
     if (!confirm(`Delete banner ${id}?`)) return;
     if (configured) {
       await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      invalidateBannerCache();
       await load();
     } else {
       deleteBanner(id);
@@ -61,6 +63,7 @@ export default function AdminBannersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !b.active }),
       });
+      invalidateBannerCache();
       await load();
     } else {
       toggleBanner(b.id);
