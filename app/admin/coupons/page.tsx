@@ -277,6 +277,17 @@ export default function AdminCouponsPage() {
         </form>
       )}
 
+      <div className="bg-white border border-[rgba(184,137,58,0.18)] p-4 mb-5 flex items-center gap-2">
+        <Search size={14} className="text-[#9a8c75]" />
+        <input
+          type="text"
+          placeholder="Search by coupon code..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm"
+        />
+      </div>
+
       <div className="bg-white border border-[rgba(184,137,58,0.18)] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -291,7 +302,7 @@ export default function AdminCouponsPage() {
             </tr>
           </thead>
           <tbody>
-            {coupons.map((c) => (
+            {filtered.map((c) => (
               <tr key={c.id} className="border-b border-[rgba(184,137,58,0.1)] hover:bg-[#fbf8f1]/40">
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -349,8 +360,10 @@ export default function AdminCouponsPage() {
             ))}
           </tbody>
         </table>
-        {coupons.length === 0 && (
-          <div className="text-center py-12 text-sm text-[#6b5d4c]">No coupons yet. Add your first one.</div>
+        {filtered.length === 0 && (
+          <div className="text-center py-12 text-sm text-[#6b5d4c]">
+            {coupons.length === 0 ? 'No coupons yet. Add your first one.' : 'No coupons match your search.'}
+          </div>
         )}
       </div>
     </div>
