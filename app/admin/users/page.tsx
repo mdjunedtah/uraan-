@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { UserCog, Plus, Edit2, Trash2, Mail, Phone, Shield, X } from 'lucide-react';
+import { UserCog, Plus, Edit2, Trash2, Mail, Phone, Shield, X, Search } from 'lucide-react';
 import { type User, type TeamRole, getTeam, addMember, updateMember, deleteMember } from '@/lib/team';
 
 const emptyForm = { name: '', email: '', phone: '', role: 'staff' as TeamRole };
@@ -11,6 +11,7 @@ export default function AdminUsersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     setUsers(getTeam());

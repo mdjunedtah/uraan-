@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import BannerForm from '@/components/admin/BannerForm';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Database, HardDrive } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Database, HardDrive, Search } from 'lucide-react';
 import {
   type Banner,
   getBanners,
@@ -18,6 +18,7 @@ export default function AdminBannersPage() {
   const [configured, setConfigured] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | undefined>();
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -102,6 +103,15 @@ export default function AdminBannersPage() {
     setEditingBanner(undefined);
   };
 
+  const filtered = banners.filter((b) => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return (
+      b.title.toLowerCase().includes(q) ||
+      (b.subtitle || '').toLowerCase().includes(q)
+    );
+  });
+
   if (showForm) {
     return (
       <div>
@@ -121,7 +131,7 @@ export default function AdminBannersPage() {
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Banners</h1>
           <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
-            {banners.length} banners · {banners.filter((b) => b.active).length} active
+            {filtered.length} banners · {filtered.filter((b) => b.active).length} active
             <StorageBadge configured={configured} />
           </p>
         </div>
@@ -136,8 +146,19 @@ export default function AdminBannersPage() {
         </button>
       </div>
 
+      <div className="bg-white border border-[rgba(184,137,58,0.18)] p-4 mb-5 flex items-center gap-2">
+        <Search size={14} className="text-[#9a8c75]" />
+        <input
+          type="text"
+          placeholder="Search by title or subtitle..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm"
+        />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {banners.map((b) => (
+        {filtered.map((b) => (
           <div key={b.id} className="bg-white border border-[rgba(184,137,58,0.18)] overflow-hidden">
             <div
               className="aspect-video bg-[#f8f2e6] bg-cover bg-center relative"
@@ -188,9 +209,9 @@ export default function AdminBannersPage() {
         ))}
       </div>
 
-      {banners.length === 0 && (
+      {filtered.length === 0 && (
         <div className="bg-white border border-[rgba(184,137,58,0.18)] text-center py-12 text-sm text-[#6b5d4c]">
-          No banners yet. Add your first one.
+          {banners.length === 0 ? 'No banners yet. Add your first one.' : 'No banners match your search.'}
         </div>
       )}
     </div>

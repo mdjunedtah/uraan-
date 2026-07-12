@@ -159,7 +159,7 @@ export default function AdminCouponsPage() {
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Coupons</h1>
           <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
-            {coupons.length} coupons · {coupons.filter((c) => c.active).length} active
+            {filtered.length} coupons · {filtered.filter((c) => c.active).length} active
             <StorageBadge configured={configured} />
           </p>
         </div>
