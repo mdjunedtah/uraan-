@@ -86,6 +86,7 @@ export default function AdminBannersPage() {
           body: JSON.stringify(data),
         });
       }
+      invalidateBannerCache();
       await load();
     } else {
       if (editingBanner) updateBanner(editingBanner.id, data);
