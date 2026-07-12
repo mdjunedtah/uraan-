@@ -146,6 +146,23 @@ export async function notifyAdminNewOrder(order: OrderNotification): Promise<Wha
   return sendWhatsAppText(ADMIN_WHATSAPP_NUMBER, text);
 }
 
+// Sends the CUSTOMER a WhatsApp confirmation right after their order is
+// placed. Free-form text only (no template configured for this — Meta only
+// delivers it if the customer messaged the business number in the last 24h,
+// same known limitation as the post-purchase status-update messages below).
+// Best-effort and fail-safe; never throws into the payment/order response.
+export async function notifyCustomerOrderPlaced(
+  phone: string,
+  orderId: string,
+  amount: number
+): Promise<WhatsAppResult> {
+  const text =
+    `Thank you for your order! 🙏\n\n` +
+    `Order ${orderId} for ₹${amount.toLocaleString('en-IN')} has been placed with Om Gauri Putra.\n` +
+    `We'll notify you here as it ships.`;
+  return sendWhatsAppText(phone, text);
+}
+
 // ── Admin lead notifications ────────────────────────────────────────────────
 // Recipient for new-lead WhatsApp alerts. Override per-environment with
 // ADMIN_WHATSAPP_NUMBER (digits only, international format, e.g. 91XXXXXXXXXX);

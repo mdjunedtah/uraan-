@@ -532,3 +532,31 @@ create table if not exists public.admin_notifications (
 create index if not exists admin_notifications_created_idx on public.admin_notifications (created_at desc);
 create index if not exists admin_notifications_unread_idx on public.admin_notifications (is_read) where is_read = false;
 alter table public.admin_notifications enable row level security;
+
+-- ════════════════════════════════════════════════════════════════════════
+--  PAYMENT HARDENING — replay protection + atomic coupon usage.
+--  Safe to re-run (idempotent).
+-- ════════════════════════════════════════════════════════════════════════
+
+-- A captured Razorpay payment id must map to exactly one order — this is the
+-- database-level backstop for /api/payment/verify's idempotency check, so a
+-- duplicate insert is rejected even if that application-level check is ever
+-- bypassed or racing itself. Partial index: COD orders (payment_id null)
+-- are unrestricted; only real payment ids must be unique.
+create unique index if not exists orders_payment_id_unique_idx
+  on public.orders (payment_id) where payment_id is not null;
+
+-- Atomic "used = used + 1, but only while still under usage_limit" for
+-- coupon redemption — a plain fetch-then-PATCH from application code loses
+-- updates when two checkouts apply the same coupon at the same time.
+-- usage_limit = 0 means unlimited. Returns the updated row when it
+-- incremented, or no rows when the coupon was already at its limit.
+create or replace function public.increment_coupon_usage(p_id text)
+returns setof public.coupons
+language sql
+as $$
+  update public.coupons
+  set used = used + 1
+  where id = p_id and (usage_limit = 0 or used < usage_limit)
+  returning *;
+$$;

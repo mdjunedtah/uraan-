@@ -87,9 +87,14 @@ export async function dbCreateReview(input: {
 }): Promise<Review | null> {
   const sb = getSupabase();
   if (!sb) return null;
+  // reviews.id is `text primary key` with no DB-side default (unlike e.g.
+  // admin_notifications.id) — every insert must supply one itself, or every
+  // submission hits a NOT NULL violation and silently fails below.
+  const id = 'RV' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
   const { data, error } = await sb
     .from('reviews')
     .insert({
+      id,
       name: input.name,
       city: input.city || null,
       avatar: '/images/model.jpg',

@@ -108,13 +108,28 @@ function ReturnsContent() {
   };
 
   const handleStatusChange = async (id: string, status: ReturnStatus) => {
+    const previous = items.find((r) => r.id === id)?.status;
     setItems((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
     if (configured) {
-      await fetch(`/api/returns/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
+      // Marking a return "Refunded" triggers a real refund server-side (via
+      // Razorpay when paid online) and can genuinely fail — e.g. the order
+      // was already fully refunded, or the gateway rejects it — so the
+      // optimistic update above must be reverted rather than trusted blind.
+      try {
+        const res = await fetch(`/api/returns/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!data?.ok) {
+          setItems((prev) => prev.map((r) => (r.id === id ? { ...r, status: previous || r.status } : r)));
+          alert(data?.error || 'Could not update this return.');
+        }
+      } catch {
+        setItems((prev) => prev.map((r) => (r.id === id ? { ...r, status: previous || r.status } : r)));
+        alert('Network error. Please try again.');
+      }
     } else {
       updateReturnStatus(id, status);
     }

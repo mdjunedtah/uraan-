@@ -1,3 +1,11 @@
+// Collision-resistant order id — timestamp + random suffix, base36. A plain
+// Date.now() (or its last 8 digits) collides whenever two orders land in the
+// same millisecond, which a duplicate-key insert then rejects outright.
+export function generateOrderId(): string {
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return 'OGP' + Date.now().toString(36).toUpperCase() + rand;
+}
+
 export type OrderStatus = 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
 
 export type Order = {

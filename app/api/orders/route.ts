@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { dbGetOrders, dbInsertOrder } from '@/lib/ordersDb';
+import { dbAdjustStock } from '@/lib/productsDb';
 import { isAdminRequest } from '@/lib/adminApi';
 import { checkLengths, isBodyTooLarge, MAX_LEN } from '@/lib/security/validate';
-import { notifyAdminNewOrder } from '@/lib/whatsappServer';
+import { notifyAdminNewOrder, notifyCustomerOrderPlaced } from '@/lib/whatsappServer';
 import { normalizePhone } from '@/lib/phone';
 import { notify } from '@/lib/notify';
-
-const MAX_ITEMS = 100;
+import { resolveCartLines, computeShipping } from '@/lib/orderPricing';
+import { checkCoupon } from '@/lib/couponValidation';
 
 // GET → list orders from the database (admin only — contains customer PII).
 export async function GET() {
@@ -21,7 +22,11 @@ export async function GET() {
   return NextResponse.json({ ok: true, configured: true, orders: orders || [] });
 }
 
-// POST → record a placed order (from checkout).
+// POST → record a placed order (from checkout). This is the COD / no-gateway
+// path — it can NEVER be used to record an order as paid. A "paid" order can
+// only ever be created by /api/payment/verify after a real signature check,
+// so `paid` and `paymentId` here are always forced, regardless of what the
+// request body claims.
 export async function POST(request: Request) {
   if (isBodyTooLarge(request)) {
     return NextResponse.json({ ok: false, error: 'Request too large.' }, { status: 413 });
@@ -35,14 +40,9 @@ export async function POST(request: Request) {
 
   const id = String(body.id || '').trim();
   const customer = String(body.customer || '').trim();
-  const amount = Number(body.amount || 0);
-  const items = Array.isArray(body.items) ? (body.items as NewItem[]) : [];
 
-  if (!id || !customer || !items.length) {
+  if (!id || !customer) {
     return NextResponse.json({ ok: false, error: 'Incomplete order.' }, { status: 400 });
-  }
-  if (items.length > MAX_ITEMS) {
-    return NextResponse.json({ ok: false, error: `Orders are limited to ${MAX_ITEMS} items.` }, { status: 400 });
   }
 
   const email = String(body.email || '').trim();
@@ -51,26 +51,46 @@ export async function POST(request: Request) {
   const payment = String(body.payment || '').trim();
   const status = String(body.status || 'Processing').trim();
   const address = String(body.address || '').trim();
-  const paymentId = String(body.paymentId || '').trim();
-  const lengthError =
-    checkLengths({
-      'Order id': { value: id, max: MAX_LEN.short },
-      Customer: { value: customer, max: MAX_LEN.short },
-      Email: { value: email, max: MAX_LEN.short },
-      Address: { value: address, max: MAX_LEN.text },
-      Status: { value: status, max: MAX_LEN.short },
-    }) ||
-    items
-      .map((i) => checkLengths({ 'Item name': { value: String(i.name || ''), max: MAX_LEN.short } }))
-      .find(Boolean);
+  const lengthError = checkLengths({
+    'Order id': { value: id, max: MAX_LEN.short },
+    Customer: { value: customer, max: MAX_LEN.short },
+    Email: { value: email, max: MAX_LEN.short },
+    Address: { value: address, max: MAX_LEN.text },
+    Status: { value: status, max: MAX_LEN.short },
+  });
   if (lengthError) {
     return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
   }
 
-  // No DB yet: accept silently so checkout still succeeds.
+  // No DB yet: accept silently so checkout still succeeds (nothing to price
+  // against either — the same demo fallback the rest of the app uses).
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ ok: true, configured: false });
   }
+
+  const resolved = await resolveCartLines(body.items);
+  if (!resolved.ok) {
+    return NextResponse.json({ ok: false, error: resolved.error }, { status: 400 });
+  }
+  if (resolved.lines.length > 100) {
+    return NextResponse.json({ ok: false, error: 'Orders are limited to 100 items.' }, { status: 400 });
+  }
+
+  let discount = 0;
+  const couponCode = typeof body.couponCode === 'string' ? body.couponCode.trim() : '';
+  if (couponCode) {
+    const categories = Array.from(new Set(resolved.lines.map((l) => l.category).filter(Boolean))) as string[];
+    const couponResult = await checkCoupon({
+      code: couponCode,
+      orderTotal: resolved.subtotal,
+      categories,
+      phone,
+      email,
+      recordUsage: true,
+    });
+    if (couponResult.ok) discount = couponResult.discount;
+  }
+  const amount = Math.max(0, resolved.subtotal + computeShipping(resolved.subtotal) - discount);
 
   const saved = await dbInsertOrder({
     id,
@@ -78,42 +98,38 @@ export async function POST(request: Request) {
     email: email || undefined,
     phone: phone || undefined,
     amount,
-    items: items.map((i) => ({
-      name: String(i.name || ''),
-      quantity: Number(i.quantity || 1),
-      price: Number(i.price || 0),
-      image: i.image ? String(i.image) : undefined,
-    })),
+    items: resolved.lines.map((l) => ({ name: l.name, quantity: l.quantity, price: l.price, image: l.image })),
     payment: payment || undefined,
     status,
     address: address || undefined,
-    paid: Boolean(body.paid),
-    paymentId: paymentId || undefined,
+    paid: false,
+    paymentId: undefined,
   });
 
   if (!saved) {
     return NextResponse.json({ ok: false, error: 'Could not save order.' }, { status: 502 });
   }
 
-  // Best-effort admin notification — never fails the order response.
+  // Best-effort stock decrement — never fails the order response.
+  for (const line of resolved.lines) {
+    dbAdjustStock(line.id, -line.quantity, `Order ${id}`, 'system').catch(() => {});
+  }
+
+  // Best-effort notifications — never fail the order response.
   notifyAdminNewOrder({
     orderId: id,
     customer,
     amount,
     payment: payment || 'COD',
-    items: items.map((i) => ({ name: String(i.name || ''), quantity: Number(i.quantity || 1) })),
+    items: resolved.lines.map((l) => ({ name: l.name, quantity: l.quantity })),
   }).catch(() => {});
+  if (phone) {
+    notifyCustomerOrderPlaced(phone, id, amount).catch(() => {});
+  }
 
   notify('new_order', `${customer} placed order ${id} for ₹${amount.toLocaleString('en-IN')}.`, {
     link: `/admin/orders/${id}`,
   }).catch(() => {});
-  if (Boolean(body.paid)) {
-    notify('payment_received', `Payment received for order ${id} (₹${amount.toLocaleString('en-IN')}, ${payment || 'online'}).`, {
-      link: `/admin/orders/${id}`,
-    }).catch(() => {});
-  }
 
   return NextResponse.json({ ok: true, configured: true });
 }
-
-type NewItem = { name?: unknown; quantity?: unknown; price?: unknown; image?: unknown };

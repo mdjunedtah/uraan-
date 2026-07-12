@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/adminApi';
-import { dbGetOrderById, dbSetOrderRefund, dbInsertTransaction } from '@/lib/ordersDb';
-import { isRazorpayConfigured, createRazorpayRefund } from '@/lib/razorpay';
+import { processRefund } from '@/lib/refunds';
 import { currentApiAdmin } from '@/lib/security/guard';
 import { logAudit } from '@/lib/audit';
 import { checkLengths, MAX_LEN } from '@/lib/security/validate';
@@ -23,61 +22,21 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   const amount = Number(body.amount || 0);
   const reason = String(body.reason || '').trim();
-  if (!amount || amount <= 0) {
-    return NextResponse.json(
-      { ok: false, error: 'Refund amount must be greater than zero.' },
-      { status: 400 }
-    );
-  }
   const lengthError = checkLengths({ Reason: { value: reason, max: MAX_LEN.text } });
   if (lengthError) {
     return NextResponse.json({ ok: false, error: lengthError }, { status: 400 });
   }
 
-  const order = await dbGetOrderById(params.id);
-  if (!order) {
-    return NextResponse.json({ ok: false, error: 'Order not found.' }, { status: 404 });
+  const result = await processRefund(params.id, amount, reason || undefined);
+  if (!result.ok) {
+    const status =
+      result.error === 'Order not found.'
+        ? 404
+        : result.error === 'Refund amount must be greater than zero.' || result.error === 'Refund amount exceeds the order total.'
+        ? 400
+        : 502;
+    return NextResponse.json({ ok: false, error: result.error }, { status });
   }
-
-  const alreadyRefunded = order.refundAmount || 0;
-  const totalRefunded = alreadyRefunded + amount;
-  if (totalRefunded > order.amount) {
-    return NextResponse.json(
-      { ok: false, error: 'Refund amount exceeds the order total.' },
-      { status: 400 }
-    );
-  }
-
-  let gateway: string | undefined;
-  let gatewayResponse: Record<string, unknown> = { manual: true, reason: reason || undefined };
-
-  if (order.paymentId && isRazorpayConfigured()) {
-    gateway = 'razorpay';
-    const result = await createRazorpayRefund(order.paymentId, Math.round(amount * 100));
-    if (!result.ok) {
-      return NextResponse.json(
-        { ok: false, error: result.error || 'Refund failed.' },
-        { status: 502 }
-      );
-    }
-    gatewayResponse = { razorpayRefundId: result.id };
-  }
-
-  const refundStatus: 'partial' | 'full' = totalRefunded >= order.amount ? 'full' : 'partial';
-
-  const saved = await dbSetOrderRefund(params.id, totalRefunded, refundStatus);
-  if (!saved) {
-    return NextResponse.json({ ok: false, error: 'Could not record refund.' }, { status: 502 });
-  }
-
-  await dbInsertTransaction({
-    orderId: params.id,
-    type: 'refund',
-    gateway,
-    gatewayResponse,
-    amount,
-    status: 'success',
-  });
 
   const admin = await currentApiAdmin();
   await logAudit({
@@ -85,8 +44,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
     actorRole: admin?.role,
     action: 'order_refunded',
     target: params.id,
-    metadata: { amount, totalRefunded, refundStatus, reason: reason || undefined },
+    metadata: { amount, totalRefunded: result.refundAmount, refundStatus: result.refundStatus, reason: reason || undefined },
   });
 
-  return NextResponse.json({ ok: true, refundStatus, refundAmount: totalRefunded });
+  return NextResponse.json({ ok: true, refundStatus: result.refundStatus, refundAmount: result.refundAmount });
 }
