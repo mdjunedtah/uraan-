@@ -164,7 +164,7 @@ export default function AdminAbandonedCartsPage() {
         </table>
         {!loading && carts.length === 0 && (
           <div className="text-center py-12 text-sm text-[#6b5d4c]">
-            No abandoned carts yet — they'll appear when a customer starts checkout without finishing.
+            No abandoned carts yet — they&apos;ll appear when a customer starts checkout without finishing.
           </div>
         )}
       </div>
