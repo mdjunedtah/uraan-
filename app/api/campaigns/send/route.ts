@@ -82,6 +82,11 @@ export async function POST(request: Request) {
     // reach recently-active customers) but warn the admin why the rest fail.
     const templateName = process.env.WHATSAPP_CAMPAIGN_TEMPLATE;
     const templateLang = process.env.WHATSAPP_CAMPAIGN_TEMPLATE_LANG || 'en_US';
+    // Static templates (no variable) and Meta's built-in "hello_world" take 0
+    // params; set WHATSAPP_CAMPAIGN_TEMPLATE_VARS=0 for those. Default is one
+    // {{1}} filled with the personalized message (no newlines — Meta rejects
+    // template params containing them — and capped under Meta's limit).
+    const templateVars = process.env.WHATSAPP_CAMPAIGN_TEMPLATE_VARS ?? '1';
     if (!templateName) {
       warning =
         'No WHATSAPP_CAMPAIGN_TEMPLATE is configured — only customers who messaged you in the last 24 hours ' +
@@ -97,7 +102,12 @@ export async function POST(request: Request) {
       try {
         const personalized = personalize(message, r.name);
         const result = templateName
-          ? await sendWhatsAppTemplate(phone, templateName, templateLang, [personalized])
+          ? await sendWhatsAppTemplate(
+              phone,
+              templateName,
+              templateLang,
+              templateVars === '0' ? [] : [personalized.replace(/\s+/g, ' ').trim().slice(0, 900)]
+            )
           : await sendWhatsAppText(phone, personalized);
         if (result.ok && result.configured) sentCount++;
         else failedCount++;

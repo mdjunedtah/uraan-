@@ -95,6 +95,25 @@ export async function dbUpdateCoupon(id: string, patch: Partial<Coupon>): Promis
   return true;
 }
 
+// Atomic "used = used + 1, but only if still under the limit" — a plain
+// read-then-write (fetch `used`, PATCH `used + 1`) loses updates when two
+// checkouts apply the same coupon concurrently. Backed by the
+// increment_coupon_usage() SQL function (supabase/schema.sql) so the
+// check-and-increment happens in one statement. Returns false if the coupon
+// was already at its usage limit (a genuine, if rare, race — the caller
+// already decided to grant the discount for this request, so this is
+// logged rather than retroactively rejected).
+export async function dbIncrementCouponUsage(id: string): Promise<boolean> {
+  const sb = getSupabase();
+  if (!sb) return false;
+  const { data, error } = await sb.rpc('increment_coupon_usage', { p_id: id });
+  if (error) {
+    console.error('[couponsDb] incrementUsage:', error.message);
+    return false;
+  }
+  return Array.isArray(data) && data.length > 0;
+}
+
 export async function dbDeleteCoupon(id: string): Promise<boolean> {
   const sb = getSupabase();
   if (!sb) return false;

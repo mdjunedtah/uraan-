@@ -39,7 +39,10 @@ export async function createRazorpayOrder(
         Authorization: 'Basic ' + Buffer.from(`${keyId}:${secret}`).toString('base64'),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ amount: amountPaise, currency: 'INR', receipt }),
+      // payment_capture: 1 — auto-capture on success so a completed checkout
+      // always reaches 'captured' status; /api/payment/verify requires that
+      // status before it will ever record an order as paid.
+      body: JSON.stringify({ amount: amountPaise, currency: 'INR', receipt, payment_capture: 1 }),
     });
     if (!res.ok) {
       console.error('[razorpay] create order failed:', res.status, await res.text());
@@ -84,6 +87,39 @@ export async function createRazorpayRefund(
   } catch (err) {
     console.error('[razorpay] refund error:', err);
     return { ok: false, error: 'Could not reach Razorpay API.' };
+  }
+}
+
+export interface RazorpayPayment {
+  id: string;
+  order_id: string;
+  status: string; // 'created' | 'authorized' | 'captured' | 'refunded' | 'failed'
+  amount: number; // paise
+  currency: string;
+}
+
+// Fetches the payment record straight from Razorpay so the server never has
+// to trust what the browser claims was paid — used by /api/payment/verify to
+// get the authoritative amount/status for a payment id.
+export async function fetchRazorpayPayment(paymentId: string): Promise<RazorpayPayment | null> {
+  const keyId = razorpayKeyId();
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !secret) return null;
+
+  try {
+    const res = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${keyId}:${secret}`).toString('base64'),
+      },
+    });
+    if (!res.ok) {
+      console.error('[razorpay] fetch payment failed:', res.status, await res.text());
+      return null;
+    }
+    return (await res.json()) as RazorpayPayment;
+  } catch (err) {
+    console.error('[razorpay] fetch payment error:', err);
+    return null;
   }
 }
 

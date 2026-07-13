@@ -24,7 +24,11 @@ function loadReviews(): Promise<Review[] | null> {
     inflight = fetch('/api/reviews')
       .then((r) => r.json())
       .then((d) => {
-        if (d?.ok && Array.isArray(d.reviews) && d.reviews.length) {
+        // A genuinely empty (but configured) table is a valid result, not a
+        // failure — treating `reviews: []` as "fetch failed" masked a real
+        // empty DB behind stale local/seed data. Only `configured: false`
+        // (no DB wired up) or an actual fetch error should fall back.
+        if (d?.ok && d.configured && Array.isArray(d.reviews)) {
           cached = d.reviews as Review[];
           return cached;
         }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { UserCog, Plus, Edit2, Trash2, Mail, Phone, Shield, X } from 'lucide-react';
+import { UserCog, Plus, Edit2, Trash2, Mail, Phone, Shield, X, Search } from 'lucide-react';
 import { type User, type TeamRole, getTeam, addMember, updateMember, deleteMember } from '@/lib/team';
 
 const emptyForm = { name: '', email: '', phone: '', role: 'staff' as TeamRole };
@@ -11,6 +11,7 @@ export default function AdminUsersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     setUsers(getTeam());
@@ -64,13 +65,19 @@ export default function AdminUsersPage() {
     customer: 'bg-gray-500/10 text-gray-600',
   };
 
+  const filtered = users.filter((u) => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Admin Users</h1>
           <p className="text-sm text-[#6b5d4c]">
-            {users.length} team members · {users.filter((u) => u.role === 'admin').length} admins
+            {filtered.length} team members · {filtered.filter((u) => u.role === 'admin').length} admins
           </p>
         </div>
         <button
@@ -139,6 +146,17 @@ export default function AdminUsersPage() {
         </form>
       )}
 
+      <div className="bg-white border border-[rgba(184,137,58,0.18)] p-4 mb-5 flex items-center gap-2">
+        <Search size={14} className="text-[#9a8c75]" />
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm"
+        />
+      </div>
+
       <div className="bg-white border border-[rgba(184,137,58,0.18)] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -151,7 +169,7 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
+            {filtered.map((u) => (
               <tr key={u.id} className="border-b border-[rgba(184,137,58,0.1)] hover:bg-[#fbf8f1]/40">
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-3">
@@ -192,6 +210,11 @@ export default function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+        {filtered.length === 0 && (
+          <div className="text-center py-12 text-sm text-[#6b5d4c]">
+            {users.length === 0 ? 'No team members yet.' : 'No team members match your search.'}
+          </div>
+        )}
       </div>
     </div>
   );

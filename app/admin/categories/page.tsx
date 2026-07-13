@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Database, HardDrive } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Plus, Edit2, Trash2, X, Database, HardDrive, Upload, Search } from 'lucide-react';
 import {
   type Category,
   getCategories,
@@ -9,6 +9,7 @@ import {
   updateCategory,
   deleteCategory,
 } from '@/lib/categories';
+import { invalidateCategoryCache } from '@/hooks/useCategories';
 
 const emptyForm = { name: '', description: '', image: '' };
 
@@ -18,6 +19,15 @@ export default function AdminCategoriesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [uploading, setUploading] = useState(false);
+  const [search, setSearch] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const filtered = categories.filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q) || c.description.toLowerCase().includes(q);
+  });
 
   // Prefer the database; fall back to the in-browser store when it's off.
   const load = useCallback(async () => {
@@ -58,13 +68,35 @@ export default function AdminCategoriesPage() {
     setForm(emptyForm);
   };
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setForm((f) => ({ ...f, image: data.url }));
+      } else {
+        alert(data.error || 'Upload failed.');
+      }
+    } catch {
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
-      image: form.image.trim() || '/images/necklace.jpg',
+      image: form.image.trim(),
     };
     if (configured) {
       if (editingSlug) {
@@ -80,10 +112,12 @@ export default function AdminCategoriesPage() {
           body: JSON.stringify(payload),
         });
       }
+      invalidateCategoryCache();
       await load();
     } else {
       if (editingSlug) updateCategory(editingSlug, payload);
       else addCategory(form);
+      invalidateCategoryCache();
       setCategories(getCategories());
     }
     closeForm();
@@ -93,9 +127,11 @@ export default function AdminCategoriesPage() {
     if (!confirm(`Delete category "${name}"?`)) return;
     if (configured) {
       await fetch(`/api/categories/${slug}`, { method: 'DELETE' });
+      invalidateCategoryCache();
       await load();
     } else {
       deleteCategory(slug);
+      invalidateCategoryCache();
       setCategories(getCategories());
     }
   };
@@ -145,13 +181,24 @@ export default function AdminCategoriesPage() {
             </div>
             <div className="md:col-span-2">
               <label className="luxury-label">Image URL</label>
-              <input
-                type="text"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                className="luxury-input"
-                placeholder="/images/necklace.jpg"
-              />
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={form.image}
+                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  className="luxury-input"
+                  placeholder="/images/necklace.jpg"
+                />
+                <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleUpload} />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="px-4 py-2 border border-[rgba(184,137,58,0.32)] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#fbf8f1] flex items-center gap-2 disabled:opacity-60 whitespace-nowrap"
+                >
+                  <Upload size={12} /> {uploading ? 'Uploading…' : 'Upload'}
+                </button>
+              </div>
             </div>
           </div>
           <div className="mt-4 flex gap-3">
@@ -165,8 +212,19 @@ export default function AdminCategoriesPage() {
         </form>
       )}
 
+      <div className="relative mb-4 max-w-sm">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search categories…"
+          className="luxury-input pl-9"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((c) => (
+        {filtered.map((c) => (
           <div key={c.slug} className="bg-white border border-[rgba(184,137,58,0.18)] p-5 group hover:shadow-[0_12px_40px_rgba(122,90,31,0.12)] transition-all">
             <div className="flex items-start gap-4">
               <div
@@ -198,9 +256,9 @@ export default function AdminCategoriesPage() {
         ))}
       </div>
 
-      {categories.length === 0 && (
+      {filtered.length === 0 && (
         <div className="bg-white border border-[rgba(184,137,58,0.18)] text-center py-12 text-sm text-[#6b5d4c]">
-          No categories yet. Add your first one.
+          {categories.length === 0 ? 'No categories yet. Add your first one.' : 'No categories match your search.'}
         </div>
       )}
     </div>

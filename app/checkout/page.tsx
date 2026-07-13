@@ -19,6 +19,7 @@ import {
 import { BUSINESS_ADDRESS_INLINE, MAPS_DIRECTIONS_URL } from '@/lib/business';
 import { COUNTRIES, DEFAULT_COUNTRY, normalizePhone } from '@/lib/phone';
 import type { Address } from '@/lib/addresses';
+import { generateOrderId } from '@/lib/orders';
 
 type PaymentMethod = 'card' | 'upi' | 'wallet' | 'netbanking' | 'cod';
 
@@ -153,6 +154,15 @@ export default function CheckoutPage() {
     setCouponError('');
   };
 
+  // Synchronous re-entrancy guard for "Place Order" — a ref (not the
+  // `processing` state) so a same-tick double-click can't slip both calls
+  // through before React has re-rendered the disabled button.
+  const placingOrder = useRef(false);
+  const stopProcessing = () => {
+    placingOrder.current = false;
+    setProcessing(false);
+  };
+
   // Best-effort abandoned-cart capture: fires once per session (guarded by a
   // ref) once the customer has entered a phone number and has cart items but
   // hasn't completed the order yet. Never blocks or alters checkout UX.
@@ -233,52 +243,78 @@ export default function CheckoutPage() {
     clearCart();
   };
 
+  // Server recomputes the authoritative price from the real product
+  // catalogue — only ids/quantities are trusted from the browser here.
   const orderPayload = () => ({
     customer: form.name,
     email: form.email,
     phone: form.phone,
-    amount: finalTotal,
-    items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
+    items: items.map((i) => ({ id: i.id, quantity: i.quantity })),
     address: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
     couponCode: appliedCoupon?.code,
-    discount,
   });
 
   // COD / demo (no online payment): record the order directly as unpaid.
-  const placeDirect = () => {
-    const id = 'OGP' + Date.now().toString().slice(-8);
+  // Awaits the server's response instead of firing-and-forgetting, since the
+  // server can now reject this (price/stock mismatch) — "Order Placed!"
+  // must not show unless it's actually been recorded.
+  const placeDirect = async () => {
+    const id = generateOrderId();
     const label = paymentLabel();
-    fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, ...orderPayload(), payment: label, status: 'Processing', paid: false }),
-    }).catch(() => { /* offline / not configured — saved locally */ });
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...orderPayload(), payment: label, status: 'Processing', paid: false }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!data?.ok) {
+        alert(data?.error || 'Could not place your order. Please try again.');
+        stopProcessing();
+        return;
+      }
+    } catch {
+      alert('Network error. Please check your connection and try again.');
+      stopProcessing();
+      return;
+    }
     finishLocal(id, label);
   };
 
   const handlePlaceOrder = async () => {
-    // COD, or no gateway configured → place the order directly.
-    if (paymentMethod === 'cod' || !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
-      placeDirect();
-      return;
-    }
+    if (placingOrder.current) return;
+    placingOrder.current = true;
     setProcessing(true);
     try {
+      // COD, or no gateway configured → place the order directly.
+      if (paymentMethod === 'cod' || !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+        await placeDirect();
+        return;
+      }
       const res = await fetch('/api/payment/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: finalTotal }),
+        body: JSON.stringify({ items: items.map((i) => ({ id: i.id, quantity: i.quantity })), couponCode: appliedCoupon?.code, phone: form.phone, email: form.email }),
       });
       const data = await res.json();
-      // Server has no keys → fall back to a direct (demo) order.
-      if (!data.ok || !data.configured) {
-        placeDirect();
+      if (!data.ok) {
+        // A real validation error (out of stock, coupon no longer valid,
+        // etc.) — show it. Must NOT fall through to placeDirect(), which
+        // would silently place an unpaid demo order instead of telling the
+        // customer what's actually wrong.
+        alert(data.error || 'Could not start payment. Please review your cart and try again.');
+        stopProcessing();
+        return;
+      }
+      // Server has no Razorpay keys → fall back to a direct (demo) order.
+      if (!data.configured) {
+        await placeDirect();
         return;
       }
       const loaded = await loadRazorpay();
       if (!loaded || !window.Razorpay) {
         alert('Payment system load nahi hua. Dobara koshish karein.');
-        setProcessing(false);
+        stopProcessing();
         return;
       }
       const rzp = new window.Razorpay({
@@ -299,22 +335,22 @@ export default function CheckoutPage() {
             });
             const vd = await v.json();
             if (vd.ok && vd.valid) {
-              const id = (vd.orderId as string) || ('OGP' + Date.now().toString().slice(-8));
+              const id = (vd.orderId as string) || generateOrderId();
               finishLocal(id, `${paymentLabel()} · Paid`);
             } else {
-              alert('Payment verify nahi ho paaya. Agar paisa kata hai to support se contact karein.');
-              setProcessing(false);
+              alert(vd.error || 'Payment verify nahi ho paaya. Agar paisa kata hai to support se contact karein.');
+              stopProcessing();
             }
           } catch {
-            setProcessing(false);
+            stopProcessing();
           }
         },
-        modal: { ondismiss: () => setProcessing(false) },
+        modal: { ondismiss: () => stopProcessing() },
       });
       rzp.open();
     } catch {
       alert('Payment shuru nahi ho paaya. Dobara koshish karein.');
-      setProcessing(false);
+      stopProcessing();
     }
   };
 
@@ -386,7 +422,7 @@ export default function CheckoutPage() {
           </div>
 
           <p className="text-xs text-[#6b5d4c] mb-6">
-            Confirmation sent to <strong>{form.email}</strong>.
+            We&apos;ll keep you updated at <strong>{form.email}</strong> and <strong>{form.phone}</strong>.
           </p>
 
           <div className="flex items-start gap-2 justify-center mb-6 text-left max-w-sm mx-auto">

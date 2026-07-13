@@ -50,6 +50,7 @@ export async function getAuditLogs(opts?: {
   offset?: number;
   action?: string;
   actorEmail?: string;
+  search?: string;
 }): Promise<AuditLogRow[] | null> {
   const sb = getSupabase();
   if (!sb) return null;
@@ -61,6 +62,15 @@ export async function getAuditLogs(opts?: {
       .range(opts?.offset || 0, (opts?.offset || 0) + (opts?.limit || 50) - 1);
     if (opts?.action) query = query.eq('action', opts.action);
     if (opts?.actorEmail) query = query.ilike('actor_email', opts.actorEmail);
+    // Free-text search across the audit log's full dataset (not just already
+    // loaded pages) — strip characters that are structurally significant to
+    // PostgREST's or=(...) filter list (comma separates conditions,
+    // parentheses group them) so the raw term can't break the filter we build.
+    const term = opts?.search?.replace(/[,()%]/g, ' ').trim();
+    if (term) {
+      const like = `%${term}%`;
+      query = query.or(`actor_email.ilike.${like},target.ilike.${like},action.ilike.${like}`);
+    }
     const { data, error } = await query;
     if (error) throw error;
     return (data || []).map((r) => ({

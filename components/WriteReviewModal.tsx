@@ -9,8 +9,9 @@ const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 interface WriteReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  productId: string;
-  productName: string;
+  /** Omit for a general review not tied to one product (e.g. from /reviews). */
+  productId?: string;
+  productName?: string;
 }
 
 async function compressPhoto(file: File): Promise<string> {
@@ -26,7 +27,7 @@ async function compressPhoto(file: File): Promise<string> {
   return canvas.toDataURL('image/jpeg', 0.82);
 }
 
-export default function WriteReviewModal({ isOpen, onClose, productId, productName }: WriteReviewModalProps) {
+export default function WriteReviewModal({ isOpen, onClose, productId = '', productName = '' }: WriteReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [name, setName] = useState('');
@@ -106,8 +107,8 @@ export default function WriteReviewModal({ isOpen, onClose, productId, productNa
       rating,
       title: title.trim() || undefined,
       text: text.trim(),
-      product: productName,
-      productId,
+      product: productName || undefined,
+      productId: productId || undefined,
       photo: photo || undefined,
       website: honeypotRef.current?.value || '',
     });
@@ -152,9 +153,11 @@ export default function WriteReviewModal({ isOpen, onClose, productId, productNa
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 space-y-4">
-            <p className="text-xs text-[#9a8c75]">
-              Reviewing <span className="font-semibold text-[#6b5d4c]">{productName}</span>
-            </p>
+            {productName && (
+              <p className="text-xs text-[#9a8c75]">
+                Reviewing <span className="font-semibold text-[#6b5d4c]">{productName}</span>
+              </p>
+            )}
 
             {/* Star rating */}
             <div>

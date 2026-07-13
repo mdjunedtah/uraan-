@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, X, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Save, X, Upload, ImageOff } from 'lucide-react';
 
 type BannerData = {
   id?: string;
@@ -36,6 +36,33 @@ export default function BannerForm({
     position: initialBanner?.position || 'hero',
     active: initialBanner?.active ?? true,
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setForm((f) => ({ ...f, image: data.url }));
+        setImageError(false);
+      } else {
+        alert(data.error || 'Upload failed.');
+      }
+    } catch {
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,22 +106,41 @@ export default function BannerForm({
               type="text"
               required
               value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, image: e.target.value });
+                setImageError(false);
+              }}
               className="luxury-input flex-1"
               placeholder="/images/banner.jpg"
             />
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleUpload} />
             <button
               type="button"
-              className="px-4 py-2 border border-[rgba(184,137,58,0.32)] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#fbf8f1] flex items-center gap-2"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="px-4 py-2 border border-[rgba(184,137,58,0.32)] text-[10px] tracking-[1.5px] uppercase font-semibold hover:bg-[#fbf8f1] flex items-center gap-2 disabled:opacity-60 whitespace-nowrap"
             >
-              <Upload size={12} /> Upload
+              <Upload size={12} /> {uploading ? 'Uploading…' : 'Upload'}
             </button>
           </div>
+          <p className="text-[10px] text-[#9a8c75] mt-1.5">Upload an image, or paste an image URL above.</p>
           {form.image && (
-            <div
-              className="mt-3 aspect-video w-full max-w-md bg-[#f8f2e6] bg-cover bg-center border border-[rgba(184,137,58,0.18)]"
-              style={{ backgroundImage: `url(${form.image})` }}
-            />
+            <div className="mt-3 aspect-video w-full max-w-md bg-[#f8f2e6] border border-[rgba(184,137,58,0.18)] overflow-hidden relative">
+              {!imageError ? (
+                <img
+                  key={form.image}
+                  src={form.image}
+                  alt="Banner preview"
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-[#9a8c75]">
+                  <ImageOff size={20} />
+                  <span className="text-[10px] tracking-[1.5px] uppercase">Image failed to load</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

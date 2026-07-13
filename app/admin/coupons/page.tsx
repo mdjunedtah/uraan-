@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive, UserPlus, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Ticket, Copy, X, Check, Database, HardDrive, UserPlus, Tag, Search } from 'lucide-react';
 import {
   type Coupon,
   type CouponType,
@@ -31,6 +31,7 @@ export default function AdminCouponsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [copied, setCopied] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -140,6 +141,8 @@ export default function AdminCouponsPage() {
     }
   };
 
+  const filtered = coupons.filter((c) => c.code.toLowerCase().includes(search.toLowerCase()));
+
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
@@ -156,7 +159,7 @@ export default function AdminCouponsPage() {
         <div>
           <h1 className="serif text-3xl text-[#1a1410] mb-1">Coupons</h1>
           <p className="text-sm text-[#6b5d4c] flex items-center gap-2 flex-wrap">
-            {coupons.length} coupons · {coupons.filter((c) => c.active).length} active
+            {filtered.length} coupons · {filtered.filter((c) => c.active).length} active
             <StorageBadge configured={configured} />
           </p>
         </div>
@@ -274,6 +277,17 @@ export default function AdminCouponsPage() {
         </form>
       )}
 
+      <div className="bg-white border border-[rgba(184,137,58,0.18)] p-4 mb-5 flex items-center gap-2">
+        <Search size={14} className="text-[#9a8c75]" />
+        <input
+          type="text"
+          placeholder="Search by coupon code..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm"
+        />
+      </div>
+
       <div className="bg-white border border-[rgba(184,137,58,0.18)] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -288,7 +302,7 @@ export default function AdminCouponsPage() {
             </tr>
           </thead>
           <tbody>
-            {coupons.map((c) => (
+            {filtered.map((c) => (
               <tr key={c.id} className="border-b border-[rgba(184,137,58,0.1)] hover:bg-[#fbf8f1]/40">
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -346,8 +360,10 @@ export default function AdminCouponsPage() {
             ))}
           </tbody>
         </table>
-        {coupons.length === 0 && (
-          <div className="text-center py-12 text-sm text-[#6b5d4c]">No coupons yet. Add your first one.</div>
+        {filtered.length === 0 && (
+          <div className="text-center py-12 text-sm text-[#6b5d4c]">
+            {coupons.length === 0 ? 'No coupons yet. Add your first one.' : 'No coupons match your search.'}
+          </div>
         )}
       </div>
     </div>

@@ -79,6 +79,20 @@ export async function dbGetOrders(): Promise<Order[] | null> {
   return (data as Row[]).map(toOrder);
 }
 
+// Idempotency lookup for /api/payment/verify — a replayed (valid) signature
+// must resolve to the SAME order instead of minting a new one every time.
+export async function dbGetOrderByPaymentId(paymentId: string): Promise<Order | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.from('orders').select('*').eq('payment_id', paymentId).maybeSingle();
+  if (error) {
+    console.error('[ordersDb] getByPaymentId:', error.message);
+    return null;
+  }
+  if (!data) return null;
+  return toOrder(data as Row);
+}
+
 export async function dbGetOrderById(id: string): Promise<Order | null> {
   const sb = getSupabase();
   if (!sb) return null;

@@ -59,6 +59,18 @@ export async function dbGetReturns(): Promise<Return[] | null> {
   return (data as Row[]).map(toReturn);
 }
 
+export async function dbGetReturnById(id: string): Promise<Return | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.from('returns').select('*').eq('id', id).maybeSingle();
+  if (error) {
+    console.error('[returnsDb] getById:', error.message);
+    return null;
+  }
+  if (!data) return null;
+  return toReturn(data as Row);
+}
+
 export async function dbInsertReturn(input: ReturnInput): Promise<Return | null> {
   const sb = getSupabase();
   if (!sb) return null;

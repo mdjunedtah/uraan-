@@ -15,6 +15,8 @@
 //
 // Docs: https://developers.facebook.com/docs/whatsapp/cloud-api
 
+import { normalizePhone } from './phone';
+
 export interface WhatsAppResult {
   ok: boolean;
   configured: boolean;
@@ -146,16 +148,39 @@ export async function notifyAdminNewOrder(order: OrderNotification): Promise<Wha
   return sendWhatsAppText(ADMIN_WHATSAPP_NUMBER, text);
 }
 
+// Sends the CUSTOMER a WhatsApp confirmation right after their order is
+// placed. Free-form text only (no template configured for this — Meta only
+// delivers it if the customer messaged the business number in the last 24h,
+// same known limitation as the post-purchase status-update messages below).
+// Best-effort and fail-safe; never throws into the payment/order response.
+export async function notifyCustomerOrderPlaced(
+  phone: string,
+  orderId: string,
+  amount: number
+): Promise<WhatsAppResult> {
+  const text =
+    `Thank you for your order! 🙏\n\n` +
+    `Order ${orderId} for ₹${amount.toLocaleString('en-IN')} has been placed with Om Gauri Putra.\n` +
+    `We'll notify you here as it ships.`;
+  return sendWhatsAppText(phone, text);
+}
+
 // ── Admin lead notifications ────────────────────────────────────────────────
 // Recipient for new-lead WhatsApp alerts. Override per-environment with
 // ADMIN_WHATSAPP_NUMBER (digits only, international format, e.g. 91XXXXXXXXXX);
 // falls back to the public store number, then to the configured default.
-// Server-only — never shipped to the browser.
-export const ADMIN_WHATSAPP_NUMBER = (
+// Server-only — never shipped to the browser. Run through normalizePhone() so
+// a value hand-typed into Vercel's env var UI without its country code (e.g.
+// "9128596443" instead of "919128596443") still resolves to a deliverable
+// recipient; falls back to a bare digit-strip if normalization can't make
+// sense of the value, so an already-correct number never breaks.
+const ADMIN_WHATSAPP_NUMBER_RAW =
   process.env.ADMIN_WHATSAPP_NUMBER ||
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
-  '919128596443'
-).replace(/[^0-9]/g, '');
+  '919128596443';
+export const ADMIN_WHATSAPP_NUMBER =
+  normalizePhone(ADMIN_WHATSAPP_NUMBER_RAW)?.slice(1) ||
+  ADMIN_WHATSAPP_NUMBER_RAW.replace(/[^0-9]/g, '');
 
 export interface LeadNotification {
   name: string;

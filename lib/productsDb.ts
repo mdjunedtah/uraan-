@@ -146,6 +146,22 @@ export async function dbGetProducts(opts: { includeDeleted?: boolean } = {}): Pr
   return withDynamicPricing(list);
 }
 
+// Looks up specific products by id (checkout/payment server-side pricing —
+// never trust a client-supplied price/name, always re-derive from here).
+// Soft-deleted and draft products are excluded so they can't be "bought".
+export async function dbGetProductsByIds(ids: string[]): Promise<Product[] | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  if (!ids.length) return [];
+  const { data, error } = await sb.from('products').select('*').in('id', ids).is('deleted_at', null);
+  if (error) {
+    console.error('[productsDb] listByIds:', error.message);
+    return null;
+  }
+  const list = (data as Row[]).map(toProduct).filter((p) => p.status !== 'draft');
+  return withDynamicPricing(list);
+}
+
 export async function dbGetDeletedProducts(): Promise<Product[] | null> {
   const sb = getSupabase();
   if (!sb) return null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Star, Trash2, CheckCircle2, XCircle, Database, HardDrive, Flag } from 'lucide-react';
+import { Search, Star, Trash2, CheckCircle2, XCircle, Database, HardDrive, Flag } from 'lucide-react';
 import { type Review, getReviews, setReviewVerified, deleteReview } from '@/lib/reviewsStore';
 import { initialsOf, reviewAccent } from '@/lib/reviewStyle';
 
@@ -9,6 +9,7 @@ export default function AdminReviewsPage() {
   const [reviewList, setReviewList] = useState<Review[]>([]);
   const [configured, setConfigured] = useState(false);
   const [filter, setFilter] = useState<'all' | 'verified' | 'pending' | 'reported'>('all');
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -30,11 +31,21 @@ export default function AdminReviewsPage() {
     load();
   }, [load]);
 
-  const filtered =
+  const statusFiltered =
     filter === 'all' ? reviewList
     : filter === 'verified' ? reviewList.filter((r) => r.verified)
     : filter === 'reported' ? reviewList.filter((r) => r.reported)
     : reviewList.filter((r) => !r.verified);
+
+  const filtered = statusFiltered.filter((r) => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return (
+      r.name.toLowerCase().includes(q) ||
+      r.text.toLowerCase().includes(q) ||
+      (r.product || '').toLowerCase().includes(q)
+    );
+  });
 
   const avgRating = reviewList.length
     ? (reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length).toFixed(1)
@@ -105,6 +116,17 @@ export default function AdminReviewsPage() {
           <div className="stat-value text-[#7a2e2e]">{reviewList.filter((r) => r.reported).length}</div>
           <div className="stat-label mt-1">Reported</div>
         </button>
+      </div>
+
+      <div className="bg-white border border-[rgba(184,137,58,0.18)] p-4 mb-5 flex items-center gap-2">
+        <Search size={14} className="text-[#9a8c75]" />
+        <input
+          type="text"
+          placeholder="Search by reviewer, review text, or product..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm"
+        />
       </div>
 
       <div className="space-y-3">
