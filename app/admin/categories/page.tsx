@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Database, HardDrive, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Database, HardDrive, Upload, Search } from 'lucide-react';
 import {
   type Category,
   getCategories,
@@ -20,7 +20,14 @@ export default function AdminCategoriesPage() {
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [uploading, setUploading] = useState(false);
+  const [search, setSearch] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const filtered = categories.filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q) || c.description.toLowerCase().includes(q);
+  });
 
   // Prefer the database; fall back to the in-browser store when it's off.
   const load = useCallback(async () => {
@@ -205,8 +212,19 @@ export default function AdminCategoriesPage() {
         </form>
       )}
 
+      <div className="relative mb-4 max-w-sm">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8c75]" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search categories…"
+          className="luxury-input pl-9"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((c) => (
+        {filtered.map((c) => (
           <div key={c.slug} className="bg-white border border-[rgba(184,137,58,0.18)] p-5 group hover:shadow-[0_12px_40px_rgba(122,90,31,0.12)] transition-all">
             <div className="flex items-start gap-4">
               <div
@@ -238,9 +256,9 @@ export default function AdminCategoriesPage() {
         ))}
       </div>
 
-      {categories.length === 0 && (
+      {filtered.length === 0 && (
         <div className="bg-white border border-[rgba(184,137,58,0.18)] text-center py-12 text-sm text-[#6b5d4c]">
-          No categories yet. Add your first one.
+          {categories.length === 0 ? 'No categories yet. Add your first one.' : 'No categories match your search.'}
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ import { reviewAccent, initialsOf } from '@/lib/reviewStyle';
 import { Heart, Star, CheckCircle2, Search, ThumbsUp, Flag, ImageIcon } from 'lucide-react';
 import { useReviews, verifiedOnly } from '@/hooks/useReviews';
 import { voteHelpful, reportReviewAction } from '@/lib/reviewsActions';
+import WriteReviewModal from '@/components/WriteReviewModal';
 
 type SortKey = 'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful' | 'verified';
 
@@ -22,6 +23,7 @@ export default function ReviewsPage() {
   const [verifiedOnlyFilter, setVerifiedOnlyFilter] = useState(false);
   const [sort, setSort] = useState<SortKey>('newest');
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const avgRating = all.length > 0 ? all.reduce((sum, r) => sum + r.rating, 0) / all.length : 0;
 
@@ -258,11 +260,17 @@ export default function ReviewsPage() {
         </div>
         <p className="text-center text-sm text-[#6b5d4c] mt-4">
           Loved your purchase?{' '}
-          <Link href="/contact" className="text-[#b8893a] font-medium hover:underline">
+          <button
+            type="button"
+            onClick={() => setReviewModalOpen(true)}
+            className="text-[#b8893a] font-medium hover:underline"
+          >
             Share your experience with us
-          </Link>
+          </button>
         </p>
       </section>
+
+      <WriteReviewModal isOpen={reviewModalOpen} onClose={() => setReviewModalOpen(false)} />
 
       <Footer />
     </main>
