@@ -63,7 +63,14 @@ export async function POST(request: Request) {
     Address: { value: address, max: MAX_LEN.text },
   });
   if (lengthError) {
-    return NextResponse.json({ ok: false, valid: false, error: lengthError }, { status: 400 });
+    // Payment is already captured at this point (signature verified above) —
+    // a rejection here must still tell the customer their money went
+    // through, so support can find the order by payment id.
+    console.error('[verify] length validation failed for captured payment:', paymentId, lengthError);
+    return NextResponse.json(
+      { ok: false, valid: false, error: `${lengthError} Your payment was received — please contact support with payment id ${paymentId} to complete your order.` },
+      { status: 400 }
+    );
   }
 
   // Re-derive line items (name/price/image) from the real catalogue for an

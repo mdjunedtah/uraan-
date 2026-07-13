@@ -37,11 +37,17 @@ export async function POST(request: Request) {
       email: typeof body.email === 'string' ? body.email : undefined,
       recordUsage: false,
     });
-    if (couponResult.ok) {
-      discount = couponResult.discount;
+    if (!couponResult.ok) {
+      // Reject rather than silently dropping the discount — the customer
+      // already saw this coupon applied on the checkout page (from the
+      // earlier /api/coupons/validate call); charging them the full amount
+      // without a word would be a silent bait-and-switch. Rare in practice
+      // (requires the coupon to become invalid in the few seconds between
+      // "Apply" and "Place Order" — e.g. another customer just hit its
+      // usage limit) but worth a clear error over a surprise charge.
+      return NextResponse.json({ ok: false, error: couponResult.error }, { status: 400 });
     }
-    // An invalid/expired coupon at this point (e.g. limit hit between "Apply"
-    // and "Place Order") doesn't block checkout — it just doesn't discount.
+    discount = couponResult.discount;
   }
 
   const amount = Math.max(0, resolved.subtotal + shipping - discount);

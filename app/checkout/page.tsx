@@ -297,8 +297,17 @@ export default function CheckoutPage() {
         body: JSON.stringify({ items: items.map((i) => ({ id: i.id, quantity: i.quantity })), couponCode: appliedCoupon?.code, phone: form.phone, email: form.email }),
       });
       const data = await res.json();
-      // Server has no keys → fall back to a direct (demo) order.
-      if (!data.ok || !data.configured) {
+      if (!data.ok) {
+        // A real validation error (out of stock, coupon no longer valid,
+        // etc.) — show it. Must NOT fall through to placeDirect(), which
+        // would silently place an unpaid demo order instead of telling the
+        // customer what's actually wrong.
+        alert(data.error || 'Could not start payment. Please review your cart and try again.');
+        stopProcessing();
+        return;
+      }
+      // Server has no Razorpay keys → fall back to a direct (demo) order.
+      if (!data.configured) {
         await placeDirect();
         return;
       }

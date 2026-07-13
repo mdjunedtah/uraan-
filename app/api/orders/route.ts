@@ -88,7 +88,12 @@ export async function POST(request: Request) {
       email,
       recordUsage: true,
     });
-    if (couponResult.ok) discount = couponResult.discount;
+    if (!couponResult.ok) {
+      // Reject rather than silently dropping the discount — see the same
+      // reasoning in /api/payment/create-order.
+      return NextResponse.json({ ok: false, error: couponResult.error }, { status: 400 });
+    }
+    discount = couponResult.discount;
   }
   const amount = Math.max(0, resolved.subtotal + computeShipping(resolved.subtotal) - discount);
 
